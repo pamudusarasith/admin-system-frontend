@@ -4,7 +4,6 @@ import {
   Alert,
   Box,
   Button,
-  Container,
   Divider,
   IconButton,
   InputAdornment,
@@ -70,24 +69,100 @@ function LoginPage() {
   }
 
   return (
-    <Container maxWidth="sm">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+      }}
+    >
+      {/* Left Side - Branding Section - Hidden on mobile */}
       <Box
         sx={{
-          minHeight: '100vh',
+          flex: 0.5,
+          background: `
+            linear-gradient(135deg, ${theme.palette.primary.main}CC, ${theme.palette.secondary.main}CC),
+            url('./login.jpg')
+          `,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          display: { xs: 'none', md: 'flex' },
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Left side content */}
+        <Box
+          sx={{
+            textAlign: 'center',
+            color: 'white',
+            zIndex: 1,
+          }}
+        >
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 700,
+              mb: 2,
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            }}
+          >
+            Admin System
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 400,
+              opacity: 0.9,
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            }}
+          >
+            Manage your system with ease
+          </Typography>
+        </Box>
+
+        {/* Background decoration */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-50%',
+            width: '200%',
+            height: '200%',
+            background:
+              'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+            animation: 'pulse 4s ease-in-out infinite',
+            '@keyframes pulse': {
+              '0%, 100%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.1)' },
+            },
+          }}
+        />
+      </Box>
+
+      {/* Right Side - Login Form */}
+      <Box
+        sx={{
+          flex: { xs: 1, md: 1 },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          py: 4,
+          p: { xs: 2, md: 4 },
+          backgroundColor: theme.palette.background.default,
+          minHeight: { xs: '100vh', md: 'auto' },
         }}
       >
         <Paper
           elevation={12}
           sx={{
-            p: 6,
+            p: { xs: 4, md: 6 },
             borderRadius: 4,
             background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
             width: '100%',
-            maxWidth: 480,
+            maxWidth: { xs: 400, md: 600 },
             position: 'relative',
             overflow: 'hidden',
             '&::before': {
@@ -101,10 +176,14 @@ function LoginPage() {
             },
           }}
         >
-          <Stack spacing={4} alignItems="center">
+          <Stack spacing={{ xs: 3, md: 4 }} alignItems="center">
             {/* Logo/Icon */}
             <AnimatedIcon size={100}>
-              <LoginIcon sx={{ fontSize: 50 }} />
+              <LoginIcon
+                sx={{
+                  fontSize: { xs: 40, md: 50 },
+                }}
+              />
             </AnimatedIcon>
 
             {/* Welcome Text */}
@@ -115,6 +194,7 @@ function LoginPage() {
                   fontWeight: 700,
                   color: theme.palette.text.primary,
                   mb: 1,
+                  fontSize: { xs: '1.75rem', md: '2.125rem' },
                 }}
               >
                 Welcome Back
@@ -123,7 +203,7 @@ function LoginPage() {
                 variant="body1"
                 sx={{
                   color: theme.palette.text.secondary,
-                  fontSize: '1.1rem',
+                  fontSize: { xs: '1rem', md: '1.1rem' },
                 }}
               >
                 Sign in to your admin account
@@ -173,6 +253,12 @@ function LoginPage() {
                       error={!!field.state.meta.errors.length}
                       helperText={field.state.meta.errors[0]}
                       disabled={loginMutation.isPending}
+                      InputLabelProps={{
+                        sx: {
+                          fontSize: '1.1rem',
+                          fontWeight: 500,
+                        },
+                      }}
                       slotProps={{
                         input: {
                           startAdornment: (
@@ -210,6 +296,12 @@ function LoginPage() {
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       error={!!field.state.meta.errors.length}
+                      InputLabelProps={{
+                        sx: {
+                          fontSize: '1.1rem',
+                          fontWeight: 500,
+                        },
+                      }}
                       slotProps={{
                         input: {
                           startAdornment: (
@@ -245,6 +337,36 @@ function LoginPage() {
                     />
                   )}
                 </form.Field>
+
+                {/* Forgot Password Link */}
+                <Box
+                  sx={{ display: 'flex', justifyContent: 'flex-end', mt: -1 }}
+                >
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => {
+                      // Handle forgot password logic here
+                      console.log('Forgot password clicked')
+                      // You can navigate to forgot password page or show a modal
+                      // navigate({ to: '/forgot-password' })
+                    }}
+                    sx={{
+                      color: theme.palette.primary.main,
+                      textTransform: 'none',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      p: 0.5,
+                      minWidth: 'auto',
+                      '&:hover': {
+                        backgroundColor: 'transparent',
+                        textDecoration: 'underline',
+                      },
+                    }}
+                  >
+                    Forgot password?
+                  </Button>
+                </Box>
 
                 <Button
                   type="submit"
@@ -325,6 +447,6 @@ function LoginPage() {
           </Stack>
         </Paper>
       </Box>
-    </Container>
+    </Box>
   )
 }
