@@ -20,6 +20,8 @@ interface SearchBarProps {
   size?: 'small' | 'medium'
   autoFocus?: boolean
   debounceMs?: number
+  minWidth?: string | number
+  minHeight?: string | number
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -34,6 +36,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   size = 'medium',
   autoFocus = false,
   debounceMs = 300,
+  minWidth,
+  minHeight,
 }) => {
   const theme = useTheme()
   const [internalValue, setInternalValue] = useState('')
@@ -104,7 +108,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   }
 
   return (
-    <Box sx={{ width: fullWidth ? '100%' : 'auto' }}>
+    <Box
+      sx={{
+        width: fullWidth ? '100%' : 'auto',
+        minWidth: minWidth,
+        minHeight: minHeight,
+      }}
+    >
       <TextField
         fullWidth={fullWidth}
         variant={variant}

@@ -15,6 +15,7 @@ import { Route as UsersRouteImport } from './routes/users'
 
 
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AllLettersRouteImport } from './routes/all-letters'
 import { Route as R500RouteImport } from './routes/500'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as R403RouteImport } from './routes/403'
@@ -31,6 +32,11 @@ const UsersRoute = UsersRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AllLettersRoute = AllLettersRouteImport.update({
+  id: '/all-letters',
+  path: '/all-letters',
   getParentRoute: () => rootRouteImport,
 } as any)
 const R500Route = R500RouteImport.update({
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/403': typeof R403Route
   '/404': typeof R404Route
   '/500': typeof R500Route
+  '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
 
   '/users': typeof UsersRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/403': typeof R403Route
   '/404': typeof R404Route
   '/500': typeof R500Route
+  '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
 
   '/users': typeof UsersRoute
@@ -88,16 +96,43 @@ export interface FileRoutesById {
   '/403': typeof R403Route
   '/404': typeof R404Route
   '/500': typeof R500Route
+  '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
 
   '/users': typeof UsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/401' | '/403' | '/404' | '/500' | '/login' | '/users'
+
+  fullPaths:
+    | '/'
+    | '/401'
+    | '/403'
+    | '/404'
+    | '/500'
+    | '/all-letters'
+    | '/login'
+    | '/user-roles'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/401' | '/403' | '/404' | '/500' | '/login' | '/users'
-  id: '__root__' | '/' | '/401' | '/403' | '/404' | '/500' | '/login' | '/users'
+  to:
+    | '/'
+    | '/401'
+    | '/403'
+    | '/404'
+    | '/500'
+    | '/all-letters'
+    | '/login'
+    | '/user-roles'
+  id:
+    | '__root__'
+    | '/'
+    | '/401'
+    | '/403'
+    | '/404'
+    | '/500'
+    | '/all-letters'
+    | '/login'
+    | '/user-roles'
 
   fileRoutesById: FileRoutesById
 }
@@ -107,6 +142,7 @@ export interface RootRouteChildren {
   R403Route: typeof R403Route
   R404Route: typeof R404Route
   R500Route: typeof R500Route
+  AllLettersRoute: typeof AllLettersRoute
   LoginRoute: typeof LoginRoute
 
   UsersRoute: typeof UsersRoute
@@ -129,6 +165,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/all-letters': {
+      id: '/all-letters'
+      path: '/all-letters'
+      fullPath: '/all-letters'
+      preLoaderRoute: typeof AllLettersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/500': {
@@ -175,6 +218,7 @@ const rootRouteChildren: RootRouteChildren = {
   R403Route: R403Route,
   R404Route: R404Route,
   R500Route: R500Route,
+  AllLettersRoute: AllLettersRoute,
   LoginRoute: LoginRoute,
 
   UsersRoute: UsersRoute,
