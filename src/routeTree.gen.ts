@@ -9,7 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UserRolesRouteImport } from './routes/user-roles'
+
+import { Route as UsersRouteImport } from './routes/users'
+
+
+
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as R500RouteImport } from './routes/500'
 import { Route as R404RouteImport } from './routes/404'
@@ -17,9 +21,11 @@ import { Route as R403RouteImport } from './routes/403'
 import { Route as R401RouteImport } from './routes/401'
 import { Route as IndexRouteImport } from './routes/index'
 
-const UserRolesRoute = UserRolesRouteImport.update({
-  id: '/user-roles',
-  path: '/user-roles',
+
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -60,7 +66,9 @@ export interface FileRoutesByFullPath {
   '/404': typeof R404Route
   '/500': typeof R500Route
   '/login': typeof LoginRoute
-  '/user-roles': typeof UserRolesRoute
+
+  '/users': typeof UsersRoute
+
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,7 +77,9 @@ export interface FileRoutesByTo {
   '/404': typeof R404Route
   '/500': typeof R500Route
   '/login': typeof LoginRoute
-  '/user-roles': typeof UserRolesRoute
+
+  '/users': typeof UsersRoute
+
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -79,22 +89,16 @@ export interface FileRoutesById {
   '/404': typeof R404Route
   '/500': typeof R500Route
   '/login': typeof LoginRoute
-  '/user-roles': typeof UserRolesRoute
+
+  '/users': typeof UsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/401' | '/403' | '/404' | '/500' | '/login' | '/user-roles'
+  fullPaths: '/' | '/401' | '/403' | '/404' | '/500' | '/login' | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/401' | '/403' | '/404' | '/500' | '/login' | '/user-roles'
-  id:
-    | '__root__'
-    | '/'
-    | '/401'
-    | '/403'
-    | '/404'
-    | '/500'
-    | '/login'
-    | '/user-roles'
+  to: '/' | '/401' | '/403' | '/404' | '/500' | '/login' | '/users'
+  id: '__root__' | '/' | '/401' | '/403' | '/404' | '/500' | '/login' | '/users'
+
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,16 +108,20 @@ export interface RootRouteChildren {
   R404Route: typeof R404Route
   R500Route: typeof R500Route
   LoginRoute: typeof LoginRoute
-  UserRolesRoute: typeof UserRolesRoute
+
+  UsersRoute: typeof UsersRoute
+
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/user-roles': {
-      id: '/user-roles'
-      path: '/user-roles'
-      fullPath: '/user-roles'
-      preLoaderRoute: typeof UserRolesRouteImport
+
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -168,7 +176,9 @@ const rootRouteChildren: RootRouteChildren = {
   R404Route: R404Route,
   R500Route: R500Route,
   LoginRoute: LoginRoute,
-  UserRolesRoute: UserRolesRoute,
+
+  UsersRoute: UsersRoute,
+
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
