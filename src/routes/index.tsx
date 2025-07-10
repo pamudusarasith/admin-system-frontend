@@ -6,7 +6,5 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
-  return (
-    <SidebarLayout>hi</SidebarLayout>
-  )
+  return <SidebarLayout>hi</SidebarLayout>
 }
