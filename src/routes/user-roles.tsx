@@ -7,13 +7,11 @@ export const Route = createFileRoute('/user-roles')({
 
 function RouteComponent() {
   return (
-    <div>
-      <SearchBar
-        placeholder="Search..."
-        minWidth="200px"
-        minHeight="40px"
-        fullWidth={false}
-      />
-    </div>
+    <SearchBar
+      placeholder="Search documents..."
+      width="300px"
+      height="100px"
+      size="medium"
+    />
   )
 }
