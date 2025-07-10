@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as UserRolesRouteImport } from './routes/user-roles'
+
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AllLettersRouteImport } from './routes/all-letters'
 import { Route as R500RouteImport } from './routes/500'
@@ -19,6 +21,7 @@ import { Route as R403RouteImport } from './routes/403'
 import { Route as R401RouteImport } from './routes/401'
 import { Route as IndexRouteImport } from './routes/index'
 
+<
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -27,6 +30,7 @@ const UsersRoute = UsersRouteImport.update({
 const UserRolesRoute = UserRolesRouteImport.update({
   id: '/user-roles',
   path: '/user-roles',
+
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -73,8 +77,10 @@ export interface FileRoutesByFullPath {
   '/500': typeof R500Route
   '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
+
   '/user-roles': typeof UserRolesRoute
   '/users': typeof UsersRoute
+
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,8 +90,10 @@ export interface FileRoutesByTo {
   '/500': typeof R500Route
   '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
+
   '/user-roles': typeof UserRolesRoute
   '/users': typeof UsersRoute
+
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/500': typeof R500Route
   '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
+
   '/user-roles': typeof UserRolesRoute
   '/users': typeof UsersRoute
 }
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/user-roles'
     | '/users'
+
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -143,12 +153,15 @@ export interface RootRouteChildren {
   R500Route: typeof R500Route
   AllLettersRoute: typeof AllLettersRoute
   LoginRoute: typeof LoginRoute
+
   UserRolesRoute: typeof UserRolesRoute
   UsersRoute: typeof UsersRoute
+
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+
     '/users': {
       id: '/users'
       path: '/users'
@@ -161,6 +174,7 @@ declare module '@tanstack/react-router' {
       path: '/user-roles'
       fullPath: '/user-roles'
       preLoaderRoute: typeof UserRolesRouteImport
+
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -223,8 +237,10 @@ const rootRouteChildren: RootRouteChildren = {
   R500Route: R500Route,
   AllLettersRoute: AllLettersRoute,
   LoginRoute: LoginRoute,
+
   UserRolesRoute: UserRolesRoute,
   UsersRoute: UsersRoute,
+
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
