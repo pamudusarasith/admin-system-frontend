@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { AddButton } from '@/components'
+import { AddButton, AddLetterDialog } from '@/components'
 import {
   Box,
   Typography,
@@ -91,6 +91,7 @@ function Letters() {
   const [dateFilter, setDateFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   // Format date helper
   const formatDate = (dateString: string) => {
@@ -156,6 +157,20 @@ function Letters() {
 
   const handleSearch = (value: string) => {
     setSearchTerm(value)
+  }
+
+  const handleOpenAddDialog = () => {
+    setIsAddDialogOpen(true)
+  }
+
+  const handleCloseAddDialog = () => {
+    setIsAddDialogOpen(false)
+  }
+
+  const handleSubmitLetter = (letterData: any) => {
+    console.log('New letter submitted:', letterData)
+    // Here you would typically send the data to your backend
+    // For now, we'll just log it and close the dialog
   }
 
   return (
@@ -283,7 +298,7 @@ function Letters() {
             {/* Add Letter Button - Right Side */}
             <AddButton
               label="Add Letter"
-              onClick={() => console.log('Clicked')}
+              onClick={handleOpenAddDialog}
               tooltip="Add a new letter"
               size="small"
               sx={{
@@ -451,10 +466,18 @@ function Letters() {
             No letters found
           </Typography>
           <Typography variant="body2" color="text.secondary">
+            {' '}
             Try adjusting your search terms or filters
           </Typography>
         </Box>
       )}
+
+      {/* Add Letter Dialog */}
+      <AddLetterDialog
+        open={isAddDialogOpen}
+        onClose={handleCloseAddDialog}
+        onSubmit={handleSubmitLetter}
+      />
     </Container>
   )
 }
