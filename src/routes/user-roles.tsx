@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SearchBar } from '@/components'
+import { AddButton, SearchBar } from '@/components'
 
 export const Route = createFileRoute('/user-roles')({
   component: RouteComponent,
@@ -7,11 +7,17 @@ export const Route = createFileRoute('/user-roles')({
 
 function RouteComponent() {
   return (
-    <SearchBar
-      placeholder="Search documents..."
-      width="300px"
-      height="100px"
-      size="medium"
-    />
+    <>
+      <SearchBar
+        placeholder="Search documents..."
+        width="700px"
+        height="50px"
+        size="medium"
+      />
+
+      <div>
+        <AddButton label="Add Task" onClick={() => console.log('Clicked')} />
+      </div>
+    </>
   )
 }

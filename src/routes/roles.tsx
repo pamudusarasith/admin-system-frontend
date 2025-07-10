@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { SearchBar } from '@/components'
 import {
   Box,
   Button,
@@ -152,6 +153,10 @@ function RolesPage() {
     setOpenDialog(true)
   }
 
+  const handleSearch = (value: string) => {
+    setSearchTerm(value)
+  }
+
   const handleEditRole = (role: UserRole) => {
     setSelectedRole(role)
     setOpenDialog(true)
@@ -166,10 +171,6 @@ function RolesPage() {
   const handleCloseDialog = () => {
     setOpenDialog(false)
     setSelectedRole(null)
-  }
-
-  const handleClearSearch = () => {
-    setSearchTerm('')
   }
 
   return (
@@ -224,37 +225,15 @@ function RolesPage() {
           }}
         >
           <Box sx={{ flex: 1, width: '100%' }}>
-            <TextField
-              fullWidth
-              placeholder="Search roles by name or description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              variant="outlined"
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: searchTerm && (
-                    <InputAdornment position="end">
-                      <IconButton onClick={handleClearSearch} size="small">
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  '&:hover fieldset': {
-                    borderColor: theme.palette.primary.main,
-                  },
-                },
-              }}
-            />
+            {/* Search Bar */}
+            <Box>
+              <SearchBar
+                placeholder="Search letters by title, content, or category..."
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onSearch={handleSearch}
+              />
+            </Box>
           </Box>
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <Chip
