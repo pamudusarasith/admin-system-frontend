@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { SearchBar } from '@/components'
+import { AddButton } from '@/components'
 import {
   Box,
   Button,
@@ -487,25 +488,25 @@ function RolesPage() {
         ))}
       </Box>
 
+      
       {/* Floating Add Button */}
-      <Fab
-        color="primary"
-        size="large"
-        onClick={handleAddRole}
+      <Box
         sx={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-          '&:hover': {
-            background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
-            transform: 'scale(1.1)',
+          position: 'absolute',
+          top: 55,
+          right: 150,
+          zIndex: 2,
+          '@media (max-width:600px)': {
+        top: 16,
+        right: 16,
           },
-          transition: 'all 0.3s ease',
         }}
       >
-        <AddIcon />
-      </Fab>
+        <AddButton 
+        label="Add Role"
+        tooltip="Add a new user role"
+        onClick={handleAddRole} />
+      </Box>
 
       {/* Action Menu */}
       <Menu
