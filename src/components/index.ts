@@ -1,3 +1,6 @@
 export { AnimatedIcon } from './AnimatedIcon'
 export { ActionButtons } from './ActionButtons'
 export { ErrorPage } from './ErrorPage'
+export { SidebarLayout } from './SidebarLayout'
+export { Navbar } from './Navbar'
+export { Sidebar } from './Sidebar'
