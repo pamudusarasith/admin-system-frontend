@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { AddButton } from '@/components'
 import {
   Box,
   Typography,
@@ -208,68 +209,88 @@ function Letters() {
             direction={{ xs: 'column', md: 'row' }}
             spacing={2}
             alignItems={{ xs: 'stretch', md: 'center' }}
+            justifyContent={{ xs: 'flex-start', md: 'space-between' }}
+            sx={{ width: '100%' }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <FilterIcon color="action" />
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ fontWeight: 500 }}
-              >
-                Filters:
-              </Typography>
-            </Box>
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              spacing={2}
+              alignItems={{ xs: 'stretch', md: 'center' }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FilterIcon color="action" />
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ fontWeight: 500 }}
+                >
+                  Filters:
+                </Typography>
+              </Box>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Date</InputLabel>
-              <Select
-                value={dateFilter}
-                label="Date"
-                onChange={(e) => setDateFilter(e.target.value)}
-                startAdornment={
-                  <CalendarIcon sx={{ mr: 1, color: 'action.active' }} />
-                }
-              >
-                <MenuItem value="all">All Dates</MenuItem>
-                <MenuItem value="today">Today</MenuItem>
-                <MenuItem value="week">Last Week</MenuItem>
-                <MenuItem value="month">Last Month</MenuItem>
-              </Select>
-            </FormControl>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Date</InputLabel>
+                <Select
+                  value={dateFilter}
+                  label="Date"
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  startAdornment={
+                    <CalendarIcon sx={{ mr: 1, color: 'action.active' }} />
+                  }
+                >
+                  <MenuItem value="all">All Dates</MenuItem>
+                  <MenuItem value="today">Today</MenuItem>
+                  <MenuItem value="week">Last Week</MenuItem>
+                  <MenuItem value="month">Last Month</MenuItem>
+                </Select>
+              </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Priority</InputLabel>
-              <Select
-                value={priorityFilter}
-                label="Priority"
-                onChange={(e) => setPriorityFilter(e.target.value)}
-                startAdornment={
-                  <FlagIcon sx={{ mr: 1, color: 'action.active' }} />
-                }
-              >
-                <MenuItem value="all">All Priorities</MenuItem>
-                <MenuItem value="high">High</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="low">Low</MenuItem>
-              </Select>
-            </FormControl>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Priority</InputLabel>
+                <Select
+                  value={priorityFilter}
+                  label="Priority"
+                  onChange={(e) => setPriorityFilter(e.target.value)}
+                  startAdornment={
+                    <FlagIcon sx={{ mr: 1, color: 'action.active' }} />
+                  }
+                >
+                  <MenuItem value="all">All Priorities</MenuItem>
+                  <MenuItem value="high">High</MenuItem>
+                  <MenuItem value="medium">Medium</MenuItem>
+                  <MenuItem value="low">Low</MenuItem>
+                </Select>
+              </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={categoryFilter}
-                label="Category"
-                onChange={(e) => setCategoryFilter(e.target.value)}
-              >
-                <MenuItem value="all">All Categories</MenuItem>
-                <MenuItem value="finance">Finance</MenuItem>
-                <MenuItem value="hr">HR</MenuItem>
-                <MenuItem value="procurement">Procurement</MenuItem>
-                <MenuItem value="general">General</MenuItem>
-                <MenuItem value="training">Training</MenuItem>
-                <MenuItem value="security">Security</MenuItem>
-              </Select>
-            </FormControl>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Category</InputLabel>
+                <Select
+                  value={categoryFilter}
+                  label="Category"
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                >
+                  <MenuItem value="all">All Categories</MenuItem>
+                  <MenuItem value="finance">Finance</MenuItem>
+                  <MenuItem value="hr">HR</MenuItem>
+                  <MenuItem value="procurement">Procurement</MenuItem>
+                  <MenuItem value="general">General</MenuItem>
+                  <MenuItem value="training">Training</MenuItem>
+                  <MenuItem value="security">Security</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+
+            {/* Add Letter Button - Right Side */}
+            <AddButton
+              label="Add Letter"
+              onClick={() => console.log('Clicked')}
+              tooltip="Add a new letter"
+              size="small"
+              sx={{
+                alignSelf: { xs: 'flex-start', md: 'center' },
+                mt: { xs: 2, md: 0 },
+              }}
+            />
           </Stack>
         </Stack>
       </Paper>
