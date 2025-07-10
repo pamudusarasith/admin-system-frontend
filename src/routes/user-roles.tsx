@@ -9,8 +9,8 @@ function RouteComponent() {
   return (
     <SearchBar
       placeholder="Search documents..."
-      width="300px"
-      height="100px"
+      width="700px"
+      height="50px"
       size="medium"
     />
   )
