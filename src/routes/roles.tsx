@@ -475,21 +475,22 @@ function RolesPage() {
             </CardContent>
 
             <CardActions sx={{ px: 3, pb: 3, pt: 0 }}>
-              <Button
+                <Button
                 variant="outlined"
                 size="small"
                 fullWidth
                 sx={{
                   borderColor: theme.palette.primary.main,
                   color: theme.palette.primary.main,
+                  backgroundColor: theme.palette.action.hover,
                   '&:hover': {
-                    borderColor: theme.palette.primary.main,
-                    bgcolor: `${theme.palette.primary.main}10`,
+                  borderColor: theme.palette.primary.main,
+                  bgcolor: `${theme.palette.primary.main}10`,
                   },
                 }}
-              >
+                >
                 View Details
-              </Button>
+                </Button>
               <IconButton
                 onClick={(e) => handleMenuOpen(e, role)}
                 sx={{
