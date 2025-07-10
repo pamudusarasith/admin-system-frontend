@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UserRolesRouteImport } from './routes/user-roles'
+import { Route as RolesRouteImport } from './routes/roles'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AllLettersRouteImport } from './routes/all-letters'
 import { Route as R500RouteImport } from './routes/500'
@@ -23,6 +24,11 @@ import { Route as UsersCreateRouteImport } from './routes/users/create'
 const UserRolesRoute = UserRolesRouteImport.update({
   id: '/user-roles',
   path: '/user-roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RolesRoute = RolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/500': typeof R500Route
   '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
+  '/roles': typeof RolesRoute
   '/user-roles': typeof UserRolesRoute
   '/users/create': typeof UsersCreateRoute
   '/users': typeof UsersIndexRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/500': typeof R500Route
   '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
+  '/roles': typeof RolesRoute
   '/user-roles': typeof UserRolesRoute
   '/users/create': typeof UsersCreateRoute
   '/users': typeof UsersIndexRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/500': typeof R500Route
   '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
+  '/roles': typeof RolesRoute
   '/user-roles': typeof UserRolesRoute
   '/users/create': typeof UsersCreateRoute
   '/users/': typeof UsersIndexRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/all-letters'
     | '/login'
+    | '/roles'
     | '/user-roles'
     | '/users/create'
     | '/users'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/all-letters'
     | '/login'
+    | '/roles'
     | '/user-roles'
     | '/users/create'
     | '/users'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/all-letters'
     | '/login'
+    | '/roles'
     | '/user-roles'
     | '/users/create'
     | '/users/'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   R500Route: typeof R500Route
   AllLettersRoute: typeof AllLettersRoute
   LoginRoute: typeof LoginRoute
+  RolesRoute: typeof RolesRoute
   UserRolesRoute: typeof UserRolesRoute
   UsersCreateRoute: typeof UsersCreateRoute
   UsersIndexRoute: typeof UsersIndexRoute
@@ -167,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/user-roles'
       fullPath: '/user-roles'
       preLoaderRoute: typeof UserRolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/roles': {
+      id: '/roles'
+      path: '/roles'
+      fullPath: '/roles'
+      preLoaderRoute: typeof RolesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   R500Route: R500Route,
   AllLettersRoute: AllLettersRoute,
   LoginRoute: LoginRoute,
+  RolesRoute: RolesRoute,
   UserRolesRoute: UserRolesRoute,
   UsersCreateRoute: UsersCreateRoute,
   UsersIndexRoute: UsersIndexRoute,
