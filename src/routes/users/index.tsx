@@ -1,8 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { CreateUser } from '@/components'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
-import { Stack, Typography, useTheme } from '@mui/material'
+import { Modal, Stack, Typography, useTheme } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import Paper from '@mui/material/Paper'
 import { Tabs } from '@mui/material'
@@ -33,6 +34,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/users/')({
   component: RouteComponent,
@@ -106,6 +108,15 @@ const rows = [
 
 function RouteComponent() {
   const theme = useTheme()
+  const [open, setOpen] = useState(false)
+
+  const handleOpen = () => {
+    setOpen(true)
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+  }
 
   const getStatusBadge = (
     status: 'Active' | 'Pending' | 'Banned' | 'Rejected',
@@ -174,13 +185,38 @@ function RouteComponent() {
           Users
         </Typography>
         <Button
+          onClick={handleOpen}
           variant="contained"
           startIcon={<AddIcon />}
           sx={{ borderRadius: 2 }}
-          href="/users/create"
         >
           Add User
         </Button>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="create-user-modal"
+          aria-describedby="create-user-form"
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: { xs: '90%', sm: '80%', md: '70%', lg: '60%' },
+              maxWidth: 1000,
+              maxHeight: '90vh',
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              boxShadow: 24,
+              p: 4,
+              overflow: 'auto',
+            }}
+          >
+            <CreateUser onClose={handleClose} />
+          </Box>
+        </Modal>
       </Box>
 
       <Box sx={{ mb: 3 }}>
@@ -340,15 +376,41 @@ function RouteComponent() {
           <TableContainer
             component={Paper}
             elevation={0}
-            sx={{ borderRadius: 0 }}
+            sx={{
+              borderRadius: 0,
+              overflowX: 'auto',
+              '&::-webkit-scrollbar': {
+                height: 8,
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: theme.palette.grey[100],
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: theme.palette.grey[400],
+                borderRadius: 4,
+              },
+            }}
           >
-            <Table sx={{ minWidth: 650 }} aria-label="user table">
+            <Table
+              sx={{ minWidth: { xs: 800, sm: 650 } }}
+              aria-label="user table"
+            >
               <TableHead>
-                <TableRow sx={{ backgroundColor: theme.palette.grey[100] }}>
-                  <TableCell padding="checkbox">
+                <TableRow
+                  sx={{
+                    backgroundColor:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.grey[800]
+                        : theme.palette.grey[100],
+                  }}
+                >
+                  <TableCell
+                    padding="checkbox"
+                    sx={{ display: { xs: 'none', sm: 'table-cell' } }}
+                  >
                     <Checkbox color="primary" />
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ minWidth: 200 }}>
                     <Box
                       sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
                     >
@@ -361,43 +423,102 @@ function RouteComponent() {
                       />
                     </Box>
                   </TableCell>
-                  <TableCell>Phone number</TableCell>
-                  <TableCell>Branch</TableCell>
-                  <TableCell>Role</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell></TableCell>
+                  <TableCell
+                    sx={{
+                      display: { xs: 'none', md: 'table-cell' },
+                      minWidth: 120,
+                    }}
+                  >
+                    Phone number
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      display: { xs: 'none', lg: 'table-cell' },
+                      minWidth: 180,
+                    }}
+                  >
+                    Branch
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>Role</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>Status</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {rows.map((row) => (
                   <TableRow
+                    key={row.id}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
-                    <TableCell padding="checkbox">
+                    <TableCell
+                      padding="checkbox"
+                      sx={{ display: { xs: 'none', sm: 'table-cell' } }}
+                    >
                       <Checkbox color="primary" />
                     </TableCell>
-                    <TableCell component="th" scope="row">
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      sx={{ minWidth: 200 }}
+                    >
                       <Stack direction="row" alignItems="center" spacing={1}>
-                        <Avatar src={row.avatarUrl} alt={row.name} />
+                        <Avatar
+                          src={row.avatarUrl}
+                          alt={row.name}
+                          sx={{ width: 32, height: 32 }}
+                        />
                         <Box>
-                          <Typography variant="subtitle2" fontWeight="medium">
+                          <Typography
+                            variant="subtitle2"
+                            fontWeight="medium"
+                            sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                          >
                             {row.name}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                          >
                             {row.email}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                              display: { xs: 'block', md: 'none' },
+                            }}
+                          >
+                            {row.phone}
                           </Typography>
                         </Box>
                       </Stack>
                     </TableCell>
-                    <TableCell>{row.phone}</TableCell>
-                    <TableCell>{row.branch}</TableCell>
-                    <TableCell>{row.role}</TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
+                      {row.phone}
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', lg: 'table-cell' } }}
+                    >
+                      {row.branch}
+                    </TableCell>
+                    <TableCell>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                      >
+                        {row.role}
+                      </Typography>
+                    </TableCell>
                     <TableCell>{getStatusBadge(row.status)}</TableCell>
                     <TableCell align="right">
-                      <IconButton>
+                      <IconButton size="small">
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton>
+                      <IconButton size="small">
                         <MoreVertIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
@@ -414,22 +535,41 @@ function RouteComponent() {
               alignItems: 'center',
               p: 2,
               flexWrap: 'wrap',
+              gap: 2,
             }}
           >
             <FormControlLabel
               label="Dense"
               control={<Switch />}
-              sx={{ mr: 2 }}
+              sx={{ mr: { xs: 0, sm: 2 } }}
             />
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Rows per page: 5
-              </Typography>
-              <KeyboardArrowDownIcon />
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: { xs: 1, sm: 2 },
+                flexWrap: 'wrap',
+                justifyContent: { xs: 'center', sm: 'flex-end' },
+              }}
+            >
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ ml: 2, mr: 1 }}
+                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
+                Rows per page: 5
+              </Typography>
+              <KeyboardArrowDownIcon
+                sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}
+              />
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  ml: { xs: 1, sm: 2 },
+                  mr: 1,
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                }}
               >
                 1-10 of {rows.length}
               </Typography>

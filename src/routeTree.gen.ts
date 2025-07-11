@@ -18,7 +18,6 @@ import { Route as R403RouteImport } from './routes/403'
 import { Route as R401RouteImport } from './routes/401'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsersIndexRouteImport } from './routes/users/index'
-import { Route as UsersCreateRouteImport } from './routes/users/create'
 
 const UserRolesRoute = UserRolesRouteImport.update({
   id: '/user-roles',
@@ -65,11 +64,6 @@ const UsersIndexRoute = UsersIndexRouteImport.update({
   path: '/users/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UsersCreateRoute = UsersCreateRouteImport.update({
-  id: '/users/create',
-  path: '/users/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -80,7 +74,6 @@ export interface FileRoutesByFullPath {
   '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
   '/user-roles': typeof UserRolesRoute
-  '/users/create': typeof UsersCreateRoute
   '/users': typeof UsersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -92,7 +85,6 @@ export interface FileRoutesByTo {
   '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
   '/user-roles': typeof UserRolesRoute
-  '/users/create': typeof UsersCreateRoute
   '/users': typeof UsersIndexRoute
 }
 export interface FileRoutesById {
@@ -105,7 +97,6 @@ export interface FileRoutesById {
   '/all-letters': typeof AllLettersRoute
   '/login': typeof LoginRoute
   '/user-roles': typeof UserRolesRoute
-  '/users/create': typeof UsersCreateRoute
   '/users/': typeof UsersIndexRoute
 }
 export interface FileRouteTypes {
@@ -119,7 +110,6 @@ export interface FileRouteTypes {
     | '/all-letters'
     | '/login'
     | '/user-roles'
-    | '/users/create'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -131,7 +121,6 @@ export interface FileRouteTypes {
     | '/all-letters'
     | '/login'
     | '/user-roles'
-    | '/users/create'
     | '/users'
   id:
     | '__root__'
@@ -143,7 +132,6 @@ export interface FileRouteTypes {
     | '/all-letters'
     | '/login'
     | '/user-roles'
-    | '/users/create'
     | '/users/'
   fileRoutesById: FileRoutesById
 }
@@ -156,7 +144,6 @@ export interface RootRouteChildren {
   AllLettersRoute: typeof AllLettersRoute
   LoginRoute: typeof LoginRoute
   UserRolesRoute: typeof UserRolesRoute
-  UsersCreateRoute: typeof UsersCreateRoute
   UsersIndexRoute: typeof UsersIndexRoute
 }
 
@@ -225,13 +212,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/users/create': {
-      id: '/users/create'
-      path: '/users/create'
-      fullPath: '/users/create'
-      preLoaderRoute: typeof UsersCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -244,7 +224,6 @@ const rootRouteChildren: RootRouteChildren = {
   AllLettersRoute: AllLettersRoute,
   LoginRoute: LoginRoute,
   UserRolesRoute: UserRolesRoute,
-  UsersCreateRoute: UsersCreateRoute,
   UsersIndexRoute: UsersIndexRoute,
 }
 export const routeTree = rootRouteImport
