@@ -4,7 +4,6 @@ import {
   Alert,
   Box,
   Button,
-  Divider,
   IconButton,
   InputAdornment,
   Paper,
@@ -14,7 +13,6 @@ import {
   useTheme,
 } from '@mui/material'
 import {
-  Home as HomeIcon,
   Lock as LockIcon,
   Login as LoginIcon,
   Person as PersonIcon,
@@ -23,8 +21,9 @@ import {
 } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
-import { AnimatedIcon } from '../components'
+import { AnimatedIcon } from '@/components'
 import { login } from '@/api'
+import { useAuth } from '@/AuthProvider'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -38,15 +37,23 @@ interface LoginForm {
 function LoginPage() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { login: authLogin, error: authError, clearError } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
 
   const loginMutation = useMutation({
     mutationFn: ({ username, password }: LoginForm) =>
       login(username, password),
     onSuccess: (data) => {
-      // Store the token (you might want to use a more secure method)
-      localStorage.setItem('access_token', data.access_token)
-      navigate({ to: '/' })
+      // Clear any previous auth errors
+      clearError()
+      // Use the auth context login method
+      const success = authLogin(data.access_token)
+      if (success) {
+        navigate({ to: '/' })
+      }
+    },
+    onError: () => {
+      // Error is handled by the auth context
     },
   })
 
@@ -62,10 +69,6 @@ function LoginPage() {
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword)
-  }
-
-  const handleGoHome = () => {
-    navigate({ to: '/' })
   }
 
   return (
@@ -172,7 +175,7 @@ function LoginPage() {
               left: 0,
               right: 0,
               height: 4,
-              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              backgroundColor: theme.palette.primary.light,
             },
           }}
         >
@@ -211,7 +214,7 @@ function LoginPage() {
             </Box>
 
             {/* Error Alert */}
-            {loginMutation.isError && (
+            {(loginMutation.isError || authError) && (
               <Alert
                 severity="error"
                 sx={{
@@ -219,9 +222,10 @@ function LoginPage() {
                   borderRadius: 2,
                 }}
               >
-                {loginMutation.error instanceof Error
-                  ? loginMutation.error.message
-                  : 'Login failed. Please check your credentials.'}
+                {authError || 
+                 (loginMutation.error instanceof Error
+                   ? loginMutation.error.message
+                   : 'Login failed. Please check your credentials.')}
               </Alert>
             )}
 
@@ -398,39 +402,6 @@ function LoginPage() {
                 </Button>
               </Stack>
             </Box>
-
-            {/* Divider */}
-            <Divider sx={{ width: '100%', my: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                or
-              </Typography>
-            </Divider>
-
-            {/* Go Home Button */}
-            <Button
-              variant="outlined"
-              size="large"
-              startIcon={<HomeIcon />}
-              onClick={handleGoHome}
-              disabled={loginMutation.isPending}
-              sx={{
-                px: 4,
-                py: 1.5,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontSize: '1rem',
-                fontWeight: 600,
-                borderWidth: 2,
-                '&:hover': {
-                  borderWidth: 2,
-                  transform: 'translateY(-2px)',
-                  boxShadow: `0 8px 25px ${theme.palette.primary.main}20`,
-                },
-                transition: 'all 0.3s ease',
-              }}
-            >
-              Back to Home
-            </Button>
 
             {/* Footer Text */}
             <Typography

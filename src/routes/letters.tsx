@@ -21,6 +21,7 @@ import {
   Flag as FlagIcon,
 } from '@mui/icons-material'
 import { AddButton, SearchBar, SidebarLayout } from '@/components'
+import { ProtectedRoute } from '@/AuthProvider'
 
 export const Route = createFileRoute('/letters')({
   component: Letters,
@@ -160,304 +161,306 @@ function Letters() {
   }
 
   return (
-    <SidebarLayout>
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: 700,
-              color: theme.palette.text.primary,
-              mb: 1,
-            }}
-          >
-            Letters
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: theme.palette.text.secondary,
-              fontSize: '1.1rem',
-            }}
-          >
-            Manage and review all incoming correspondence
-          </Typography>
-        </Box>
-
-        {/* Search and Filters */}
-        <Paper
-          elevation={2}
-          sx={{
-            p: 3,
-            mb: 4,
-            borderRadius: 3,
-            background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
-          }}
-        >
-          <Stack spacing={3}>
-            {/* Search Bar */}
-            <Box>
-              <SearchBar
-                placeholder="Search letters by title, content, or category..."
-                value={searchTerm}
-                onChange={setSearchTerm}
-                onSearch={handleSearch}
-              />
-            </Box>
-
-            {/* Filters */}
-            <Stack
-              direction={{ xs: 'column', md: 'row' }}
-              spacing={2}
-              alignItems={{ xs: 'stretch', md: 'center' }}
-              justifyContent={{ xs: 'flex-start', md: 'space-between' }}
-              sx={{ width: '100%' }}
+    <ProtectedRoute>
+      <SidebarLayout>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          {/* Header */}
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 700,
+                color: theme.palette.text.primary,
+                mb: 1,
+              }}
             >
+              Letters
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: theme.palette.text.secondary,
+                fontSize: '1.1rem',
+              }}
+            >
+              Manage and review all incoming correspondence
+            </Typography>
+          </Box>
+
+          {/* Search and Filters */}
+          <Paper
+            elevation={2}
+            sx={{
+              p: 3,
+              mb: 4,
+              borderRadius: 3,
+              background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+            }}
+          >
+            <Stack spacing={3}>
+              {/* Search Bar */}
+              <Box>
+                <SearchBar
+                  placeholder="Search letters by title, content, or category..."
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  onSearch={handleSearch}
+                />
+              </Box>
+
+              {/* Filters */}
               <Stack
                 direction={{ xs: 'column', md: 'row' }}
                 spacing={2}
                 alignItems={{ xs: 'stretch', md: 'center' }}
+                justifyContent={{ xs: 'flex-start', md: 'space-between' }}
+                sx={{ width: '100%' }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FilterIcon color="action" />
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ fontWeight: 500 }}
-                  >
-                    Filters:
-                  </Typography>
-                </Box>
+                <Stack
+                  direction={{ xs: 'column', md: 'row' }}
+                  spacing={2}
+                  alignItems={{ xs: 'stretch', md: 'center' }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FilterIcon color="action" />
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontWeight: 500 }}
+                    >
+                      Filters:
+                    </Typography>
+                  </Box>
 
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel>Date</InputLabel>
-                  <Select
-                    value={dateFilter}
-                    label="Date"
-                    onChange={(e) => setDateFilter(e.target.value)}
-                    startAdornment={
-                      <CalendarIcon sx={{ mr: 1, color: 'action.active' }} />
-                    }
-                  >
-                    <MenuItem value="all">All Dates</MenuItem>
-                    <MenuItem value="today">Today</MenuItem>
-                    <MenuItem value="week">Last Week</MenuItem>
-                    <MenuItem value="month">Last Month</MenuItem>
-                  </Select>
-                </FormControl>
+                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                    <InputLabel>Date</InputLabel>
+                    <Select
+                      value={dateFilter}
+                      label="Date"
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      startAdornment={
+                        <CalendarIcon sx={{ mr: 1, color: 'action.active' }} />
+                      }
+                    >
+                      <MenuItem value="all">All Dates</MenuItem>
+                      <MenuItem value="today">Today</MenuItem>
+                      <MenuItem value="week">Last Week</MenuItem>
+                      <MenuItem value="month">Last Month</MenuItem>
+                    </Select>
+                  </FormControl>
 
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel>Priority</InputLabel>
-                  <Select
-                    value={priorityFilter}
-                    label="Priority"
-                    onChange={(e) => setPriorityFilter(e.target.value)}
-                    startAdornment={
-                      <FlagIcon sx={{ mr: 1, color: 'action.active' }} />
-                    }
-                  >
-                    <MenuItem value="all">All Priorities</MenuItem>
-                    <MenuItem value="high">High</MenuItem>
-                    <MenuItem value="medium">Medium</MenuItem>
-                    <MenuItem value="low">Low</MenuItem>
-                  </Select>
-                </FormControl>
+                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                    <InputLabel>Priority</InputLabel>
+                    <Select
+                      value={priorityFilter}
+                      label="Priority"
+                      onChange={(e) => setPriorityFilter(e.target.value)}
+                      startAdornment={
+                        <FlagIcon sx={{ mr: 1, color: 'action.active' }} />
+                      }
+                    >
+                      <MenuItem value="all">All Priorities</MenuItem>
+                      <MenuItem value="high">High</MenuItem>
+                      <MenuItem value="medium">Medium</MenuItem>
+                      <MenuItem value="low">Low</MenuItem>
+                    </Select>
+                  </FormControl>
 
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    value={categoryFilter}
-                    label="Category"
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                  >
-                    <MenuItem value="all">All Categories</MenuItem>
-                    <MenuItem value="finance">Finance</MenuItem>
-                    <MenuItem value="hr">HR</MenuItem>
-                    <MenuItem value="procurement">Procurement</MenuItem>
-                    <MenuItem value="general">General</MenuItem>
-                    <MenuItem value="training">Training</MenuItem>
-                    <MenuItem value="security">Security</MenuItem>
-                  </Select>
-                </FormControl>
+                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                    <InputLabel>Category</InputLabel>
+                    <Select
+                      value={categoryFilter}
+                      label="Category"
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                    >
+                      <MenuItem value="all">All Categories</MenuItem>
+                      <MenuItem value="finance">Finance</MenuItem>
+                      <MenuItem value="hr">HR</MenuItem>
+                      <MenuItem value="procurement">Procurement</MenuItem>
+                      <MenuItem value="general">General</MenuItem>
+                      <MenuItem value="training">Training</MenuItem>
+                      <MenuItem value="security">Security</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+
+                {/* Add Letter Button - Right Side */}
+                <AddButton
+                  label="Add Letter"
+                  onClick={() => console.log('Clicked')}
+                  tooltip="Add a new letter"
+                  size="small"
+                  sx={{
+                    alignSelf: { xs: 'flex-start', md: 'center' },
+                    mt: { xs: 2, md: 0 },
+                  }}
+                />
               </Stack>
-
-              {/* Add Letter Button - Right Side */}
-              <AddButton
-                label="Add Letter"
-                onClick={() => console.log('Clicked')}
-                tooltip="Add a new letter"
-                size="small"
-                sx={{
-                  alignSelf: { xs: 'flex-start', md: 'center' },
-                  mt: { xs: 2, md: 0 },
-                }}
-              />
             </Stack>
-          </Stack>
-        </Paper>
+          </Paper>
 
-        {/* Results Summary */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body2" color="text.secondary">
-            Showing {filteredLetters.length} of {mockLetters.length} letters
-          </Typography>
-        </Box>
+          {/* Results Summary */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {filteredLetters.length} of {mockLetters.length} letters
+            </Typography>
+          </Box>
 
-        {/* Letters Grid */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: '1fr',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-            },
-            gap: 3,
-            // Ensure all cards in a row have the same height
-            gridAutoRows: 'minmax(380px, auto)',
-          }}
-        >
-          {filteredLetters.map((letter) => (
-            <Card
-              key={letter.id}
-              elevation={4}
-              sx={{
-                height: '100%',
-                width: '100%',
-                borderRadius: 3,
-                transition: 'all 0.3s ease',
-                background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: `0 12px 24px ${theme.palette.primary.main}15`,
-                },
-                position: 'relative',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 3,
-                  background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                },
-              }}
-            >
-              <CardContent
+          {/* Letters Grid */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+              },
+              gap: 3,
+              // Ensure all cards in a row have the same height
+              gridAutoRows: 'minmax(380px, auto)',
+            }}
+          >
+            {filteredLetters.map((letter) => (
+              <Card
+                key={letter.id}
+                elevation={4}
                 sx={{
-                  p: 3,
                   height: '100%',
+                  width: '100%',
+                  borderRadius: 3,
+                  transition: 'all 0.3s ease',
+                  background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: `0 12px 24px ${theme.palette.primary.main}15`,
+                  },
+                  position: 'relative',
+                  overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 3,
+                    background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  },
                 }}
               >
-                {/* Letter Title */}
-                <Typography
-                  variant="h6"
+                <CardContent
                   sx={{
-                    fontWeight: 700,
-                    color: theme.palette.text.primary,
-                    mb: 2,
-                    lineHeight: 1.3,
+                    p: 3,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
                   }}
                 >
-                  {letter.title}
-                </Typography>
+                  {/* Letter Title */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      color: theme.palette.text.primary,
+                      mb: 2,
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {letter.title}
+                  </Typography>
 
-                {/* Date and Priority */}
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{ mb: 2 }}
-                >
+                  {/* Date and Priority */}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    sx={{ mb: 2 }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                      }}
+                    >
+                      <CalendarIcon sx={{ fontSize: 16 }} />
+                      {formatDate(letter.receivingDate)}
+                    </Typography>
+
+                    <Chip
+                      label={letter.priority}
+                      size="small"
+                      sx={{
+                        backgroundColor: `${getPriorityColor(letter.priority)}20`,
+                        color: getPriorityColor(letter.priority),
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                      }}
+                    />
+                  </Stack>
+
+                  {/* Category */}
+                  <Box sx={{ mb: 2 }}>
+                    <Chip
+                      label={letter.category}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        borderColor: theme.palette.primary.main,
+                        color: theme.palette.primary.main,
+                        fontSize: '0.75rem',
+                      }}
+                    />
+                  </Box>
+
+                  {/* Content Preview */}
                   <Typography
                     variant="body2"
                     sx={{
                       color: theme.palette.text.secondary,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5,
+                      lineHeight: 1.6,
+                      flex: 1,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
                   >
-                    <CalendarIcon sx={{ fontSize: 16 }} />
-                    {formatDate(letter.receivingDate)}
+                    {letter.content}
                   </Typography>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
 
-                  <Chip
-                    label={letter.priority}
-                    size="small"
-                    sx={{
-                      backgroundColor: `${getPriorityColor(letter.priority)}20`,
-                      color: getPriorityColor(letter.priority),
-                      fontWeight: 600,
-                      fontSize: '0.75rem',
-                    }}
-                  />
-                </Stack>
-
-                {/* Category */}
-                <Box sx={{ mb: 2 }}>
-                  <Chip
-                    label={letter.category}
-                    variant="outlined"
-                    size="small"
-                    sx={{
-                      borderColor: theme.palette.primary.main,
-                      color: theme.palette.primary.main,
-                      fontSize: '0.75rem',
-                    }}
-                  />
-                </Box>
-
-                {/* Content Preview */}
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    lineHeight: 1.6,
-                    flex: 1,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {letter.content}
-                </Typography>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-
-        {/* No Results */}
-        {filteredLetters.length === 0 && (
-          <Box
-            sx={{
-              textAlign: 'center',
-              py: 8,
-            }}
-          >
-            <Typography
-              variant="h6"
+          {/* No Results */}
+          {filteredLetters.length === 0 && (
+            <Box
               sx={{
-                color: theme.palette.text.secondary,
-                mb: 1,
+                textAlign: 'center',
+                py: 8,
               }}
             >
-              No letters found
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Try adjusting your search terms or filters
-            </Typography>
-          </Box>
-        )}
-      </Container>
-    </SidebarLayout>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: theme.palette.text.secondary,
+                  mb: 1,
+                }}
+              >
+                No letters found
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Try adjusting your search terms or filters
+              </Typography>
+            </Box>
+          )}
+        </Container>
+      </SidebarLayout>
+    </ProtectedRoute>
   )
 }
