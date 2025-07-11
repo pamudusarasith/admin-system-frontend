@@ -34,7 +34,7 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 
-export const Route = createFileRoute('/users')({
+export const Route = createFileRoute('/users/')({
   component: RouteComponent,
 })
 
@@ -177,6 +177,7 @@ function RouteComponent() {
           variant="contained"
           startIcon={<AddIcon />}
           sx={{ borderRadius: 2 }}
+          href="/users/create"
         >
           Add User
         </Button>
