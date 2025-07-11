@@ -124,7 +124,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
               onClick={() => handleItemToggle(item.id)}
               sx={{
                 minHeight: 48,
-                justifyContent: open ? 'initial' : 'center',
                 px: 2.5,
                 pl: depth * 2 + 2.5,
                 '&:hover': {
@@ -135,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
               <ListItemIcon
                 sx={{
                   minWidth: 0,
-                  mr: open ? 3 : 'auto',
+                  mr: 3,
                   justifyContent: 'center',
                   color: theme.palette.text.secondary,
                 }}
@@ -145,17 +144,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
               <ListItemText
                 primary={item.label}
                 sx={{
-                  opacity: open ? 1 : 0,
                   '& .MuiListItemText-primary': {
                     fontSize: '0.875rem',
                     fontWeight: 500,
                   },
                 }}
               />
-              {open && (isExpanded ? <ExpandLess /> : <ExpandMore />)}
+              {isExpanded ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
           </ListItem>
-          <Collapse in={isExpanded && open} timeout="auto" unmountOnExit>
+          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {item.children?.map((child) => renderMenuItem(child, depth + 1))}
             </List>
@@ -171,7 +169,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
           to={item.path || '/'}
           sx={{
             minHeight: 48,
-            justifyContent: open ? 'initial' : 'center',
             px: 2.5,
             pl: depth * 2 + 2.5,
             '&:hover': {
@@ -193,7 +190,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
           <ListItemIcon
             sx={{
               minWidth: 0,
-              mr: open ? 3 : 'auto',
+              mr: 3,
               justifyContent: 'center',
               color: theme.palette.text.secondary,
             }}
@@ -203,7 +200,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
           <ListItemText
             primary={item.label}
             sx={{
-              opacity: open ? 1 : 0,
               '& .MuiListItemText-primary': {
                 fontSize: '0.875rem',
                 fontWeight: 500,
@@ -216,69 +212,59 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
   }
 
   const drawerWidth = 280
-  const collapsedWidth = 64
 
   return (
     <Drawer
-      variant={isMobile ? 'temporary' : 'permanent'}
-      open={isMobile ? open : true}
+      variant={isMobile ? 'temporary' : 'persistent'}
+      open={open}
       onClose={isMobile ? onToggle : undefined}
       sx={{
-        width: open ? drawerWidth : collapsedWidth,
+        width: open ? drawerWidth : 0,
         flexShrink: 0,
-        whiteSpace: 'nowrap',
-        boxSizing: 'border-box',
         '& .MuiDrawer-paper': {
-          width: open ? drawerWidth : collapsedWidth,
-          transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-          overflowX: 'hidden',
+          width: open ? drawerWidth : 0,
           backgroundColor: theme.palette.background.paper,
           borderRight: `1px solid ${theme.palette.divider}`,
         },
       }}
     >
       {/* User Profile */}
-      {open && (
-        <Box sx={{ p: 2, mt: theme.spacing(8) }}>
-          <Box
+      <Box sx={{ p: 2, mt: theme.spacing(8) }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            p: 1.5,
+            borderRadius: 2,
+            backgroundColor: theme.palette.background.default,
+            border: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Avatar
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-              p: 1.5,
-              borderRadius: 2,
-              backgroundColor: theme.palette.background.default,
-              border: `1px solid ${theme.palette.divider}`,
+              width: 40,
+              height: 40,
+              backgroundColor: theme.palette.primary.main,
             }}
           >
-            <Avatar
-              sx={{
-                width: 40,
-                height: 40,
-                backgroundColor: theme.palette.primary.main,
-              }}
-            >
-              JD
-            </Avatar>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="subtitle2" noWrap>
-                John Doe
-              </Typography>
-              <Typography variant="caption" color="text.secondary" noWrap>
-                Administrator
-              </Typography>
-            </Box>
+            JD
+          </Avatar>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="subtitle2" noWrap>
+              John Doe
+            </Typography>
+            <Typography variant="caption" color="text.secondary" noWrap>
+              Administrator
+            </Typography>
           </Box>
         </Box>
-      )}
+      </Box>
 
-      {open && <Divider />}
+      <Divider />
 
       {/* Navigation Menu */}
-      <List sx={{ flex: 1, pt: 1, mt: open ? 0 : theme.spacing(8) }}>
+      <List sx={{ flex: 1, pt: 1 }}>
         {menuItems.map((item) => renderMenuItem(item))}
       </List>
     </Drawer>
