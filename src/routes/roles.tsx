@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { SearchBar } from '@/components'
-import { AddButton, SidebarLayout } from '@/components'
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -14,6 +13,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
@@ -21,20 +21,19 @@ import {
   Stack,
   Typography,
   useTheme,
-  Avatar,
-  Divider,
 } from '@mui/material'
 import {
-  MoreVert as MoreVertIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  People as PeopleIcon,
-  Security as SecurityIcon,
   AdminPanelSettings as AdminIcon,
-  Person as PersonIcon,
   Business as BusinessIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  MoreVert as MoreVertIcon,
+  People as PeopleIcon,
+  Person as PersonIcon,
+  Security as SecurityIcon,
   Support as SupportIcon,
 } from '@mui/icons-material'
+import { AddButton, SearchBar, SidebarLayout } from '@/components'
 
 export const Route = createFileRoute('/roles')({
   component: RolesPage,
@@ -45,14 +44,14 @@ interface UserRole {
   name: string
   description: string
   userCount: number
-  permissions: string[]
+  permissions: Array<string>
   icon: React.ReactNode
   createdDate: string
   isActive: boolean
 }
 
 // Mock data for user roles
-const mockRoles: UserRole[] = [
+const mockRoles: Array<UserRole> = [
   {
     id: '1',
     name: 'Super Admin',
@@ -118,7 +117,7 @@ const mockRoles: UserRole[] = [
 function RolesPage() {
   const theme = useTheme()
   const [searchTerm, setSearchTerm] = useState('')
-  const [roles, setRoles] = useState<UserRole[]>(mockRoles)
+  const [roles, setRoles] = useState<Array<UserRole>>(mockRoles)
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
