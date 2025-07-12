@@ -33,6 +33,7 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { ProtectedRoute } from '@/AuthProvider'
+import { SidebarLayout } from '@/components'
 
 export const Route = createFileRoute('/users/')({
   component: RouteComponent,
@@ -157,297 +158,315 @@ function RouteComponent() {
 
   return (
     <ProtectedRoute>
-      <Container fixed sx={{ py: 3, fontFamily: 'Inter, sans-serif' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: { xs: 'flex-start', sm: 'center' },
-            mt: 2,
-            justifyContent: 'space-between',
-            mb: 2,
-            gap: { xs: 2, sm: 0 },
-          }}
-        >
-          <Typography
+      <SidebarLayout>
+        <Container fixed sx={{ py: 3, fontFamily: 'Inter, sans-serif' }}>
+          <Box
             sx={{
-              fontSize: { xs: '1.5rem', sm: '1.8rem' },
-              fontWeight: 'bold',
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              mt: 2,
+              justifyContent: 'space-between',
+              mb: 2,
+              gap: { xs: 2, sm: 0 },
             }}
           >
-            Users
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ borderRadius: 2 }}
-            href="/users/create"
-          >
-            Add User
-          </Button>
-        </Box>
-
-        <Box sx={{ mb: 3 }}>
-          <Breadcrumbs aria-label="breadcrumb">
-            <Link underline="hover" color="inherit">
-              Dashboard
-            </Link>
-            <Link underline="hover" color="inherit">
-              User
-            </Link>
-            <Typography color="text.primary">List</Typography>
-          </Breadcrumbs>
-        </Box>
-
-        <Paper
-          elevation={3}
-          sx={{ display: 'flex', flexDirection: 'column', borderRadius: 2 }}
-        >
-          <Box sx={{ width: '100%' }}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs
-                value={0}
-                onChange={() => {}}
-                aria-label="basic tabs example"
-                textColor="inherit"
-                indicatorColor="primary"
-                variant="scrollable"
-                scrollButtons="auto"
-                allowScrollButtonsMobile
-              >
-                <Tab
-                  label={
-                    <Box display={'flex'} gap={1} alignItems={'center'}>
-                      All{' '}
-                      <Box
-                        bgcolor={'text.primary'}
-                        borderRadius={1.4}
-                        minWidth={24}
-                        px={0.8}
-                        color={theme.palette.primary.contrastText}
-                        sx={{ textAlign: 'center' }}
-                      >
-                        20
-                      </Box>
-                    </Box>
-                  }
-                ></Tab>
-                <Tab
-                  label={
-                    <Box display={'flex'} gap={1} alignItems={'center'}>
-                      Active{' '}
-                      <Box
-                        bgcolor={theme.palette.success.light}
-                        borderRadius={1.4}
-                        minWidth={24}
-                        sx={{ textAlign: 'center' }}
-                        px={0.8}
-                        color={theme.palette.success.dark}
-                      >
-                        4
-                      </Box>
-                    </Box>
-                  }
-                ></Tab>
-                <Tab
-                  label={
-                    <Box display={'flex'} gap={1} alignItems={'center'}>
-                      Pending{' '}
-                      <Box
-                        bgcolor={theme.palette.warning.light}
-                        borderRadius={1.4}
-                        minWidth={24}
-                        sx={{ textAlign: 'center' }}
-                        px={0.8}
-                        color={theme.palette.warning.dark}
-                      >
-                        10
-                      </Box>
-                    </Box>
-                  }
-                ></Tab>
-                <Tab
-                  label={
-                    <Box display={'flex'} gap={1} alignItems={'center'}>
-                      Banned{' '}
-                      <Box
-                        bgcolor={theme.palette.error.light}
-                        borderRadius={1.4}
-                        minWidth={24}
-                        sx={{ textAlign: 'center' }}
-                        px={0.8}
-                        color={theme.palette.error.dark}
-                      >
-                        7
-                      </Box>
-                    </Box>
-                  }
-                ></Tab>
-                <Tab
-                  label={
-                    <Box display={'flex'} gap={1} alignItems={'center'}>
-                      Rejected{' '}
-                      <Box
-                        bgcolor={theme.palette.grey[400]}
-                        borderRadius={1.4}
-                        minWidth={24}
-                        sx={{ textAlign: 'center' }}
-                        px={0.8}
-                        color={theme.palette.grey[700]}
-                      >
-                        2
-                      </Box>
-                    </Box>
-                  }
-                ></Tab>
-              </Tabs>
-            </Box>
-
-            <Box
+            <Typography
               sx={{
-                p: 2,
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                gap: 2,
-                alignItems: 'center',
+                fontSize: { xs: '1.5rem', sm: '1.8rem' },
+                fontWeight: 'bold',
               }}
             >
-              <FormControl
-                sx={{
-                  minWidth: 120,
-                  flexShrink: 0,
-                  width: { xs: '100%', sm: 'auto' },
-                }}
-                size="small"
-              >
-                <InputLabel id="role-select-label">Role</InputLabel>
-                <Select label="Role" sx={{ borderRadius: 2 }}></Select>
-              </FormControl>
-
-              <TextField
-                placeholder="Search..."
-                variant="outlined"
-                size="small"
-                fullWidth
-                sx={{ borderRadius: 2 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                  sx: { borderRadius: 2 },
-                }}
-              ></TextField>
-            </Box>
-
-            <TableContainer
-              component={Paper}
-              elevation={0}
-              sx={{ borderRadius: 0 }}
+              Users
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              sx={{ borderRadius: 2 }}
+              href="/users/create"
             >
-              <Table sx={{ minWidth: 650 }} aria-label="user table">
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: theme.palette.grey[100] }}>
-                    <TableCell padding="checkbox">
-                      <Checkbox color="primary" />
-                    </TableCell>
-                    <TableCell>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                      >
-                        Name{' '}
-                        <ArrowUpwardSharpIcon
-                          sx={{
-                            fontSize: '1rem',
-                            color: theme.palette.grey[700],
-                          }}
-                        />
+              Add User
+            </Button>
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link underline="hover" color="inherit">
+                Dashboard
+              </Link>
+              <Link underline="hover" color="inherit">
+                User
+              </Link>
+              <Typography color="text.primary">List</Typography>
+            </Breadcrumbs>
+          </Box>
+
+          <Paper
+            elevation={3}
+            sx={{ display: 'flex', flexDirection: 'column', borderRadius: 2 }}
+          >
+            <Box sx={{ width: '100%' }}>
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Tabs
+                  value={0}
+                  onChange={() => {}}
+                  aria-label="basic tabs example"
+                  textColor="inherit"
+                  indicatorColor="primary"
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  allowScrollButtonsMobile
+                >
+                  <Tab
+                    label={
+                      <Box display={'flex'} gap={1} alignItems={'center'}>
+                        All{' '}
+                        <Box
+                          bgcolor={'text.primary'}
+                          borderRadius={1.4}
+                          minWidth={24}
+                          px={0.8}
+                          color={theme.palette.primary.contrastText}
+                          sx={{ textAlign: 'center' }}
+                        >
+                          20
+                        </Box>
                       </Box>
-                    </TableCell>
-                    <TableCell>Phone number</TableCell>
-                    <TableCell>Branch</TableCell>
-                    <TableCell>Role</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow
-                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
+                    }
+                  ></Tab>
+                  <Tab
+                    label={
+                      <Box display={'flex'} gap={1} alignItems={'center'}>
+                        Active{' '}
+                        <Box
+                          bgcolor={theme.palette.success.light}
+                          borderRadius={1.4}
+                          minWidth={24}
+                          sx={{ textAlign: 'center' }}
+                          px={0.8}
+                          color={theme.palette.success.dark}
+                        >
+                          4
+                        </Box>
+                      </Box>
+                    }
+                  ></Tab>
+                  <Tab
+                    label={
+                      <Box display={'flex'} gap={1} alignItems={'center'}>
+                        Pending{' '}
+                        <Box
+                          bgcolor={theme.palette.warning.light}
+                          borderRadius={1.4}
+                          minWidth={24}
+                          sx={{ textAlign: 'center' }}
+                          px={0.8}
+                          color={theme.palette.warning.dark}
+                        >
+                          10
+                        </Box>
+                      </Box>
+                    }
+                  ></Tab>
+                  <Tab
+                    label={
+                      <Box display={'flex'} gap={1} alignItems={'center'}>
+                        Banned{' '}
+                        <Box
+                          bgcolor={theme.palette.error.light}
+                          borderRadius={1.4}
+                          minWidth={24}
+                          sx={{ textAlign: 'center' }}
+                          px={0.8}
+                          color={theme.palette.error.dark}
+                        >
+                          7
+                        </Box>
+                      </Box>
+                    }
+                  ></Tab>
+                  <Tab
+                    label={
+                      <Box display={'flex'} gap={1} alignItems={'center'}>
+                        Rejected{' '}
+                        <Box
+                          bgcolor={theme.palette.grey[400]}
+                          borderRadius={1.4}
+                          minWidth={24}
+                          sx={{ textAlign: 'center' }}
+                          px={0.8}
+                          color={theme.palette.grey[700]}
+                        >
+                          2
+                        </Box>
+                      </Box>
+                    }
+                  ></Tab>
+                </Tabs>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 2,
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  gap: 2,
+                  alignItems: 'center',
+                }}
+              >
+                <FormControl
+                  sx={{
+                    minWidth: 120,
+                    flexShrink: 0,
+                    width: { xs: '100%', sm: 'auto' },
+                  }}
+                  size="small"
+                >
+                  <InputLabel id="role-select-label">Role</InputLabel>
+                  <Select label="Role" sx={{ borderRadius: 2 }}></Select>
+                </FormControl>
+
+                <TextField
+                  placeholder="Search..."
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  sx={{ borderRadius: 2 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                    sx: { borderRadius: 2 },
+                  }}
+                ></TextField>
+              </Box>
+
+              <TableContainer
+                component={Paper}
+                elevation={0}
+                sx={{ borderRadius: 0 }}
+              >
+                <Table sx={{ minWidth: 650 }} aria-label="user table">
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: theme.palette.grey[100] }}>
                       <TableCell padding="checkbox">
                         <Checkbox color="primary" />
                       </TableCell>
-                      <TableCell component="th" scope="row">
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Avatar src={row.avatarUrl} alt={row.name} />
-                          <Box>
-                            <Typography variant="subtitle2" fontWeight="medium">
-                              {row.name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {row.email}
-                            </Typography>
-                          </Box>
-                        </Stack>
+                      <TableCell>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                          }}
+                        >
+                          Name{' '}
+                          <ArrowUpwardSharpIcon
+                            sx={{
+                              fontSize: '1rem',
+                              color: theme.palette.grey[700],
+                            }}
+                          />
+                        </Box>
                       </TableCell>
-                      <TableCell>{row.phone}</TableCell>
-                      <TableCell>{row.branch}</TableCell>
-                      <TableCell>{row.role}</TableCell>
-                      <TableCell>{getStatusBadge(row.status)}</TableCell>
-                      <TableCell align="right">
-                        <IconButton>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton>
-                          <MoreVertIcon fontSize="small" />
-                        </IconButton>
-                      </TableCell>
+                      <TableCell>Phone number</TableCell>
+                      <TableCell>Branch</TableCell>
+                      <TableCell>Role</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell></TableCell>
                     </TableRow>
-                  ))}
-                  <Divider />
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                p: 2,
-                flexWrap: 'wrap',
-              }}
-            >
-              <FormControlLabel
-                label="Dense"
-                control={<Switch />}
-                sx={{ mr: 2 }}
-              />
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Rows per page: 5
-                </Typography>
-                <KeyboardArrowDownIcon />
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ ml: 2, mr: 1 }}
-                >
-                  1-10 of {rows.length}
-                </Typography>
-                <IconButton size="small" disabled>
-                  <KeyboardArrowLeftIcon />
-                </IconButton>
-                <IconButton size="small">
-                  <KeyboardArrowRightIcon />
-                </IconButton>
+                  </TableHead>
+                  <TableBody>
+                    {rows.map((row) => (
+                      <TableRow
+                        sx={{
+                          '&:last-child td, &:last-child th': { border: 0 },
+                        }}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox color="primary" />
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1}
+                          >
+                            <Avatar src={row.avatarUrl} alt={row.name} />
+                            <Box>
+                              <Typography
+                                variant="subtitle2"
+                                fontWeight="medium"
+                              >
+                                {row.name}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {row.email}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>{row.phone}</TableCell>
+                        <TableCell>{row.branch}</TableCell>
+                        <TableCell>{row.role}</TableCell>
+                        <TableCell>{getStatusBadge(row.status)}</TableCell>
+                        <TableCell align="right">
+                          <IconButton>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton>
+                            <MoreVertIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    <Divider />
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  p: 2,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <FormControlLabel
+                  label="Dense"
+                  control={<Switch />}
+                  sx={{ mr: 2 }}
+                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Rows per page: 5
+                  </Typography>
+                  <KeyboardArrowDownIcon />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ ml: 2, mr: 1 }}
+                  >
+                    1-10 of {rows.length}
+                  </Typography>
+                  <IconButton size="small" disabled>
+                    <KeyboardArrowLeftIcon />
+                  </IconButton>
+                  <IconButton size="small">
+                    <KeyboardArrowRightIcon />
+                  </IconButton>
+                </Box>
               </Box>
             </Box>
-          </Box>
-        </Paper>
-      </Container>
+          </Paper>
+        </Container>
+      </SidebarLayout>
     </ProtectedRoute>
   )
 }

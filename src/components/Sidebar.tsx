@@ -61,7 +61,7 @@ const menuItems: Array<MenuItem> = [
         id: 'users-roles',
         label: 'Roles & Permissions',
         icon: <SettingsIcon />,
-        path: '/users/roles',
+        path: '/roles',
       },
     ],
   },
