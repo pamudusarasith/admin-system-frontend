@@ -1,4 +1,3 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
@@ -12,11 +11,7 @@ import Switch from '@mui/material/Switch'
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import IconButton from '@mui/material/IconButton'
 
-export const Route = createFileRoute('/users/create')({
-  component: RouteComponent,
-})
-
-function RouteComponent() {
+function EUser() {
   const theme = useTheme()
 
   return (
@@ -145,9 +140,8 @@ function RouteComponent() {
                       label="Phone number"
                       placeholder="Enter Phone number"
                     />
-                    <TextField label="State/region" />
-                    <TextField label="Address" />
                     <TextField label="Branch" select />
+                    <TextField label="Role" select />
                   </div>
                 </Box>
               </Grid>
@@ -159,11 +153,9 @@ function RouteComponent() {
                   autoComplete="off"
                 >
                   <div>
+                    <TextField label="Username" />
                     <TextField label="Email address" />
-                    <TextField label="City" select />
-                    <TextField label="Province" select />
-                    <TextField label="Zip/code" />
-                    <TextField label="Role" select />
+                    <TextField label="Division" select />
                   </div>
                 </Box>
               </Grid>
