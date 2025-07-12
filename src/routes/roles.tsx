@@ -1,7 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { SearchBar } from '@/components'
-import { AddButton, SidebarLayout } from '@/components'
 import {
   Avatar,
   Box,
@@ -15,6 +13,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
@@ -24,6 +23,10 @@ import {
   useTheme,
 } from '@mui/material'
 import {
+  AdminPanelSettings as AdminIcon,
+  Business as BusinessIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
   MoreVert as MoreVertIcon,
   People as PeopleIcon,
   Person as PersonIcon,
@@ -31,7 +34,6 @@ import {
   Support as SupportIcon,
 } from '@mui/icons-material'
 import { AddButton, SearchBar, SidebarLayout } from '@/components'
-import { ProtectedRoute } from '@/AuthProvider'
 
 export const Route = createFileRoute('/roles')({
   component: RolesPage,
