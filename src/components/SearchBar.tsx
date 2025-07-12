@@ -22,6 +22,8 @@ interface SearchBarProps {
   debounceMs?: number
   minWidth?: string | number
   minHeight?: string | number
+  width?: string | number
+  height?: string | number
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -38,6 +40,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   debounceMs = 300,
   minWidth,
   minHeight,
+  width,
+  height,
 }) => {
   const theme = useTheme()
   const [internalValue, setInternalValue] = useState('')
@@ -110,7 +114,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <Box
       sx={{
-        width: fullWidth ? '100%' : 'auto',
+        width: width || (fullWidth ? '100%' : 'auto'),
+        height: height,
         minWidth: minWidth,
         minHeight: minHeight,
       }}
@@ -162,10 +167,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           ),
         }}
         sx={{
+          height: height,
           '& .MuiOutlinedInput-root': {
             borderRadius: 3,
             backgroundColor: theme.palette.background.paper,
             transition: 'all 0.3s ease',
+            height: height ? '100%' : 'auto',
             '&:hover': {
               backgroundColor: theme.palette.action.hover,
               '& fieldset': {
@@ -184,6 +191,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           '& .MuiInputBase-input': {
             fontSize: size === 'small' ? '0.875rem' : '1rem',
             fontWeight: 400,
+            height: height
+              ? `calc(${typeof height === 'number' ? `${height}px` : height} - 16px)`
+              : 'auto',
+            boxSizing: 'border-box',
             '&::placeholder': {
               color: theme.palette.text.secondary,
               opacity: 0.7,
