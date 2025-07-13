@@ -2,17 +2,18 @@ import type { ThemeOptions } from '@mui/material/styles';
 
 export const typography: ThemeOptions['typography'] = {
   fontFamily: [
+    '"Roboto"',
     'Inter',
     '-apple-system',
     'BlinkMacSystemFont',
     '"Segoe UI"',
-    'Roboto',
     '"Helvetica Neue"',
     'Arial',
     'sans-serif',
     '"Apple Color Emoji"',
     '"Segoe UI Emoji"',
     '"Segoe UI Symbol"',
+
   ].join(','),
   fontWeightLight: 300,
   fontWeightRegular: 400,

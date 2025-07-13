@@ -175,7 +175,7 @@ function RouteComponent() {
 
   return (
     <SidebarLayout>
-      <Container fixed sx={{ py: 3, fontFamily: 'Inter, sans-serif' }}>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
         <Box
           sx={{
             display: 'flex',
@@ -236,9 +236,9 @@ function RouteComponent() {
               Dashboard
             </Link>
             <Link underline="hover" color="inherit">
-              User
+              User Management
             </Link>
-            <Typography color="text.primary">List</Typography>
+            <Typography color="text.primary">All Users</Typography>
           </Breadcrumbs>
         </Box>
 
