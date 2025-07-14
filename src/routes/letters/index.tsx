@@ -21,6 +21,7 @@ import {
   Inbox as InboxIcon,
 } from '@mui/icons-material'
 import {
+  AddLetterDialog,
   Filters,
   LetterCard,
   SidebarLayout,
@@ -174,6 +175,7 @@ function LettersPage() {
   const [page, setPage] = useState(1)
   const [itemsPerPage] = useState(10)
   const [isLoading] = useState(false)
+  const [isAddLetterDialogOpen, setIsAddLetterDialogOpen] = useState(false)
 
   const filteredLetters = letters.filter((letter) => {
     const matchesSearch =
@@ -259,6 +261,22 @@ function LettersPage() {
     setPage(newPage)
   }
 
+  const handleAddLetterSubmit = (letterData: any) => {
+    // TODO: Implement API call to create new letter
+    console.log('New letter data:', letterData)
+    
+    // For now, we'll just show a success message
+    // In a real application, you would send this data to your backend API
+    // and then refresh the letters list or add the new letter to the state
+    
+    // Close the dialog
+    setIsAddLetterDialogOpen(false)
+    
+    // You could also show a success snackbar here
+    // setSnackbarMessage('Letter added successfully!')
+    // setSnackbarOpen(true)
+  }
+
   const totalPages = Math.ceil(filteredLetters.length / itemsPerPage)
   const startIndex = (page - 1) * itemsPerPage
   const paginatedLetters = filteredLetters.slice(
@@ -312,7 +330,7 @@ function LettersPage() {
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
-                onClick={() => console.log('Register new letter')}
+                onClick={() => setIsAddLetterDialogOpen(true)}
                 sx={{
                   borderRadius: 2,
                   textTransform: 'none',
@@ -322,7 +340,7 @@ function LettersPage() {
                   px: 3,
                 }}
               >
-                Register Letter
+                Add New Letter
               </Button>
             </Box>
 
@@ -486,99 +504,14 @@ function LettersPage() {
             </Box>
           </Fade>
         )}
-
-        {/* Quick Stats Summary */}
-        <Fade in timeout={1400}>
-          <Box
-            sx={{
-              mt: 4,
-              p: 3,
-              backgroundColor: theme.palette.grey[50],
-              borderRadius: 2,
-              border: `1px solid ${theme.palette.divider}`,
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 600, mb: 2, textAlign: 'center' }}
-            >
-              Quick Statistics
-            </Typography>
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: 'repeat(2, 1fr)',
-                  sm: 'repeat(4, 1fr)',
-                },
-                gap: 3,
-                justifyItems: 'center',
-              }}
-            >
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="h4"
-                  color="primary"
-                  sx={{ fontWeight: 'bold' }}
-                >
-                  {letters.filter((l) => l.daysOpen > 7).length}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Overdue Items
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="h4"
-                  color="success.main"
-                  sx={{ fontWeight: 'bold' }}
-                >
-                  {Math.round(
-                    (letters.filter((l) => l.status === 'Completed').length /
-                      letters.length) *
-                      100,
-                  )}
-                  %
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Completion Rate
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="h4"
-                  color="warning.main"
-                  sx={{ fontWeight: 'bold' }}
-                >
-                  {
-                    letters.filter(
-                      (l) => l.priority === 'Urgent' || l.priority === 'High',
-                    ).length
-                  }
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  High Priority
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="h4"
-                  color="info.main"
-                  sx={{ fontWeight: 'bold' }}
-                >
-                  {Math.round(
-                    letters.reduce((sum, l) => sum + l.daysOpen, 0) /
-                      letters.length,
-                  )}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Avg. Days Open
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Fade>
       </Container>
+
+      {/* Add Letter Dialog */}
+      <AddLetterDialog
+        open={isAddLetterDialogOpen}
+        onClose={() => setIsAddLetterDialogOpen(false)}
+        onSubmit={handleAddLetterSubmit}
+      />
     </SidebarLayout>
   )
 }

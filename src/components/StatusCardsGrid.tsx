@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 import {
   Assignment as AssignmentIcon,
   Inbox as InboxIcon,
@@ -22,44 +22,49 @@ export const StatusCardsGrid: React.FC<StatusCardsGridProps> = ({
   onStatusFilterChange,
   getStatusColor,
 }) => {
+  const theme = useTheme()
   const getStatusIcon = (type: string) => {
     switch (type) {
-      case 'Pending': return <ScheduleIcon />
-      case 'In Progress': return <TrendingUpIcon />
-      case 'Completed': return <AssignmentIcon />
-      case 'Returned': return <ReplyIcon />
-      default: return <InboxIcon />
+      case 'Pending':
+        return <ScheduleIcon />
+      case 'In Progress':
+        return <TrendingUpIcon />
+      case 'Completed':
+        return <AssignmentIcon />
+      case 'Returned':
+        return <ReplyIcon />
+      default:
+        return <InboxIcon />
     }
   }
 
   const getStatusColorForCard = (type: string) => {
-    if (type === 'All') return '#6366f1' // Indigo color for "All"
+    if (type === 'All') return theme.palette.grey[500]
     return getStatusColor(type)
   }
 
   return (
-    <Box 
-      sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: { 
-          xs: 'repeat(2, 1fr)', 
-          sm: 'repeat(3, 1fr)', 
-          md: 'repeat(5, 1fr)' 
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: 'repeat(2, 1fr)',
+          sm: 'repeat(3, 1fr)',
+          md: 'repeat(5, 1fr)',
         },
-        gap: { xs: 2, sm: 3 }, 
-        mb: 4 
+        gap: 2,
+        mb: 4,
       }}
     >
-      {Object.entries(statusCounts).map(([statusType, count], index) => (
+      {Object.entries(statusCounts).map(([statusType, count]) => (
         <StatusCard
           key={statusType}
-          statusType={statusType}
-          count={count}
+          statusText={statusType}
+          value={count.toString()}
           icon={getStatusIcon(statusType)}
           isSelected={statusFilter === statusType}
           color={getStatusColorForCard(statusType)}
           onClick={() => onStatusFilterChange(statusType)}
-          animationDelay={index * 100}
         />
       ))}
     </Box>

@@ -101,7 +101,8 @@ interface Letter {
 const mockLetter: Letter = {
   id: '1',
   referenceNumber: 'MIN/EDU/2024/001',
-  subject: 'Request for Educational Policy Review and Implementation Guidelines',
+  subject:
+    'Request for Educational Policy Review and Implementation Guidelines',
   sender: {
     name: 'Dr. Priyanka Wickramasinghe',
     organization: 'University of Colombo',
@@ -147,7 +148,8 @@ const mockLetter: Letter = {
         division: 'Mail Room',
       },
       timestamp: '2024-01-15T09:30:00Z',
-      content: 'We hereby request a comprehensive review of the current educational policies...',
+      content:
+        'We hereby request a comprehensive review of the current educational policies...',
     },
     {
       id: '2',
@@ -162,7 +164,8 @@ const mockLetter: Letter = {
       timestamp: '2024-01-15T10:15:00Z',
       fromDivision: 'Secretary Office',
       toDivision: 'Policy Development Division',
-      content: 'Please review this policy request and provide recommendations within 5 working days.',
+      content:
+        'Please review this policy request and provide recommendations within 5 working days.',
     },
     {
       id: '3',
@@ -189,7 +192,8 @@ const mockLetter: Letter = {
         avatar: 'https://placehold.co/40x40/4CAF50/FFFFFF?text=NP',
       },
       timestamp: '2024-01-16T14:20:00Z',
-      content: 'Initial analysis completed. The proposal requires input from the Legal Division regarding compliance with existing regulations. Coordination meeting scheduled for next week.',
+      content:
+        'Initial analysis completed. The proposal requires input from the Legal Division regarding compliance with existing regulations. Coordination meeting scheduled for next week.',
       attachments: [
         {
           id: '3',
@@ -290,15 +294,36 @@ function LetterThreadView() {
 
           {/* Letter Title Section */}
           <Paper sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                mb: 2,
+              }}
+            >
               <Box sx={{ flex: 1, mr: 2 }}>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1, lineHeight: 1.2 }}>
+                <Typography
+                  variant="h4"
+                  sx={{ fontWeight: 'bold', mb: 1, lineHeight: 1.2 }}
+                >
                   {letter.subject}
                 </Typography>
-                <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant="subtitle1"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
                   Reference: {letter.referenceNumber}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: 1,
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                  }}
+                >
                   <Chip
                     label={letter.priority}
                     size="small"
@@ -325,7 +350,7 @@ function LetterThreadView() {
                   />
                 </Box>
               </Box>
-              
+
               {/* Primary Actions */}
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
                 <Button
@@ -352,7 +377,14 @@ function LetterThreadView() {
           </Paper>
 
           {/* Letter Details Grid */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 3 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gap: 3,
+              mb: 3,
+            }}
+          >
             {/* Left Column - Sender & Assignment */}
             <Box>
               <Paper sx={{ p: 3, mb: 3 }}>
@@ -360,8 +392,17 @@ function LetterThreadView() {
                   Sender Information
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ width: 56, height: 56, backgroundColor: theme.palette.primary.main }}>
-                    {letter.sender.name.split(' ').map(n => n[0]).join('')}
+                  <Avatar
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      backgroundColor: theme.palette.primary.main,
+                    }}
+                  >
+                    {letter.sender.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
                   </Avatar>
                   <Box>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -385,8 +426,17 @@ function LetterThreadView() {
                   Current Assignment
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ width: 48, height: 48, backgroundColor: theme.palette.secondary.main }}>
-                    {letter.currentAssignee.name.split(' ').map(n => n[0]).join('')}
+                  <Avatar
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      backgroundColor: theme.palette.secondary.main,
+                    }}
+                  >
+                    {letter.currentAssignee.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
                   </Avatar>
                   <Box>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -411,17 +461,39 @@ function LetterThreadView() {
                 </Typography>
                 <Stack spacing={2}>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">Category</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Category
+                    </Typography>
                     <Typography variant="body1">{letter.category}</Typography>
                   </Box>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">Received Date</Typography>
-                    <Typography variant="body1">{formatTimestamp(letter.receivedDate)}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Received Date
+                    </Typography>
+                    <Typography variant="body1">
+                      {formatTimestamp(letter.receivedDate)}
+                    </Typography>
                   </Box>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">Days Open</Typography>
-                    <Typography variant="body1" color={new Date().getTime() - new Date(letter.receivedDate).getTime() > 7 * 24 * 60 * 60 * 1000 ? 'error.main' : 'text.primary'}>
-                      {Math.floor((new Date().getTime() - new Date(letter.receivedDate).getTime()) / (1000 * 60 * 60 * 24))} days
+                    <Typography variant="body2" color="text.secondary">
+                      Days Open
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      color={
+                        new Date().getTime() -
+                          new Date(letter.receivedDate).getTime() >
+                        7 * 24 * 60 * 60 * 1000
+                          ? 'error.main'
+                          : 'text.primary'
+                      }
+                    >
+                      {Math.floor(
+                        (new Date().getTime() -
+                          new Date(letter.receivedDate).getTime()) /
+                          (1000 * 60 * 60 * 24),
+                      )}{' '}
+                      days
                     </Typography>
                   </Box>
                 </Stack>
@@ -445,13 +517,20 @@ function LetterThreadView() {
                           border: `1px solid ${theme.palette.divider}`,
                           borderRadius: 1,
                           cursor: 'pointer',
-                          '&:hover': { backgroundColor: theme.palette.grey[50] }
+                          '&:hover': {
+                            backgroundColor: theme.palette.grey[50],
+                          },
                         }}
-                        onClick={() => console.log('Download:', attachment.name)}
+                        onClick={() =>
+                          console.log('Download:', attachment.name)
+                        }
                       >
                         <AttachIcon color="primary" />
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 'bold' }}
+                          >
                             {attachment.name}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
@@ -488,10 +567,16 @@ function LetterThreadView() {
                 backgroundColor: theme.palette.divider,
               }}
             />
-            
+
             <Stack spacing={0}>
               {letter.actions.map((action, index) => (
-                <Box key={action.id} sx={{ position: 'relative', pb: index < letter.actions.length - 1 ? 4 : 0 }}>
+                <Box
+                  key={action.id}
+                  sx={{
+                    position: 'relative',
+                    pb: index < letter.actions.length - 1 ? 4 : 0,
+                  }}
+                >
                   {/* Timeline dot */}
                   <Box
                     sx={{
@@ -506,23 +591,43 @@ function LetterThreadView() {
                       zIndex: 1,
                     }}
                   />
-                  
+
                   {/* Action content */}
                   <Box sx={{ ml: 8, pl: 3 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        mb: 1,
+                      }}
+                    >
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+                      >
                         <Avatar
                           src={action.performedBy.avatar}
-                          sx={{ width: 36, height: 36, backgroundColor: theme.palette.secondary.main }}
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            backgroundColor: theme.palette.secondary.main,
+                          }}
                         >
-                          {action.performedBy.name.split(' ').map((n) => n[0]).join('')}
+                          {action.performedBy.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')}
                         </Avatar>
                         <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ fontWeight: 'bold' }}
+                          >
                             {action.performedBy.name}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {action.performedBy.role} • {action.performedBy.division}
+                            {action.performedBy.role} •{' '}
+                            {action.performedBy.division}
                           </Typography>
                         </Box>
                       </Box>
@@ -530,7 +635,14 @@ function LetterThreadView() {
                         <Typography variant="caption" color="text.secondary">
                           {formatTimestamp(action.timestamp)}
                         </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            justifyContent: 'flex-end',
+                          }}
+                        >
                           {getActionIcon(action.type)}
                           <Typography variant="caption" color="text.secondary">
                             {action.type.replace('_', ' ').toUpperCase()}
@@ -539,16 +651,19 @@ function LetterThreadView() {
                       </Box>
                     </Box>
 
-                    <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{ fontWeight: 'bold', mb: 1 }}
+                    >
                       {action.description}
                     </Typography>
 
                     {action.content && (
                       <Paper
                         variant="outlined"
-                        sx={{ 
-                          p: 2, 
-                          backgroundColor: theme.palette.grey[50], 
+                        sx={{
+                          p: 2,
+                          backgroundColor: theme.palette.grey[50],
                           mb: 2,
                           border: `1px solid ${theme.palette.divider}`,
                         }}
@@ -560,21 +675,50 @@ function LetterThreadView() {
                     )}
 
                     {action.fromDivision && action.toDivision && (
-                      <Box sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'center' }}>
-                        <Chip label={action.fromDivision} size="small" variant="outlined" />
-                        <Typography variant="body2" color="text.secondary">→</Typography>
-                        <Chip label={action.toDivision} size="small" color="primary" />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          gap: 1,
+                          mb: 2,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Chip
+                          label={action.fromDivision}
+                          size="small"
+                          variant="outlined"
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          →
+                        </Typography>
+                        <Chip
+                          label={action.toDivision}
+                          size="small"
+                          color="primary"
+                        />
                       </Box>
                     )}
 
                     {action.statusFrom && action.statusTo && (
-                      <Box sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          gap: 1,
+                          mb: 2,
+                          alignItems: 'center',
+                        }}
+                      >
                         <Chip
                           label={action.statusFrom}
                           size="small"
-                          sx={{ backgroundColor: theme.palette.grey[300], color: theme.palette.grey[700] }}
+                          sx={{
+                            backgroundColor: theme.palette.grey[300],
+                            color: theme.palette.grey[700],
+                          }}
                         />
-                        <Typography variant="body2" color="text.secondary">→</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          →
+                        </Typography>
                         <Chip
                           label={action.statusTo}
                           size="small"
@@ -588,8 +732,13 @@ function LetterThreadView() {
 
                     {action.attachments && action.attachments.length > 0 && (
                       <Box sx={{ mt: 2 }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                          {action.attachments.length} attachment{action.attachments.length > 1 ? 's' : ''}:
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ mb: 1, display: 'block' }}
+                        >
+                          {action.attachments.length} attachment
+                          {action.attachments.length > 1 ? 's' : ''}:
                         </Typography>
                         <Stack spacing={1}>
                           {action.attachments.map((attachment) => (
@@ -603,9 +752,13 @@ function LetterThreadView() {
                                 backgroundColor: theme.palette.grey[50],
                                 borderRadius: 1,
                                 cursor: 'pointer',
-                                '&:hover': { backgroundColor: theme.palette.grey[100] }
+                                '&:hover': {
+                                  backgroundColor: theme.palette.grey[100],
+                                },
                               }}
-                              onClick={() => console.log('Download:', attachment.name)}
+                              onClick={() =>
+                                console.log('Download:', attachment.name)
+                              }
                             >
                               <AttachIcon fontSize="small" color="primary" />
                               <Typography variant="caption" sx={{ flex: 1 }}>
@@ -662,9 +815,7 @@ function LetterThreadView() {
             <DownloadIcon sx={{ mr: 2 }} />
             Export as PDF
           </MenuItem>
-          <MenuItem onClick={handleMenuClose}>
-            Mark as Completed
-          </MenuItem>
+          <MenuItem onClick={handleMenuClose}>Mark as Completed</MenuItem>
           <Divider />
           <MenuItem onClick={handleMenuClose} sx={{ color: 'warning.main' }}>
             <ArchiveIcon sx={{ mr: 2 }} />
