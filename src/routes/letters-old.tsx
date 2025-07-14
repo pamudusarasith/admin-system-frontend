@@ -23,7 +23,7 @@ import {
 import { AddButton, SearchBar, SidebarLayout } from '@/components'
 // import { ProtectedRoute } from '@/AuthProvider'
 
-export const Route = createFileRoute('/letters')({
+export const Route = createFileRoute('/letters-old')({
   component: Letters,
 })
 
@@ -162,6 +162,7 @@ function Letters() {
 
   return (
     // <ProtectedRoute>
+    // </ProtectedRoute>
     <SidebarLayout>
       <Container maxWidth="xl" sx={{ py: 4 }}>
         {/* Header */}
@@ -461,6 +462,5 @@ function Letters() {
         )}
       </Container>
     </SidebarLayout>
-    // </ProtectedRoute>
   )
 }
