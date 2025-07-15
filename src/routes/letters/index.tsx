@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import {
   Box,
@@ -166,6 +166,7 @@ const mockLetters: Array<LetterSummary> = [
 
 function LettersPage() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [letters] = useState<Array<LetterSummary>>(mockLetters)
   const [searchTerm, setSearchTerm] = useState('')
@@ -264,14 +265,14 @@ function LettersPage() {
   const handleAddLetterSubmit = (letterData: any) => {
     // TODO: Implement API call to create new letter
     console.log('New letter data:', letterData)
-    
+
     // For now, we'll just show a success message
     // In a real application, you would send this data to your backend API
     // and then refresh the letters list or add the new letter to the state
-    
+
     // Close the dialog
     setIsAddLetterDialogOpen(false)
-    
+
     // You could also show a success snackbar here
     // setSnackbarMessage('Letter added successfully!')
     // setSnackbarOpen(true)
@@ -450,9 +451,7 @@ function LettersPage() {
                 getConfidentialityColor={getConfidentialityColor}
                 formatDate={formatDate}
                 formatTimeAgo={formatTimeAgo}
-                onCardClick={(id) =>
-                  window.open(`/letters/thread/${id}`, '_blank')
-                }
+                onCardClick={(id) => navigate({ to: `/letters/${id}` })}
               />
             ))
           )}
