@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Avatar,
   Box,
@@ -6,6 +6,9 @@ import {
   Card,
   CardContent,
   Chip,
+  IconButton,
+  Menu,
+  MenuItem,
   Tooltip,
   Typography,
   Zoom,
@@ -17,9 +20,12 @@ import {
   ArrowForward as ArrowForwardIcon,
   Assignment as AssignmentIcon,
   AttachFile as AttachFileIcon,
+  Forward as ForwardIcon,
+  MoreVert as MoreVertIcon,
   Reply as ReplyIcon,
   Schedule as ScheduleIcon,
   Security as SecurityIcon,
+  Visibility as VisibilityIcon,
 } from '@mui/icons-material'
 
 interface LetterSummary {
@@ -32,10 +38,15 @@ interface LetterSummary {
   }
   receivedDate: string
   priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'In Progress' | 'Completed' | 'Returned'
-  currentAssignee: {
+  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
+  assignedDivision?: {
+    name: string
+    assignedDate: string
+  }
+  currentAssignee?: {
     name: string
     division: string
+    assignedDate: string
   }
   category: string
   confidentialityLevel: 'Public' | 'Confidential' | 'Restricted' | 'Secret'
@@ -67,6 +78,40 @@ export const LetterCard: React.FC<LetterCardProps> = ({
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation()
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleMenuAction = (action: string, event: React.MouseEvent) => {
+    event.stopPropagation()
+    setAnchorEl(null)
+    
+    // Handle different actions
+    switch (action) {
+      case 'view':
+        onCardClick(letter.id)
+        break
+      case 'reply':
+        console.log('Reply to letter:', letter.id)
+        break
+      case 'forward':
+        console.log('Forward letter:', letter.id)
+        break
+      case 'assign':
+        console.log('Assign letter:', letter.id)
+        break
+      default:
+        break
+    }
+  }
 
   return (
     <Zoom in timeout={400 + index * 100}>
@@ -110,29 +155,70 @@ export const LetterCard: React.FC<LetterCardProps> = ({
             >
               {letter.referenceNumber}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Chip
-                label={letter.priority}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Chip
+                  label={letter.priority}
+                  size="small"
+                  sx={{
+                    backgroundColor: getPriorityColor(letter.priority),
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '0.75rem',
+                    height: 24,
+                  }}
+                />
+                <Chip
+                  label={letter.status}
+                  size="small"
+                  sx={{
+                    backgroundColor: getStatusColor(letter.status),
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '0.75rem',
+                    height: 24,
+                  }}
+                />
+              </Box>
+              <IconButton
                 size="small"
+                onClick={handleMenuOpen}
                 sx={{
-                  backgroundColor: getPriorityColor(letter.priority),
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: '0.75rem',
-                  height: 24,
+                  ml: 1,
+                  '&:hover': {
+                    backgroundColor: theme.palette.action.hover,
+                  },
                 }}
-              />
-              <Chip
-                label={letter.status}
-                size="small"
-                sx={{
-                  backgroundColor: getStatusColor(letter.status),
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: '0.75rem',
-                  height: 24,
-                }}
-              />
+              >
+                <MoreVertIcon fontSize="small" />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleMenuClose}
+                onClick={(e) => e.stopPropagation()}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              >
+                <MenuItem onClick={(e) => handleMenuAction('view', e)}>
+                  <VisibilityIcon sx={{ mr: 1, fontSize: 18 }} />
+                  View Details
+                </MenuItem>
+                <MenuItem onClick={(e) => handleMenuAction('reply', e)}>
+                  <ReplyIcon sx={{ mr: 1, fontSize: 18 }} />
+                  Reply
+                </MenuItem>
+                <MenuItem onClick={(e) => handleMenuAction('forward', e)}>
+                  <ForwardIcon sx={{ mr: 1, fontSize: 18 }} />
+                  Forward
+                </MenuItem>
+                {letter.status === 'Pending' && (
+                  <MenuItem onClick={(e) => handleMenuAction('assign', e)}>
+                    <AssignmentIcon sx={{ mr: 1, fontSize: 18 }} />
+                    Assign
+                  </MenuItem>
+                )}
+              </Menu>
             </Box>
           </Box>
 
@@ -295,54 +381,144 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                 variant="subtitle2"
                 sx={{ fontWeight: 'bold', mb: 1.5, color: 'secondary.main' }}
               >
-                👤 ASSIGNED TO
+                👤 ASSIGNMENT STATUS
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                <Avatar
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    backgroundColor: theme.palette.secondary.main,
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  {letter.currentAssignee.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')}
-                </Avatar>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    variant="subtitle2"
+              {letter.currentAssignee ? (
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                  <Avatar
                     sx={{
+                      width: 40,
+                      height: 40,
+                      backgroundColor: theme.palette.secondary.main,
+                      color: 'white',
+                      fontSize: '0.9rem',
                       fontWeight: 'bold',
-                      mb: 0.5,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {letter.currentAssignee.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mb: 0.5,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {letter.currentAssignee.division}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Received: {formatDate(letter.receivedDate)}
-                  </Typography>
+                    {letter.currentAssignee.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
+                  </Avatar>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 'bold',
+                        mb: 0.5,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {letter.currentAssignee.name}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mb: 0.5,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {letter.currentAssignee.division}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Assigned: {formatDate(letter.currentAssignee.assignedDate)}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
+              ) : letter.assignedDivision ? (
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                  <Avatar
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      backgroundColor: theme.palette.primary.main,
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    <AssignmentIcon />
+                  </Avatar>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 'bold',
+                        mb: 0.5,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {letter.assignedDivision.name}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mb: 0.5,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Division Assignment
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Assigned: {formatDate(letter.assignedDivision.assignedDate)}
+                    </Typography>
+                  </Box>
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                  <Avatar
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      backgroundColor: theme.palette.warning.main,
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    <ScheduleIcon />
+                  </Avatar>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 'bold',
+                        mb: 0.5,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Pending Assignment
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mb: 0.5,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Awaiting Division Assignment
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Received: {formatDate(letter.receivedDate)}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
             </Box>
           </Box>
 

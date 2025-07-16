@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -15,6 +15,8 @@ import {
   useTheme,
 } from '@mui/material'
 import {
+  Assignment as AssignmentIcon,
+  Business as BusinessIcon,
   Dashboard as DashboardIcon,
   Email as EmailIcon,
   ExpandLess,
@@ -22,6 +24,7 @@ import {
   MarkEmailUnread as MarkEmailUnreadIcon,
   People as PeopleIcon,
   Receipt as ReceiptIcon,
+  Schedule as ScheduleIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material'
 import { Link } from '@tanstack/react-router'
@@ -35,7 +38,10 @@ interface MenuItem {
   id: string
   label: string
   icon: React.ReactNode
-  path?: string
+  path?: {
+    to: string
+    search?: { [key: string]: string }
+  }
   children?: Array<MenuItem>
 }
 
@@ -44,26 +50,7 @@ const menuItems: Array<MenuItem> = [
     id: 'dashboard',
     label: 'Dashboard',
     icon: <DashboardIcon />,
-    path: '/',
-  },
-  {
-    id: 'users',
-    label: 'User Management',
-    icon: <PeopleIcon />,
-    children: [
-      {
-        id: 'users-list',
-        label: 'All Users',
-        icon: <PeopleIcon />,
-        path: '/users',
-      },
-      {
-        id: 'users-roles',
-        label: 'Roles & Permissions',
-        icon: <SettingsIcon />,
-        path: '/roles',
-      },
-    ],
+    path: { to: '/' },
   },
   {
     id: 'letters',
@@ -74,13 +61,63 @@ const menuItems: Array<MenuItem> = [
         id: 'all-letters',
         label: 'All Letters',
         icon: <EmailIcon />,
-        path: '/letters',
+        path: { to: '/letters' },
       },
       {
-        id: 'unassigned-letters',
-        label: 'Unassigned Letters',
+        id: 'pending-division',
+        label: 'Pending Division Assignment',
+        icon: <ScheduleIcon />,
+        path: { to: '/letters', search: { status: 'Pending' } },
+      },
+      {
+        id: 'pending-person',
+        label: 'Pending Person Assignment',
+        icon: <AssignmentIcon />,
+        path: { to: '/letters', search: { status: 'Assigned to Division' } },
+      },
+      {
+        id: 'my-letters',
+        label: 'My Assigned Letters',
         icon: <MarkEmailUnreadIcon />,
-        path: '/letters/unassigned',
+        path: { to: '/letters', search: { status: 'Assigned to Person' } },
+      },
+    ],
+  },
+  {
+    id: 'divisions',
+    label: 'Division Management',
+    icon: <BusinessIcon />,
+    children: [
+      {
+        id: 'all-divisions',
+        label: 'All Divisions',
+        icon: <BusinessIcon />,
+        path: { to: '/divisions' },
+      },
+      {
+        id: 'division-workload',
+        label: 'Division Workload',
+        icon: <AssignmentIcon />,
+        path: { to: '/divisions/workload' },
+      },
+    ],
+  },
+  {
+    id: 'users',
+    label: 'User Management',
+    icon: <PeopleIcon />,
+    children: [
+      {
+        id: 'users-list',
+        label: 'All Users',
+        icon: <PeopleIcon />,
+        path: { to: '/users' },
+      },
+      {
+        id: 'users-roles',
+        label: 'Roles & Permissions',
+        icon: <SettingsIcon />,
+        path: { to: '/roles' },
       },
     ],
   },
@@ -90,10 +127,10 @@ const menuItems: Array<MenuItem> = [
     icon: <ReceiptIcon />,
     children: [
       {
-        id: 'all-letters',
+        id: 'all-papers',
         label: 'All Papers',
         icon: <ReceiptIcon />,
-        path: '/papers',
+        path: { to: '/papers' },
       },
     ],
   },
@@ -103,6 +140,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [expandedItems, setExpandedItems] = useState<Array<string>>([])
+  const [selectedId, setSelectedId] = useState<string>('dashboard')
+
+  useEffect(() => {
+    const storedSelectedId = localStorage.getItem('selectedSidebarItem')
+    if (storedSelectedId) {
+      setSelectedId(storedSelectedId)
+    }
+  }, [])
 
   const handleItemToggle = (itemId: string) => {
     setExpandedItems((prev) =>
@@ -110,6 +155,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
         ? prev.filter((id) => id !== itemId)
         : [...prev, itemId],
     )
+  }
+
+  const handleItemSelect = (itemId: string) => {
+    localStorage.setItem('selectedSidebarItem', itemId)
+    setSelectedId(itemId)
   }
 
   const renderMenuItem = (item: MenuItem, depth = 0) => {
@@ -164,49 +214,51 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
 
     return (
       <ListItem key={item.id} disablePadding sx={{ display: 'block' }}>
-        <ListItemButton
-          component={Link}
-          to={item.path || '/'}
-          sx={{
-            minHeight: 48,
-            px: 2.5,
-            pl: depth * 2 + 2.5,
-            '&:hover': {
-              backgroundColor: theme.palette.action.hover,
-            },
-            '&.active': {
-              backgroundColor: theme.palette.primary.main + '15',
-              borderRight: `3px solid ${theme.palette.primary.main}`,
-              '& .MuiListItemIcon-root': {
-                color: theme.palette.primary.main,
-              },
-              '& .MuiListItemText-primary': {
-                color: theme.palette.primary.main,
-                fontWeight: 600,
-              },
-            },
-          }}
+        <Link
+          to={item.path?.to || '/'}
+          search={item.path?.search}
+          style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
         >
-          <ListItemIcon
+          <ListItemButton
             sx={{
-              minWidth: 0,
-              mr: 3,
-              justifyContent: 'center',
-              color: theme.palette.text.secondary,
-            }}
-          >
-            {item.icon}
-          </ListItemIcon>
-          <ListItemText
-            primary={item.label}
-            sx={{
-              '& .MuiListItemText-primary': {
-                fontSize: '0.875rem',
-                fontWeight: 500,
+              minHeight: 48,
+              px: 2.5,
+              pl: depth * 2 + 2.5,
+              '&:hover': {
+                backgroundColor: theme.palette.action.hover,
+              },
+              '&.Mui-selected': {
+                borderRight: `3px solid ${theme.palette.primary.main}`,
+                '& .MuiListItemIcon-root': {
+                  color: theme.palette.primary.main,
+                },
+                borderLeft: 0,
               },
             }}
-          />
-        </ListItemButton>
+            selected={item.id === selectedId}
+            onClick={() => handleItemSelect(item.id)}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                mr: 3,
+                justifyContent: 'center',
+                color: theme.palette.text.secondary,
+              }}
+            >
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText
+              primary={item.label}
+              sx={{
+                '& .MuiListItemText-primary': {
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                },
+              }}
+            />
+          </ListItemButton>
+        </Link>
       </ListItem>
     )
   }

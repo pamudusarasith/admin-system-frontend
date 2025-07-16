@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import {
   Box,
@@ -21,6 +21,7 @@ import {
   Inbox as InboxIcon,
 } from '@mui/icons-material'
 import {
+  AddLetterDialog,
   Filters,
   LetterCard,
   SidebarLayout,
@@ -29,6 +30,11 @@ import {
 
 export const Route = createFileRoute('/letters/')({
   component: LettersPage,
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      status: (search.status as string) || 'All',
+    }
+  },
 })
 
 interface LetterSummary {
@@ -41,10 +47,15 @@ interface LetterSummary {
   }
   receivedDate: string
   priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'In Progress' | 'Completed' | 'Returned'
-  currentAssignee: {
+  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
+  assignedDivision?: {
+    name: string
+    assignedDate: string
+  }
+  currentAssignee?: {
     name: string
     division: string
+    assignedDate: string
   }
   category: string
   confidentialityLevel: 'Public' | 'Confidential' | 'Restricted' | 'Secret'
@@ -67,9 +78,14 @@ const mockLetters: Array<LetterSummary> = [
     receivedDate: '2024-01-15T09:30:00Z',
     priority: 'High',
     status: 'In Progress',
+    assignedDivision: {
+      name: 'Policy Development Division',
+      assignedDate: '2024-01-15T10:15:00Z',
+    },
     currentAssignee: {
       name: 'Nimal Perera',
       division: 'Policy Development Division',
+      assignedDate: '2024-01-16T08:30:00Z',
     },
     category: 'Policy Matter',
     confidentialityLevel: 'Confidential',
@@ -87,10 +103,10 @@ const mockLetters: Array<LetterSummary> = [
     },
     receivedDate: '2024-01-18T14:20:00Z',
     priority: 'Urgent',
-    status: 'Pending',
-    currentAssignee: {
-      name: 'Kamala Silva',
-      division: 'Finance Division',
+    status: 'Assigned to Division',
+    assignedDivision: {
+      name: 'Finance Division',
+      assignedDate: '2024-01-18T15:00:00Z',
     },
     category: 'Financial Matter',
     confidentialityLevel: 'Restricted',
@@ -109,9 +125,14 @@ const mockLetters: Array<LetterSummary> = [
     receivedDate: '2024-01-20T11:45:00Z',
     priority: 'Normal',
     status: 'Completed',
+    assignedDivision: {
+      name: 'Human Resources Division',
+      assignedDate: '2024-01-20T14:00:00Z',
+    },
     currentAssignee: {
       name: 'Rohana Jayasinghe',
       division: 'Human Resources Division',
+      assignedDate: '2024-01-21T09:00:00Z',
     },
     category: 'Training & Development',
     confidentialityLevel: 'Public',
@@ -129,10 +150,15 @@ const mockLetters: Array<LetterSummary> = [
     },
     receivedDate: '2024-01-22T16:15:00Z',
     priority: 'High',
-    status: 'In Progress',
+    status: 'Assigned to Person',
+    assignedDivision: {
+      name: 'Legal Division',
+      assignedDate: '2024-01-22T17:00:00Z',
+    },
     currentAssignee: {
       name: 'Anura Mendis',
       division: 'Legal Division',
+      assignedDate: '2024-01-23T09:30:00Z',
     },
     category: 'Legal Matter',
     confidentialityLevel: 'Secret',
@@ -150,30 +176,46 @@ const mockLetters: Array<LetterSummary> = [
     },
     receivedDate: '2024-01-25T10:30:00Z',
     priority: 'Normal',
-    status: 'Returned',
-    currentAssignee: {
-      name: 'Sunil Bandara',
-      division: 'International Relations Division',
-    },
+    status: 'Pending',
     category: 'International Affairs',
     confidentialityLevel: 'Public',
     daysOpen: 2,
     hasAttachments: false,
-    replyCount: 1,
+    replyCount: 0,
   },
 ]
 
 function LettersPage() {
   const theme = useTheme()
+  const navigate = useNavigate()
+  const { status } = Route.useSearch()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [letters] = useState<Array<LetterSummary>>(mockLetters)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('All')
+  const [statusFilter, setStatusFilter] = useState(status)
   const [priorityFilter, setPriorityFilter] = useState('All')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [page, setPage] = useState(1)
   const [itemsPerPage] = useState(10)
   const [isLoading] = useState(false)
+  const [isAddLetterDialogOpen, setIsAddLetterDialogOpen] = useState(false)
+
+  const handleStatusFilterChange = (newStatus: string) => {
+    setStatusFilter(newStatus)
+    if (newStatus === 'All') {
+      navigate({ to: '/letters', search: { status: 'All' } })
+    } else {
+      navigate({ to: '/letters', search: { status: newStatus } })
+    }
+  }
+
+  const handleClearFilters = () => {
+    setStatusFilter('All')
+    setPriorityFilter('All')
+    setCategoryFilter('All')
+    setSearchTerm('')
+    navigate({ to: '/letters', search: { status: 'All' } })
+  }
 
   const filteredLetters = letters.filter((letter) => {
     const matchesSearch =
@@ -202,14 +244,18 @@ function LettersPage() {
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusColor = (statusType: string) => {
+    switch (statusType) {
       case 'Pending':
         return theme.palette.warning.main
-      case 'Completed':
-        return theme.palette.success.main
+      case 'Assigned to Division':
+        return theme.palette.primary.main
+      case 'Assigned to Person':
+        return theme.palette.secondary.main
       case 'In Progress':
         return theme.palette.info.main
+      case 'Completed':
+        return theme.palette.success.main
       case 'Returned':
         return theme.palette.error.main
       default:
@@ -259,6 +305,22 @@ function LettersPage() {
     setPage(newPage)
   }
 
+  const handleAddLetterSubmit = (letterData: any) => {
+    // TODO: Implement API call to create new letter
+    console.log('New letter data:', letterData)
+
+    // For now, we'll just show a success message
+    // In a real application, you would send this data to your backend API
+    // and then refresh the letters list or add the new letter to the state
+
+    // Close the dialog
+    setIsAddLetterDialogOpen(false)
+
+    // You could also show a success snackbar here
+    // setSnackbarMessage('Letter added successfully!')
+    // setSnackbarOpen(true)
+  }
+
   const totalPages = Math.ceil(filteredLetters.length / itemsPerPage)
   const startIndex = (page - 1) * itemsPerPage
   const paginatedLetters = filteredLetters.slice(
@@ -269,6 +331,8 @@ function LettersPage() {
   const statusCounts = {
     All: letters.length,
     Pending: letters.filter((l) => l.status === 'Pending').length,
+    'Assigned to Division': letters.filter((l) => l.status === 'Assigned to Division').length,
+    'Assigned to Person': letters.filter((l) => l.status === 'Assigned to Person').length,
     'In Progress': letters.filter((l) => l.status === 'In Progress').length,
     Completed: letters.filter((l) => l.status === 'Completed').length,
     Returned: letters.filter((l) => l.status === 'Returned').length,
@@ -312,7 +376,7 @@ function LettersPage() {
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
-                onClick={() => console.log('Register new letter')}
+                onClick={() => setIsAddLetterDialogOpen(true)}
                 sx={{
                   borderRadius: 2,
                   textTransform: 'none',
@@ -322,7 +386,7 @@ function LettersPage() {
                   px: 3,
                 }}
               >
-                Register Letter
+                Add New Letter
               </Button>
             </Box>
 
@@ -330,7 +394,7 @@ function LettersPage() {
             <StatusCardsGrid
               statusCounts={statusCounts}
               statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
+              onStatusFilterChange={handleStatusFilterChange}
               getStatusColor={getStatusColor}
             />
           </Box>
@@ -345,15 +409,10 @@ function LettersPage() {
               priorityFilter={priorityFilter}
               categoryFilter={categoryFilter}
               onSearchChange={setSearchTerm}
-              onStatusFilterChange={setStatusFilter}
+              onStatusFilterChange={handleStatusFilterChange}
               onPriorityFilterChange={setPriorityFilter}
               onCategoryFilterChange={setCategoryFilter}
-              onClearAllFilters={() => {
-                setSearchTerm('')
-                setStatusFilter('All')
-                setPriorityFilter('All')
-                setCategoryFilter('All')
-              }}
+              onClearAllFilters={handleClearFilters}
             />
           </div>
         </Fade>
@@ -409,12 +468,7 @@ function LettersPage() {
                 <Button
                   variant="outlined"
                   startIcon={<ClearIcon />}
-                  onClick={() => {
-                    setSearchTerm('')
-                    setStatusFilter('All')
-                    setPriorityFilter('All')
-                    setCategoryFilter('All')
-                  }}
+                  onClick={handleClearFilters}
                   sx={{ mt: 2, borderRadius: 2 }}
                 >
                   Clear All Filters
@@ -432,9 +486,7 @@ function LettersPage() {
                 getConfidentialityColor={getConfidentialityColor}
                 formatDate={formatDate}
                 formatTimeAgo={formatTimeAgo}
-                onCardClick={(id) =>
-                  window.open(`/letters/thread/${id}`, '_blank')
-                }
+                onCardClick={(id) => navigate({ to: `/letters/${id}` })}
               />
             ))
           )}
@@ -486,99 +538,14 @@ function LettersPage() {
             </Box>
           </Fade>
         )}
-
-        {/* Quick Stats Summary */}
-        <Fade in timeout={1400}>
-          <Box
-            sx={{
-              mt: 4,
-              p: 3,
-              backgroundColor: theme.palette.grey[50],
-              borderRadius: 2,
-              border: `1px solid ${theme.palette.divider}`,
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 600, mb: 2, textAlign: 'center' }}
-            >
-              Quick Statistics
-            </Typography>
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: 'repeat(2, 1fr)',
-                  sm: 'repeat(4, 1fr)',
-                },
-                gap: 3,
-                justifyItems: 'center',
-              }}
-            >
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="h4"
-                  color="primary"
-                  sx={{ fontWeight: 'bold' }}
-                >
-                  {letters.filter((l) => l.daysOpen > 7).length}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Overdue Items
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="h4"
-                  color="success.main"
-                  sx={{ fontWeight: 'bold' }}
-                >
-                  {Math.round(
-                    (letters.filter((l) => l.status === 'Completed').length /
-                      letters.length) *
-                      100,
-                  )}
-                  %
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Completion Rate
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="h4"
-                  color="warning.main"
-                  sx={{ fontWeight: 'bold' }}
-                >
-                  {
-                    letters.filter(
-                      (l) => l.priority === 'Urgent' || l.priority === 'High',
-                    ).length
-                  }
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  High Priority
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="h4"
-                  color="info.main"
-                  sx={{ fontWeight: 'bold' }}
-                >
-                  {Math.round(
-                    letters.reduce((sum, l) => sum + l.daysOpen, 0) /
-                      letters.length,
-                  )}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Avg. Days Open
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Fade>
       </Container>
+
+      {/* Add Letter Dialog */}
+      <AddLetterDialog
+        open={isAddLetterDialogOpen}
+        onClose={() => setIsAddLetterDialogOpen(false)}
+        onSubmit={handleAddLetterSubmit}
+      />
     </SidebarLayout>
   )
 }
