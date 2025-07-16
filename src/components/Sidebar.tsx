@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -140,9 +140,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [expandedItems, setExpandedItems] = useState<Array<string>>([])
-  const [selectedId, setSelectedId] = useState<string>(() => {
-    return localStorage.getItem('selectedSidebarItem') || 'dashboard'
-  })
+  const [selectedId, setSelectedId] = useState<string>('dashboard')
+
+  useEffect(() => {
+    const storedSelectedId = localStorage.getItem('selectedSidebarItem')
+    if (storedSelectedId) {
+      setSelectedId(storedSelectedId)
+    }
+  }, [])
 
   const handleItemToggle = (itemId: string) => {
     setExpandedItems((prev) =>
