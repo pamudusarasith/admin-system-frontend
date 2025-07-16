@@ -230,7 +230,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
                 borderLeft: 0,
               },
             }}
-            selected={item.id == selectedId}
+            selected={item.id === selectedId}
             onClick={() => handleItemSelect(item.id)}
           >
             <ListItemIcon

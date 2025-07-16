@@ -182,7 +182,7 @@ export const LetterTimeline: React.FC<LetterTimelineProps> = ({
                     >
                       {getActionIcon(action.type)}
                       <Typography variant="caption" color="text.secondary">
-                        {action.type.replace('_', ' ').toUpperCase()}
+                        {action.type.replaceAll('_', ' ').toUpperCase()}
                       </Typography>
                     </Box>
                   </Box>
