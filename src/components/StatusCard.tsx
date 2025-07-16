@@ -32,7 +32,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        p: 1,
+        p: 1.5,
         cursor: 'pointer',
         borderRadius: 3,
         border: `1px solid ${theme.palette.divider}`,
@@ -44,14 +44,15 @@ export const StatusCard: React.FC<StatusCardProps> = ({
           borderColor: `${color}50`,
         },
         transition: 'all 0.15s ease',
-        minHeight: 120,
+        minHeight: 80,
       }}
     >
       {/* Icon */}
       <Box 
         sx={{ 
           color: isSelected ? color : theme.palette.text.secondary,
-          fontSize: 24,
+          fontSize: 20,
+          mb: 0.5,
         }}
       >
         {icon}
@@ -59,11 +60,12 @@ export const StatusCard: React.FC<StatusCardProps> = ({
 
       {/* Value */}
       <Typography 
-        variant="h5" 
+        variant="h6" 
         sx={{ 
           fontWeight: 600,
           color: isSelected ? color : theme.palette.text.primary,
-          fontSize: { xs: '1.25rem', sm: '1.5rem' },
+          fontSize: { xs: '1rem', sm: '1.125rem' },
+          mb: 0.25,
         }}
       >
         {value}
@@ -71,12 +73,13 @@ export const StatusCard: React.FC<StatusCardProps> = ({
 
       {/* Status Type */}
       <Typography 
-        variant="body2" 
+        variant="caption" 
         sx={{ 
           fontWeight: 500,
           color: theme.palette.text.secondary,
           textAlign: 'center',
-          fontSize: '0.875rem',
+          fontSize: '0.75rem',
+          lineHeight: 1.2,
         }}
       >
         {statusText}

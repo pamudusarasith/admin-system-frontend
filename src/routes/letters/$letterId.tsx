@@ -25,7 +25,7 @@ interface LetterAttachment {
 
 interface LetterAction {
   id: string
-  type: 'received' | 'forwarded' | 'replied' | 'returned' | 'status_change'
+  type: 'received' | 'assigned_to_division' | 'assigned_to_person' | 'forwarded' | 'replied' | 'returned' | 'status_change'
   description: string
   performedBy: {
     name: string
@@ -38,6 +38,11 @@ interface LetterAction {
   attachments?: Array<LetterAttachment>
   fromDivision?: string
   toDivision?: string
+  assignedTo?: {
+    type: 'division' | 'person'
+    name: string
+    id?: string
+  }
   statusFrom?: string
   statusTo?: string
   priority?: 'Normal' | 'Urgent' | 'High'
@@ -55,11 +60,25 @@ interface Letter {
   }
   receivedDate: string
   priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'In Progress' | 'Completed' | 'Returned'
-  currentAssignee: {
+  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
+  assignedDivision?: {
+    id: string
+    name: string
+    assignedDate: string
+    assignedBy: {
+      name: string
+      role: string
+    }
+  }
+  currentAssignee?: {
     name: string
     role: string
     division: string
+    assignedDate?: string
+    assignedBy?: {
+      name: string
+      role: string
+    }
   }
   category: string
   confidentialityLevel: 'Public' | 'Confidential' | 'Restricted' | 'Secret'
@@ -82,10 +101,24 @@ const mockLetter: Letter = {
   receivedDate: '2024-01-15T09:30:00Z',
   priority: 'High',
   status: 'In Progress',
+  assignedDivision: {
+    id: 'policy-dev',
+    name: 'Policy Development Division',
+    assignedDate: '2024-01-15T10:15:00Z',
+    assignedBy: {
+      name: 'Kamala Silva',
+      role: 'Secretary',
+    },
+  },
   currentAssignee: {
     name: 'Nimal Perera',
     role: 'Additional Secretary',
     division: 'Policy Development Division',
+    assignedDate: '2024-01-16T08:30:00Z',
+    assignedBy: {
+      name: 'Sunil Jayasinghe',
+      role: 'Division Head',
+    },
   },
   category: 'Policy Matter',
   confidentialityLevel: 'Confidential',
@@ -123,8 +156,8 @@ const mockLetter: Letter = {
     },
     {
       id: '2',
-      type: 'forwarded',
-      description: 'Forwarded to Policy Development Division',
+      type: 'assigned_to_division',
+      description: 'Assigned to Policy Development Division',
       performedBy: {
         name: 'Kamala Silva',
         role: 'Secretary',
@@ -132,15 +165,37 @@ const mockLetter: Letter = {
         avatar: 'https://placehold.co/40x40/2196F3/FFFFFF?text=KS',
       },
       timestamp: '2024-01-15T10:15:00Z',
-      fromDivision: 'Secretary Office',
-      toDivision: 'Policy Development Division',
+      assignedTo: {
+        type: 'division',
+        name: 'Policy Development Division',
+        id: 'policy-dev',
+      },
       content:
-        'Please review this policy request and provide recommendations within 5 working days.',
+        'This policy review request requires immediate attention. Please review and provide recommendations within 5 working days.',
     },
     {
       id: '3',
+      type: 'assigned_to_person',
+      description: 'Assigned to Nimal Perera within Policy Development Division',
+      performedBy: {
+        name: 'Sunil Jayasinghe',
+        role: 'Division Head',
+        division: 'Policy Development Division',
+        avatar: 'https://placehold.co/40x40/9C27B0/FFFFFF?text=SJ',
+      },
+      timestamp: '2024-01-16T08:30:00Z',
+      assignedTo: {
+        type: 'person',
+        name: 'Nimal Perera',
+        id: 'nimal-perera',
+      },
+      content:
+        'Assigning this policy review to Additional Secretary for detailed analysis.',
+    },
+    {
+      id: '4',
       type: 'status_change',
-      description: 'Status changed from Pending to In Progress',
+      description: 'Status changed from Assigned to Person to In Progress',
       performedBy: {
         name: 'Nimal Perera',
         role: 'Additional Secretary',
@@ -148,13 +203,13 @@ const mockLetter: Letter = {
         avatar: 'https://placehold.co/40x40/4CAF50/FFFFFF?text=NP',
       },
       timestamp: '2024-01-16T08:45:00Z',
-      statusFrom: 'Pending',
+      statusFrom: 'Assigned to Person',
       statusTo: 'In Progress',
     },
     {
-      id: '4',
+      id: '5',
       type: 'replied',
-      description: 'Internal note added',
+      description: 'Internal analysis note added',
       performedBy: {
         name: 'Nimal Perera',
         role: 'Additional Secretary',
@@ -211,6 +266,10 @@ function LetterThreadView() {
         return theme.palette.success.main
       case 'In Progress':
         return theme.palette.info.main
+      case 'Assigned to Division':
+        return theme.palette.primary.main
+      case 'Assigned to Person':
+        return theme.palette.secondary.main
       case 'Returned':
         return theme.palette.warning.main
       default:
@@ -253,6 +312,7 @@ function LetterThreadView() {
 
         <LetterDetailsGrid
           sender={letter.sender}
+          assignedDivision={letter.assignedDivision}
           currentAssignee={letter.currentAssignee}
           category={letter.category}
           receivedDate={letter.receivedDate}

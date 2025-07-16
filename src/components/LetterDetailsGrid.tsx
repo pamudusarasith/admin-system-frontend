@@ -33,11 +33,27 @@ interface LetterAssignee {
   name: string
   role: string
   division: string
+  assignedDate?: string
+  assignedBy?: {
+    name: string
+    role: string
+  }
+}
+
+interface LetterDivision {
+  id: string
+  name: string
+  assignedDate: string
+  assignedBy: {
+    name: string
+    role: string
+  }
 }
 
 interface LetterDetailsGridProps {
   sender: LetterSender
-  currentAssignee: LetterAssignee
+  assignedDivision?: LetterDivision
+  currentAssignee?: LetterAssignee
   category: string
   receivedDate: string
   originalAttachments: Array<LetterAttachment>
@@ -46,6 +62,7 @@ interface LetterDetailsGridProps {
 
 export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
   sender,
+  assignedDivision,
   currentAssignee,
   category,
   receivedDate,
@@ -99,36 +116,83 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
           </Box>
         </Paper>
 
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Current Assignment
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar
-              sx={{
-                width: 48,
-                height: 48,
-                backgroundColor: theme.palette.secondary.main,
-              }}
-            >
-              {currentAssignee.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </Avatar>
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {currentAssignee.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {currentAssignee.role}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {currentAssignee.division}
-              </Typography>
+        {/* Division Assignment */}
+        {assignedDivision && (
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+              Assigned Division
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Avatar
+                sx={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: theme.palette.info.main,
+                }}
+              >
+                {assignedDivision.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')}
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  {assignedDivision.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Assigned by: {assignedDivision.assignedBy.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {formatTimestamp(assignedDivision.assignedDate)}
+                </Typography>
+              </Box>
             </Box>
-          </Box>
-        </Paper>
+          </Paper>
+        )}
+
+        {/* Person Assignment */}
+        {currentAssignee && (
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+              Assigned Person
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Avatar
+                sx={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: theme.palette.secondary.main,
+                }}
+              >
+                {currentAssignee.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')}
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  {currentAssignee.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {currentAssignee.role}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {currentAssignee.division}
+                </Typography>
+                {currentAssignee.assignedBy && (
+                  <Typography variant="body2" color="text.secondary">
+                    Assigned by: {currentAssignee.assignedBy.name}
+                  </Typography>
+                )}
+                {currentAssignee.assignedDate && (
+                  <Typography variant="body2" color="text.secondary">
+                    {formatTimestamp(currentAssignee.assignedDate)}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          </Paper>
+        )}
       </Box>
 
       {/* Right Column - Details & Attachments */}

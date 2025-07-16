@@ -50,7 +50,8 @@ export const StatusCardsGrid: React.FC<StatusCardsGridProps> = ({
         gridTemplateColumns: {
           xs: 'repeat(2, 1fr)',
           sm: 'repeat(3, 1fr)',
-          md: 'repeat(5, 1fr)',
+          md: 'repeat(6, 1fr)',
+          lg: 'repeat(7, 1fr)',
         },
         gap: 2,
         mb: 4,

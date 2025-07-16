@@ -30,6 +30,11 @@ import {
 
 export const Route = createFileRoute('/letters/')({
   component: LettersPage,
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      status: (search.status as string) || 'All',
+    }
+  },
 })
 
 interface LetterSummary {
@@ -42,10 +47,15 @@ interface LetterSummary {
   }
   receivedDate: string
   priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'In Progress' | 'Completed' | 'Returned'
-  currentAssignee: {
+  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
+  assignedDivision?: {
+    name: string
+    assignedDate: string
+  }
+  currentAssignee?: {
     name: string
     division: string
+    assignedDate: string
   }
   category: string
   confidentialityLevel: 'Public' | 'Confidential' | 'Restricted' | 'Secret'
@@ -68,9 +78,14 @@ const mockLetters: Array<LetterSummary> = [
     receivedDate: '2024-01-15T09:30:00Z',
     priority: 'High',
     status: 'In Progress',
+    assignedDivision: {
+      name: 'Policy Development Division',
+      assignedDate: '2024-01-15T10:15:00Z',
+    },
     currentAssignee: {
       name: 'Nimal Perera',
       division: 'Policy Development Division',
+      assignedDate: '2024-01-16T08:30:00Z',
     },
     category: 'Policy Matter',
     confidentialityLevel: 'Confidential',
@@ -88,10 +103,10 @@ const mockLetters: Array<LetterSummary> = [
     },
     receivedDate: '2024-01-18T14:20:00Z',
     priority: 'Urgent',
-    status: 'Pending',
-    currentAssignee: {
-      name: 'Kamala Silva',
-      division: 'Finance Division',
+    status: 'Assigned to Division',
+    assignedDivision: {
+      name: 'Finance Division',
+      assignedDate: '2024-01-18T15:00:00Z',
     },
     category: 'Financial Matter',
     confidentialityLevel: 'Restricted',
@@ -110,9 +125,14 @@ const mockLetters: Array<LetterSummary> = [
     receivedDate: '2024-01-20T11:45:00Z',
     priority: 'Normal',
     status: 'Completed',
+    assignedDivision: {
+      name: 'Human Resources Division',
+      assignedDate: '2024-01-20T14:00:00Z',
+    },
     currentAssignee: {
       name: 'Rohana Jayasinghe',
       division: 'Human Resources Division',
+      assignedDate: '2024-01-21T09:00:00Z',
     },
     category: 'Training & Development',
     confidentialityLevel: 'Public',
@@ -130,10 +150,15 @@ const mockLetters: Array<LetterSummary> = [
     },
     receivedDate: '2024-01-22T16:15:00Z',
     priority: 'High',
-    status: 'In Progress',
+    status: 'Assigned to Person',
+    assignedDivision: {
+      name: 'Legal Division',
+      assignedDate: '2024-01-22T17:00:00Z',
+    },
     currentAssignee: {
       name: 'Anura Mendis',
       division: 'Legal Division',
+      assignedDate: '2024-01-23T09:30:00Z',
     },
     category: 'Legal Matter',
     confidentialityLevel: 'Secret',
@@ -151,32 +176,46 @@ const mockLetters: Array<LetterSummary> = [
     },
     receivedDate: '2024-01-25T10:30:00Z',
     priority: 'Normal',
-    status: 'Returned',
-    currentAssignee: {
-      name: 'Sunil Bandara',
-      division: 'International Relations Division',
-    },
+    status: 'Pending',
     category: 'International Affairs',
     confidentialityLevel: 'Public',
     daysOpen: 2,
     hasAttachments: false,
-    replyCount: 1,
+    replyCount: 0,
   },
 ]
 
 function LettersPage() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { status } = Route.useSearch()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [letters] = useState<Array<LetterSummary>>(mockLetters)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('All')
+  const [statusFilter, setStatusFilter] = useState(status)
   const [priorityFilter, setPriorityFilter] = useState('All')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [page, setPage] = useState(1)
   const [itemsPerPage] = useState(10)
   const [isLoading] = useState(false)
   const [isAddLetterDialogOpen, setIsAddLetterDialogOpen] = useState(false)
+
+  const handleStatusFilterChange = (newStatus: string) => {
+    setStatusFilter(newStatus)
+    if (newStatus === 'All') {
+      navigate({ to: '/letters', search: { status: 'All' } })
+    } else {
+      navigate({ to: '/letters', search: { status: newStatus } })
+    }
+  }
+
+  const handleClearFilters = () => {
+    setStatusFilter('All')
+    setPriorityFilter('All')
+    setCategoryFilter('All')
+    setSearchTerm('')
+    navigate({ to: '/letters', search: { status: 'All' } })
+  }
 
   const filteredLetters = letters.filter((letter) => {
     const matchesSearch =
@@ -205,14 +244,18 @@ function LettersPage() {
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusColor = (statusType: string) => {
+    switch (statusType) {
       case 'Pending':
         return theme.palette.warning.main
-      case 'Completed':
-        return theme.palette.success.main
+      case 'Assigned to Division':
+        return theme.palette.primary.main
+      case 'Assigned to Person':
+        return theme.palette.secondary.main
       case 'In Progress':
         return theme.palette.info.main
+      case 'Completed':
+        return theme.palette.success.main
       case 'Returned':
         return theme.palette.error.main
       default:
@@ -288,6 +331,8 @@ function LettersPage() {
   const statusCounts = {
     All: letters.length,
     Pending: letters.filter((l) => l.status === 'Pending').length,
+    'Assigned to Division': letters.filter((l) => l.status === 'Assigned to Division').length,
+    'Assigned to Person': letters.filter((l) => l.status === 'Assigned to Person').length,
     'In Progress': letters.filter((l) => l.status === 'In Progress').length,
     Completed: letters.filter((l) => l.status === 'Completed').length,
     Returned: letters.filter((l) => l.status === 'Returned').length,
@@ -349,7 +394,7 @@ function LettersPage() {
             <StatusCardsGrid
               statusCounts={statusCounts}
               statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
+              onStatusFilterChange={handleStatusFilterChange}
               getStatusColor={getStatusColor}
             />
           </Box>
@@ -364,15 +409,10 @@ function LettersPage() {
               priorityFilter={priorityFilter}
               categoryFilter={categoryFilter}
               onSearchChange={setSearchTerm}
-              onStatusFilterChange={setStatusFilter}
+              onStatusFilterChange={handleStatusFilterChange}
               onPriorityFilterChange={setPriorityFilter}
               onCategoryFilterChange={setCategoryFilter}
-              onClearAllFilters={() => {
-                setSearchTerm('')
-                setStatusFilter('All')
-                setPriorityFilter('All')
-                setCategoryFilter('All')
-              }}
+              onClearAllFilters={handleClearFilters}
             />
           </div>
         </Fade>
@@ -428,12 +468,7 @@ function LettersPage() {
                 <Button
                   variant="outlined"
                   startIcon={<ClearIcon />}
-                  onClick={() => {
-                    setSearchTerm('')
-                    setStatusFilter('All')
-                    setPriorityFilter('All')
-                    setCategoryFilter('All')
-                  }}
+                  onClick={handleClearFilters}
                   sx={{ mt: 2, borderRadius: 2 }}
                 >
                   Clear All Filters

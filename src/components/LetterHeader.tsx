@@ -20,7 +20,7 @@ interface Letter {
   referenceNumber: string
   subject: string
   priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'In Progress' | 'Completed' | 'Returned'
+  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
   confidentialityLevel: 'Public' | 'Confidential' | 'Restricted' | 'Secret'
 }
 

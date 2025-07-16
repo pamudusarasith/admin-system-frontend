@@ -11,8 +11,10 @@ import {
 } from '@mui/material'
 import {
   AttachFile as AttachIcon,
+  Business as BusinessIcon,
   Download as DownloadIcon,
   Forward as ForwardIcon,
+  PersonAdd as PersonAddIcon,
   Reply as ReplyIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material'
@@ -28,7 +30,14 @@ interface LetterAttachment {
 
 interface LetterAction {
   id: string
-  type: 'received' | 'forwarded' | 'replied' | 'returned' | 'status_change'
+  type:
+    | 'received'
+    | 'assigned_to_division'
+    | 'assigned_to_person'
+    | 'forwarded'
+    | 'replied'
+    | 'returned'
+    | 'status_change'
   description: string
   performedBy: {
     name: string
@@ -41,6 +50,11 @@ interface LetterAction {
   attachments?: Array<LetterAttachment>
   fromDivision?: string
   toDivision?: string
+  assignedTo?: {
+    type: 'division' | 'person'
+    name: string
+    id?: string
+  }
   statusFrom?: string
   statusTo?: string
   priority?: 'Normal' | 'Urgent' | 'High'
@@ -61,6 +75,10 @@ export const LetterTimeline: React.FC<LetterTimelineProps> = ({
 
   const getActionIcon = (type: string) => {
     switch (type) {
+      case 'assigned_to_division':
+        return <BusinessIcon />
+      case 'assigned_to_person':
+        return <PersonAddIcon />
       case 'forwarded':
         return <ForwardIcon />
       case 'replied':
@@ -138,11 +156,15 @@ export const LetterTimeline: React.FC<LetterTimelineProps> = ({
                         .join('')}
                     </Avatar>
                     <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ fontWeight: 'bold' }}
+                      >
                         {action.performedBy.name}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {action.performedBy.role} • {action.performedBy.division}
+                        {action.performedBy.role} •{' '}
+                        {action.performedBy.division}
                       </Typography>
                     </Box>
                   </Box>
@@ -175,7 +197,7 @@ export const LetterTimeline: React.FC<LetterTimelineProps> = ({
                     variant="outlined"
                     sx={{
                       p: 2,
-                      backgroundColor: theme.palette.grey[50],
+                      backgroundColor: theme.palette.background.paper,
                       mb: 2,
                       border: `1px solid ${theme.palette.divider}`,
                     }}
@@ -184,6 +206,37 @@ export const LetterTimeline: React.FC<LetterTimelineProps> = ({
                       {action.content}
                     </Typography>
                   </Paper>
+                )}
+
+                {action.assignedTo && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      gap: 1,
+                      mb: 2,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Chip
+                      label="Assigned to"
+                      size="small"
+                      variant="outlined"
+                      sx={{ color: theme.palette.text.secondary }}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      →
+                    </Typography>
+                    <Chip
+                      label={action.assignedTo.name}
+                      size="small"
+                      color={
+                        action.assignedTo.type === 'division'
+                          ? 'info'
+                          : 'secondary'
+                      }
+                      sx={{ fontWeight: 'bold' }}
+                    />
+                  </Box>
                 )}
 
                 {action.fromDivision && action.toDivision && (
@@ -261,11 +314,12 @@ export const LetterTimeline: React.FC<LetterTimelineProps> = ({
                             alignItems: 'center',
                             gap: 1,
                             p: 1,
-                            backgroundColor: theme.palette.grey[50],
+                            backgroundColor: theme.palette.background.paper,
+                            border: `1px solid ${theme.palette.divider}`,
                             borderRadius: 1,
                             cursor: 'pointer',
                             '&:hover': {
-                              backgroundColor: theme.palette.grey[100],
+                              backgroundColor: `${theme.palette.background.default}a0`,
                             },
                           }}
                           onClick={() =>
