@@ -1,4 +1,9 @@
-import { AddButton, SearchBar, SidebarLayout } from '@/components'
+import {
+  AddButton,
+  SearchBar,
+  SidebarLayout,
+  AddDivisionDialog,
+} from '@/components'
 import {
   Box,
   Container,
@@ -134,6 +139,7 @@ const getStatusBadge = (status: 'Active' | 'Inactive') => {
 function divisionpage() {
   const theme = useTheme()
   const [statusFilter, setStatusFilter] = useState<string>('All')
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   // Filter divisions based on status
   const filteredDivisions = divisions.filter((division) => {
@@ -143,6 +149,20 @@ function divisionpage() {
 
   const handleStatusFilterChange = (event: any) => {
     setStatusFilter(event.target.value)
+  }
+
+  const handleOpenAddDialog = () => {
+    setIsAddDialogOpen(true)
+  }
+
+  const handleCloseAddDialog = () => {
+    setIsAddDialogOpen(false)
+  }
+
+  const handleSubmitDivision = (divisionData: any) => {
+    console.log('New division submitted:', divisionData)
+    // Here you would typically send the data to your backend
+    // You could also update the local state to add the new division to the list
   }
   return (
     <SidebarLayout>
@@ -184,7 +204,7 @@ function divisionpage() {
             <AddButton
               label="Add new Division"
               tooltip="Add a new division"
-              // onClick={handleAddRole}
+              onClick={handleOpenAddDialog}
             />
           </Box>
         </Box>
@@ -435,6 +455,13 @@ function divisionpage() {
             </Box>
           </Box>
         </Paper>
+
+        {/* Add Division Dialog */}
+        <AddDivisionDialog
+          open={isAddDialogOpen}
+          onClose={handleCloseAddDialog}
+          onSubmit={handleSubmitDivision}
+        />
       </Container>
     </SidebarLayout>
   )
