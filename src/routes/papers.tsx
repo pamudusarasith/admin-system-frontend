@@ -19,7 +19,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import { SearchBar, SidebarLayout } from '@/components'
+import { SearchBar, SidebarLayout, AddCabinetPaperDialog } from '@/components'
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
 
@@ -30,6 +30,7 @@ export const Route = createFileRoute('/papers')({
 function cabinetPaperPage() {
   const [selectedFilter, setSelectedFilter] = useState<string>('')
   const [page, setPage] = useState(1)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const theme = useTheme()
 
   const filterOptions = ['None', 'By Category', 'By Status', 'By Date']
@@ -40,6 +41,19 @@ function cabinetPaperPage() {
 
   const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value)
+  }
+
+  const handleOpenAddDialog = () => {
+    setIsAddDialogOpen(true)
+  }
+
+  const handleCloseAddDialog = () => {
+    setIsAddDialogOpen(false)
+  }
+
+  const handleSubmitPaper = (paperData: any) => {
+    console.log('New cabinet paper submitted:', paperData)
+    // Here you would typically send the data to your backend
   }
 
   interface CabinetPaper {
@@ -145,9 +159,14 @@ function cabinetPaperPage() {
           <Button
             variant="contained"
             startIcon={<CloudUploadOutlinedIcon />}
-            sx={{ borderRadius: 2 }}
+            onClick={handleOpenAddDialog}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+            }}
           >
-            upload new paper
+            Upload New Paper
           </Button>
         </Box>
 
@@ -347,6 +366,13 @@ function cabinetPaperPage() {
             />
           </Stack>
         </Box>
+
+        {/* Add Cabinet Paper Dialog */}
+        <AddCabinetPaperDialog
+          open={isAddDialogOpen}
+          onClose={handleCloseAddDialog}
+          onSubmit={handleSubmitPaper}
+        />
       </Container>
     </SidebarLayout>
   )
