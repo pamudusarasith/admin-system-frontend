@@ -317,11 +317,11 @@ function cabinetPaperPage() {
                   variant="outlined"
                   sx={{
                     // bgcolor: '#E1BEE7',
-                    color: '#4A148C',
+                    color: '#4898b5',
                     fontWeight: 'medium',
                     borderRadius: 2,
                     px: 1,
-                    border: '1px solid #9C27B0',
+                    border: '1px solidrgb(25, 194, 180)',
                     '&:hover': {
                       bgcolor: '#F3E5F5',
                     },
