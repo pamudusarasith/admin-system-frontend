@@ -4,7 +4,6 @@ import {
   Avatar,
   Box,
   Breadcrumbs,
-  Button,
   Checkbox,
   Container,
   Divider,
@@ -32,7 +31,6 @@ import {
   useTheme,
 } from '@mui/material'
 import {
-  Add as AddIcon,
   ArrowUpwardSharp as ArrowUpwardSharpIcon,
   Edit as EditIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
@@ -41,7 +39,7 @@ import {
   MoreVert as MoreVertIcon,
   Search as SearchIcon,
 } from '@mui/icons-material'
-import { CreateUser, SidebarLayout } from '@/components'
+import { CreateUser, SidebarLayout, AddButton } from '@/components'
 
 export const Route = createFileRoute('/users/')({
   component: RouteComponent,
@@ -129,27 +127,22 @@ function RouteComponent() {
     status: 'Active' | 'Pending' | 'Banned' | 'Rejected',
   ) => {
     let bgColor = ''
-    let textColor = ''
+    let textColor = '#FFFFFF'
     switch (status) {
       case 'Active':
-        bgColor = theme.palette.success.light
-        textColor = theme.palette.success.dark
+        bgColor = '#2E7D32'
         break
       case 'Pending':
-        bgColor = theme.palette.warning.light
-        textColor = theme.palette.warning.dark
+        bgColor = '#F57F17'
         break
       case 'Banned':
-        bgColor = theme.palette.error.light
-        textColor = theme.palette.error.dark
+        bgColor = '#D32F2F'
         break
       case 'Rejected':
-        bgColor = theme.palette.grey[400]
-        textColor = theme.palette.grey[700]
+        bgColor = '#7B1FA2'
         break
       default:
-        bgColor = theme.palette.grey[300]
-        textColor = theme.palette.grey[800]
+        bgColor = '#424242'
     }
     return (
       <Box
@@ -181,7 +174,7 @@ function RouteComponent() {
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: { xs: 'flex-start', sm: 'center' },
-            mt: 2,
+            // mt: 2,
             justifyContent: 'space-between',
             mb: 2,
             gap: { xs: 2, sm: 0 },
@@ -195,14 +188,14 @@ function RouteComponent() {
           >
             Users
           </Typography>
-          <Button
+          <AddButton
+            label="Add User"
             onClick={handleOpen}
+            tooltip="Create a new user"
+            size="medium"
             variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ borderRadius: 2 }}
-          >
-            Add User
-          </Button>
+            color="primary"
+          />
           <Modal
             open={open}
             onClose={handleClose}
