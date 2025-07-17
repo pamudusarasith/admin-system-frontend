@@ -112,19 +112,6 @@ function cabinetPaperPage() {
   const getStatusColor = (status: CabinetPaper['status']) => {
     switch (status) {
       case 'Approved':
-        return '#C8E6C9'
-      case 'Submitted':
-        return '#FFF9C4'
-      case 'Considered':
-        return '#BBDEFB'
-      default:
-        return theme.palette.grey[200]
-    }
-  }
-
-  const getStatusTextColor = (status: CabinetPaper['status']) => {
-    switch (status) {
-      case 'Approved':
         return '#2E7D32'
       case 'Submitted':
         return '#F57F17'
@@ -132,6 +119,19 @@ function cabinetPaperPage() {
         return '#1565C0'
       default:
         return theme.palette.grey[700]
+    }
+  }
+
+  const getStatusTextColor = (status: CabinetPaper['status']) => {
+    switch (status) {
+      case 'Approved':
+        return 'white'
+      case 'Submitted':
+        return 'white'
+      case 'Considered':
+        return 'white'
+      default:
+        return 'white'
     }
   }
 
@@ -182,49 +182,67 @@ function cabinetPaperPage() {
           </Breadcrumbs>
         </Box>
 
-        {/* <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}> */}
-        <Box
+        <Paper
+          elevation={2}
           sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            gap: 3,
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            maxWidth: '1300px',
+            mx: 'auto',
+            p: 3,
+            mb: 4,
+            borderRadius: 3,
+            background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
           }}
         >
-          <SearchBar
-            placeholder="Search by title or ID..."
-            width="700px"
-            height="50px"
-            size="medium"
-          />
-          <FormControl sx={{ height: '50px' }}>
-            <InputLabel id="filter-select-label">Filters</InputLabel>
-            <Select
-              sx={{ minWidth: 180, height: '50px' }}
-              labelId="filter-select-label"
-              id="filter-select"
-              value={selectedFilter}
-              onChange={handleChangeFilter}
-              input={<OutlinedInput label="Filters" />}
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 48 * 4.5 + 8,
-                    width: 250,
-                  },
-                },
-              }}
-              IconComponent={FilterListIcon}
-            >
-              {filterOptions.map((option) => (
-                <MenuItem key={option} value={option}>
-                  <ListItemText primary={option} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              gap: 3,
+              alignItems: 'center',
+            }}
+          >
+            <Box sx={{ flex: 1, width: '100%' }}>
+              <Box>
+                <SearchBar placeholder="Search by title or ID..." />
+              </Box>
+            </Box>
+            <Box sx={{ minWidth: 200 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="filter-select-label">
+                  Filter by Options
+                </InputLabel>
+                <Select
+                  labelId="filter-select-label"
+                  value={selectedFilter}
+                  label="Filter by Options"
+                  onChange={handleChangeFilter}
+                  input={<OutlinedInput label="Filters" />}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 48 * 4.5 + 8,
+                        width: 250,
+                      },
+                    },
+                  }}
+                  IconComponent={FilterListIcon}
+                  sx={{
+                    backgroundColor: theme.palette.background.paper,
+                    '& .MuiSelect-select': {
+                      py: 1.5,
+                    },
+                  }}
+                >
+                  {filterOptions.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      <ListItemText primary={option} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+        </Paper>
 
         <Box
           sx={{
@@ -249,6 +267,14 @@ function cabinetPaperPage() {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease-in-out',
+                '&:hover': {
+                  elevation: 8,
+                  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+                  transform: 'translateY(-4px)',
+                  border: '2px solid #1976d2',
+                },
               }}
             >
               <Box
