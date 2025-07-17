@@ -9,10 +9,6 @@ import {
   CardContent,
   Chip,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
   IconButton,
   Menu,
@@ -33,7 +29,7 @@ import {
   Security as SecurityIcon,
   Support as SupportIcon,
 } from '@mui/icons-material'
-import { AddButton, SearchBar, SidebarLayout } from '@/components'
+import { AddButton, SearchBar, SidebarLayout, AddRoleDialog } from '@/components'
 
 export const Route = createFileRoute('/roles')({
   component: RolesPage,
@@ -57,7 +53,12 @@ const mockRoles: Array<UserRole> = [
     name: 'Super Admin',
     description: 'Full system access with all administrative privileges',
     userCount: 2,
-    permissions: ['ALL_PERMISSIONS'],
+    permissions: [
+      'LETTER_CREATE', 'LETTER_RETRIEVE', 'LETTER_UPDATE', 'LETTER_DELETE',
+      'CABINET_PAPER_CREATE', 'CABINET_PAPER_RETRIEVE', 'CABINET_PAPER_UPDATE', 'CABINET_PAPER_DELETE',
+      'USER_CREATE', 'USER_RETRIEVE', 'USER_UPDATE', 'USER_DELETE',
+      'DIVISION_CREATE', 'DIVISION_RETRIEVE', 'DIVISION_UPDATE', 'DIVISION_DELETE'
+    ],
     icon: <AdminIcon />,
     createdDate: '2024-01-15',
     isActive: true,
@@ -67,7 +68,12 @@ const mockRoles: Array<UserRole> = [
     name: 'Admin',
     description: 'Administrative access to manage users and system settings',
     userCount: 5,
-    permissions: ['USER_MANAGEMENT', 'SYSTEM_SETTINGS', 'REPORTS'],
+    permissions: [
+      'LETTER_CREATE', 'LETTER_RETRIEVE', 'LETTER_UPDATE',
+      'CABINET_PAPER_RETRIEVE', 'CABINET_PAPER_UPDATE',
+      'USER_CREATE', 'USER_RETRIEVE', 'USER_UPDATE', 'USER_DELETE',
+      'DIVISION_RETRIEVE', 'DIVISION_UPDATE'
+    ],
     icon: <SecurityIcon />,
     createdDate: '2024-01-20',
     isActive: true,
@@ -77,7 +83,12 @@ const mockRoles: Array<UserRole> = [
     name: 'Manager',
     description: 'Manage team members and view departmental reports',
     userCount: 12,
-    permissions: ['TEAM_MANAGEMENT', 'REPORTS', 'APPROVAL'],
+    permissions: [
+      'LETTER_CREATE', 'LETTER_RETRIEVE', 'LETTER_UPDATE',
+      'CABINET_PAPER_RETRIEVE',
+      'USER_RETRIEVE', 'USER_UPDATE',
+      'DIVISION_RETRIEVE'
+    ],
     icon: <BusinessIcon />,
     createdDate: '2024-02-01',
     isActive: true,
@@ -87,7 +98,12 @@ const mockRoles: Array<UserRole> = [
     name: 'Employee',
     description: 'Standard user access with basic system functionality',
     userCount: 156,
-    permissions: ['BASIC_ACCESS', 'PROFILE_EDIT'],
+    permissions: [
+      'LETTER_RETRIEVE',
+      'CABINET_PAPER_RETRIEVE',
+      'USER_RETRIEVE',
+      'DIVISION_RETRIEVE'
+    ],
     icon: <PersonIcon />,
     createdDate: '2024-02-10',
     isActive: true,
@@ -97,7 +113,12 @@ const mockRoles: Array<UserRole> = [
     name: 'Support Agent',
     description: 'Customer support access with ticket management',
     userCount: 8,
-    permissions: ['TICKET_MANAGEMENT', 'CUSTOMER_VIEW'],
+    permissions: [
+      'LETTER_RETRIEVE', 'LETTER_UPDATE',
+      'CABINET_PAPER_RETRIEVE',
+      'USER_RETRIEVE',
+      'DIVISION_RETRIEVE'
+    ],
     icon: <SupportIcon />,
     createdDate: '2024-02-15',
     isActive: true,
@@ -107,7 +128,12 @@ const mockRoles: Array<UserRole> = [
     name: 'Viewer',
     description: 'Read-only access to reports and system information',
     userCount: 23,
-    permissions: ['READ_ONLY'],
+    permissions: [
+      'LETTER_RETRIEVE',
+      'CABINET_PAPER_RETRIEVE',
+      'USER_RETRIEVE',
+      'DIVISION_RETRIEVE'
+    ],
     icon: <PeopleIcon />,
     createdDate: '2024-03-01',
     isActive: false,
@@ -122,6 +148,7 @@ function RolesPage() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [menuRole, setMenuRole] = useState<UserRole | null>(null)
+  const [editMode, setEditMode] = useState(false)
 
   const filteredRoles = roles.filter(
     (role) =>
@@ -144,15 +171,13 @@ function RolesPage() {
 
   const handleAddRole = () => {
     setSelectedRole(null)
+    setEditMode(false)
     setOpenDialog(true)
-  }
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value)
   }
 
   const handleEditRole = (role: UserRole) => {
     setSelectedRole(role)
+    setEditMode(true)
     setOpenDialog(true)
     handleMenuClose()
   }
@@ -165,6 +190,37 @@ function RolesPage() {
   const handleCloseDialog = () => {
     setOpenDialog(false)
     setSelectedRole(null)
+    setEditMode(false)
+  }
+
+  const handleSubmitRole = (roleData: { name: string; description: string; permissions: string[] }) => {
+    if (editMode && selectedRole) {
+      // Update existing role
+      setRoles((prev) =>
+        prev.map((role) =>
+          role.id === selectedRole.id
+            ? { ...role, name: roleData.name, description: roleData.description, permissions: roleData.permissions }
+            : role
+        )
+      )
+    } else {
+      // Add new role
+      const newRole: UserRole = {
+        id: Date.now().toString(),
+        name: roleData.name,
+        description: roleData.description,
+        userCount: 0,
+        permissions: roleData.permissions,
+        icon: <PersonIcon />,
+        createdDate: new Date().toISOString().split('T')[0],
+        isActive: true,
+      }
+      setRoles((prev) => [...prev, newRole])
+    }
+  }
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value)
   }
 
   return (
@@ -519,35 +575,17 @@ function RolesPage() {
         </Menu>
 
         {/* Add/Edit Role Dialog */}
-        <Dialog
+        <AddRoleDialog
           open={openDialog}
           onClose={handleCloseDialog}
-          maxWidth="sm"
-          fullWidth
-          sx={{
-            '& .MuiDialog-paper': {
-              borderRadius: 3,
-            },
-          }}
-        >
-          <DialogTitle>
-            {selectedRole ? 'Edit Role' : 'Add New Role'}
-          </DialogTitle>
-          <DialogContent>
-            <Typography variant="body2" color="text.secondary">
-              {selectedRole
-                ? 'Modify the role details and permissions.'
-                : 'Create a new user role with specific permissions.'}
-            </Typography>
-            {/* Add form fields here for role creation/editing */}
-          </DialogContent>
-          <DialogActions sx={{ p: 3 }}>
-            <Button onClick={handleCloseDialog}>Cancel</Button>
-            <Button variant="contained" onClick={handleCloseDialog}>
-              {selectedRole ? 'Update Role' : 'Create Role'}
-            </Button>
-          </DialogActions>
-        </Dialog>
+          onSubmit={handleSubmitRole}
+          editMode={editMode}
+          initialData={selectedRole ? { 
+            name: selectedRole.name, 
+            description: selectedRole.description,
+            permissions: selectedRole.permissions 
+          } : undefined}
+        />
       </Container>
     </SidebarLayout>
   )
