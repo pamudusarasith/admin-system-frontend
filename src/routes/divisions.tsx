@@ -17,10 +17,6 @@ import {
   TableHead,
   TableRow,
   Typography,
-  FormControl,
-  Select,
-  MenuItem,
-  InputLabel,
 } from '@mui/material'
 import {
   Edit as EditIcon,
@@ -40,18 +36,14 @@ interface Division {
   id: string
   name: string
   description: string
-  manager: string
-  status: 'Active' | 'Inactive'
 }
 
 function createDivisionData(
   id: string,
   name: string,
   description: string,
-  manager: string,
-  status: 'Active' | 'Inactive',
 ): Division {
-  return { id, name, description, manager, status }
+  return { id, name, description }
 }
 
 const divisions = [
@@ -59,97 +51,40 @@ const divisions = [
     '1',
     'Policy Development Division',
     'Responsible for developing and reviewing educational policies and frameworks',
-    'Dr. Kamala Silva',
-    'Active',
   ),
   createDivisionData(
     '2',
     'Finance Division',
     'Handles budget planning, financial management, and resource allocation',
-    'Mr. Nimal Perera',
-    'Active',
   ),
   createDivisionData(
     '3',
     'Human Resources Division',
     'Manages staff recruitment, training, and development programs',
-    'Ms. Dilani Fernando',
-    'Active',
   ),
   createDivisionData(
     '4',
     'Legal Division',
     'Provides legal advice and handles legislative matters',
-    'Attorney Upul Ratnayake',
-    'Active',
   ),
   createDivisionData(
     '5',
     'Information Technology Division',
     'Manages IT infrastructure, systems, and digital transformation',
-    'Eng. Saman Kumara',
-    'Inactive',
   ),
   createDivisionData(
     '6',
     'Planning & Monitoring Division',
     'Oversees strategic planning, monitoring, and evaluation of programs',
-    'Prof. Chandrika Perera',
-    'Active',
   ),
 ]
 
-const getStatusBadge = (status: 'Active' | 'Inactive') => {
-  let bgColor = ''
-  const textColor = '#FFFFFF'
-
-  switch (status) {
-    case 'Active':
-      bgColor = '#2E7D32'
-      break
-    case 'Inactive':
-      bgColor = '#D32F2F'
-      break
-    default:
-      bgColor = '#424242'
-  }
-
-  return (
-    <Box
-      component="span"
-      sx={{
-        bgcolor: bgColor,
-        color: textColor,
-        borderRadius: 1.4,
-        px: 1,
-        py: 0.5,
-        fontSize: '0.75rem',
-        fontWeight: 'bold',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: 60,
-      }}
-    >
-      {status}
-    </Box>
-  )
-}
-
 function divisionpage() {
   const theme = useTheme()
-  const [statusFilter, setStatusFilter] = useState<string>('All')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
-  // Filter divisions based on status
-  const filteredDivisions = divisions.filter((division) => {
-    if (statusFilter === 'All') return true
-    return division.status === statusFilter
-  })
-
-  const handleStatusFilterChange = (event: any) => {
-    setStatusFilter(event.target.value)
-  }
+  // Use divisions array directly for now (can be filtered later)
+  const filteredDivisions = divisions
 
   const handleOpenAddDialog = () => {
     setIsAddDialogOpen(true)
@@ -237,29 +172,6 @@ function divisionpage() {
                 />
               </Box>
             </Box>
-            <Box sx={{ minWidth: 200 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="status-filter-label">
-                  Filter by Status
-                </InputLabel>
-                <Select
-                  labelId="status-filter-label"
-                  value={statusFilter}
-                  label="Filter by Status"
-                  onChange={handleStatusFilterChange}
-                  sx={{
-                    backgroundColor: theme.palette.background.paper,
-                    '& .MuiSelect-select': {
-                      py: 1.5,
-                    },
-                  }}
-                >
-                  <MenuItem value="All">All Status</MenuItem>
-                  <MenuItem value="Active">Active</MenuItem>
-                  <MenuItem value="Inactive">Inactive</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
           </Box>
         </Paper>
         <Paper
@@ -303,6 +215,15 @@ function divisionpage() {
                         : theme.palette.grey[100],
                   }}
                 >
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Box
+                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                    >
+                      <Typography variant="subtitle2" fontWeight="bold">
+                        Division ID
+                      </Typography>
+                    </Box>
+                  </TableCell>
                   <TableCell sx={{ minWidth: 200 }}>
                     <Box
                       sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
@@ -322,16 +243,6 @@ function divisionpage() {
                       Description
                     </Typography>
                   </TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>
-                    <Typography variant="subtitle2" fontWeight="bold">
-                      Manager
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <Typography variant="subtitle2" fontWeight="bold">
-                      Status
-                    </Typography>
-                  </TableCell>
                   <TableCell sx={{ minWidth: 100 }}>
                     <Typography variant="subtitle2" fontWeight="bold">
                       Actions
@@ -342,7 +253,7 @@ function divisionpage() {
               <TableBody>
                 {filteredDivisions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={4} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
                         No divisions found. Click "Add new Division" to create
                         one.
@@ -355,6 +266,15 @@ function divisionpage() {
                       key={division.id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
+                      <TableCell sx={{ minWidth: 120 }}>
+                        <Typography
+                          variant="body2"
+                          fontWeight="medium"
+                          sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                        >
+                          {division.id}
+                        </Typography>
+                      </TableCell>
                       <TableCell sx={{ minWidth: 200 }}>
                         <Box>
                           <Typography
@@ -385,15 +305,6 @@ function divisionpage() {
                           {division.description}
                         </Typography>
                       </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
-                        >
-                          {division.manager}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(division.status)}</TableCell>
                       <TableCell align="right">
                         <IconButton size="small">
                           <EditIcon fontSize="small" />
