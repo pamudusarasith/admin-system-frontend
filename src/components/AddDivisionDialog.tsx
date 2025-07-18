@@ -189,7 +189,7 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
                 }}
               />
 
-              {/* Description */}
+              {/* Description  */}
               <TextField
                 fullWidth
                 label="Description"
