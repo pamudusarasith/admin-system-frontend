@@ -7,13 +7,8 @@ import {
   Card,
   CardContent,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Button,
   Typography,
-  Box,
   Stack,
   IconButton,
   useTheme,
@@ -31,7 +26,6 @@ interface DivisionFormData {
   divisionID: string
   divisionName: string
   description: string
-  status: 'Active' | 'Inactive'
 }
 
 export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
@@ -46,15 +40,9 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
     divisionID: '',
     divisionName: '',
     description: '',
-    status: 'Active',
   })
 
   const [errors, setErrors] = useState<Partial<DivisionFormData>>({})
-
-  const statuses = [
-    { value: 'Active', color: theme.palette.success.main },
-    { value: 'Inactive', color: theme.palette.error.main },
-  ]
 
   const handleInputChange =
     (field: keyof DivisionFormData) =>
@@ -100,7 +88,6 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
       divisionID: '',
       divisionName: '',
       description: '',
-      status: 'Active',
     })
     setErrors({})
     onClose()
@@ -202,7 +189,7 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
                 }}
               />
 
-              {/* Description */}
+              {/* Description  */}
               <TextField
                 fullWidth
                 label="Description"
