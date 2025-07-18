@@ -28,9 +28,9 @@ interface AddDivisionDialogProps {
 }
 
 interface DivisionFormData {
+  divisionID: string
   divisionName: string
   description: string
-  managerName: string
   status: 'Active' | 'Inactive'
 }
 
@@ -43,9 +43,9 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const [formData, setFormData] = useState<DivisionFormData>({
+    divisionID: '',
     divisionName: '',
     description: '',
-    managerName: '',
     status: 'Active',
   })
 
@@ -73,14 +73,14 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Partial<DivisionFormData> = {}
 
+    if (!formData.divisionID.trim()) {
+      newErrors.divisionID = 'Division ID is required'
+    }
     if (!formData.divisionName.trim()) {
       newErrors.divisionName = 'Division name is required'
     }
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required'
-    }
-    if (!formData.managerName.trim()) {
-      newErrors.managerName = 'Manager name is required'
     }
 
     setErrors(newErrors)
@@ -97,9 +97,9 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
 
   const handleClose = () => {
     setFormData({
+      divisionID: '',
       divisionName: '',
       description: '',
-      managerName: '',
       status: 'Active',
     })
     setErrors({})
@@ -162,6 +162,26 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
         >
           <CardContent sx={{ p: 3 }}>
             <Stack spacing={3}>
+              {/* Division ID */}
+              <TextField
+                fullWidth
+                label="Division ID"
+                variant="outlined"
+                placeholder="Enter the division ID"
+                value={formData.divisionID}
+                onChange={handleInputChange('divisionID')}
+                error={!!errors.divisionID}
+                helperText={errors.divisionID}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  },
+                }}
+              />
+
               {/* Division Name */}
               <TextField
                 fullWidth
@@ -203,60 +223,6 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
                   },
                 }}
               />
-
-              {/* Manager Name */}
-              <TextField
-                fullWidth
-                label="Manager Name"
-                variant="outlined"
-                placeholder="Enter the manager's name"
-                value={formData.managerName}
-                onChange={handleInputChange('managerName')}
-                error={!!errors.managerName}
-                helperText={errors.managerName}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                }}
-              />
-
-              {/* Status */}
-              <FormControl sx={{ maxWidth: { xs: '100%', sm: '200px' } }}>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={formData.status}
-                  label="Status"
-                  onChange={handleInputChange('status')}
-                  sx={{
-                    borderRadius: 2,
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderRadius: 2,
-                    },
-                  }}
-                >
-                  {statuses.map((status) => (
-                    <MenuItem key={status.value} value={status.value}>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: '50%',
-                            backgroundColor: status.color,
-                          }}
-                        />
-                        {status.value}
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
             </Stack>
           </CardContent>
         </Card>
