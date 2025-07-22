@@ -1,45 +1,37 @@
 import React, { useState } from 'react'
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Box,
+  Button,
   Card,
   CardContent,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Button,
-  Typography,
-  Box,
-  Stack,
-  IconButton,
   Chip,
-  useTheme,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
   useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
-  Close as CloseIcon,
-  CloudUpload as UploadIcon,
   AttachFile as AttachFileIcon,
+  Close as CloseIcon,
   Delete as DeleteIcon,
+  CloudUpload as UploadIcon,
 } from '@mui/icons-material'
+import type { LetterFormData } from '../schemas/letter'
 
 interface AddLetterDialogProps {
   open: boolean
   onClose: () => void
   onSubmit?: (letterData: LetterFormData) => void
-}
-
-interface LetterFormData {
-  title: string
-  priority: 'High' | 'Medium' | 'Low'
-  receivingDate: string
-  content: string
-  category: string
-  attachments: File[]
 }
 
 export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
@@ -51,31 +43,38 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const [formData, setFormData] = useState<LetterFormData>({
-    title: '',
-    priority: 'Medium',
-    receivingDate: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
+    reference: '',
+    sender_details: {
+      name: '',
+      email: '',
+      phone_number: '',
+      address: '',
+    },
+    priority: 'NORMAL',
+    mode_of_arrival: 'REGISTERED_POST',
+    received_date: new Date().toISOString().split('T')[0],
+    sent_date: undefined,
+    subject: '',
     content: '',
-    category: '',
-    attachments: [],
+    attachments: undefined,
   })
 
   const [errors, setErrors] = useState<Partial<LetterFormData>>({})
 
-  const categories = [
-    'Finance',
-    'HR',
-    'Procurement',
-    'General',
-    'Training',
-    'Security',
-    'Legal',
-    'Operations',
+  const priorities = [
+    { value: 'NORMAL', color: theme.palette.success.main, label: 'Normal' },
+    { value: 'HIGH', color: theme.palette.error.main, label: 'High' },
+    { value: 'URGENT', color: theme.palette.warning.main, label: 'Urgent' },
   ]
 
-  const priorities = [
-    { value: 'High', color: theme.palette.error.main },
-    { value: 'Medium', color: theme.palette.warning.main },
-    { value: 'Low', color: theme.palette.success.main },
+  const modesOfArrival = [
+    'REGISTERED_POST',
+    'UNREGISTERED_POST',
+    'EMAIL',
+    'WHATSAPP',
+    'HAND_DELIVERED',
+    'FAX',
+    'OTHER',
   ]
 
   const allowedFileTypes = [
@@ -100,9 +99,9 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
     }
 
   const handleDateChange = (date: string) => {
-    setFormData((prev) => ({ ...prev, receivingDate: date }))
-    if (errors.receivingDate) {
-      setErrors((prev) => ({ ...prev, receivingDate: undefined }))
+    setFormData((prev) => ({ ...prev, received_date: date }))
+    if (errors.received_date) {
+      setErrors((prev) => ({ ...prev, received_date: undefined }))
     }
   }
 
@@ -115,31 +114,34 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
 
     setFormData((prev) => ({
       ...prev,
-      attachments: [...prev.attachments, ...validFiles],
+      attachments: [...(prev.attachments || []), ...validFiles],
     }))
   }
 
   const removeAttachment = (index: number) => {
     setFormData((prev) => ({
       ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index),
+      attachments: (prev.attachments || []).filter((_, i) => i !== index),
     }))
   }
 
   const validateForm = (): boolean => {
     const newErrors: Partial<LetterFormData> = {}
 
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required'
+    if (!formData.reference.trim()) {
+      newErrors.reference = 'Reference number is required'
     }
-    if (!formData.category.trim()) {
-      newErrors.category = 'Category is required'
+    if (!formData.subject.trim()) {
+      newErrors.subject = 'Subject is required'
     }
-    if (!formData.content.trim()) {
-      newErrors.content = 'Content is required'
+    if (!formData.sender_details.name.trim()) {
+      // Note: We'll need to add sender_details validation in a nested way
+      // For now, we'll use a simple approach
+      newErrors.reference = 'Sender name is required' // Using reference field for error display
     }
-    if (!formData.receivingDate) {
-      newErrors.receivingDate = 'Receiving date is required'
+    // Content is optional in the schema, so no validation needed
+    if (!formData.received_date) {
+      newErrors.received_date = 'Receiving date is required'
     }
 
     setErrors(newErrors)
@@ -155,12 +157,20 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
 
   const handleClose = () => {
     setFormData({
-      title: '',
-      priority: 'Medium',
-      receivingDate: new Date().toISOString().split('T')[0],
+      reference: '',
+      subject: '',
+      sender_details: {
+        name: '',
+        email: '',
+        phone_number: '',
+        address: '',
+      },
+      priority: 'NORMAL',
+      mode_of_arrival: 'REGISTERED_POST',
+      received_date: new Date().toISOString().split('T')[0],
+      sent_date: undefined,
       content: '',
-      category: '',
-      attachments: [],
+      attachments: undefined,
     })
     setErrors({})
     onClose()
@@ -230,15 +240,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
         >
           <CardContent sx={{ p: 3 }}>
             <Stack spacing={3}>
-              {/* Letter Title */}
+              {/* Reference Number */}
               <TextField
                 fullWidth
-                label="Letter Title"
+                label="Reference Number"
                 variant="outlined"
-                value={formData.title}
-                onChange={handleInputChange('title')}
-                error={!!errors.title}
-                helperText={errors.title}
+                value={formData.reference}
+                onChange={handleInputChange('reference')}
+                error={!!errors.reference}
+                helperText={errors.reference}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
@@ -249,7 +259,120 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                 }}
               />
 
-              {/* Priority and Date Row */}
+              {/* Subject */}
+              <TextField
+                fullWidth
+                label="Subject"
+                variant="outlined"
+                value={formData.subject}
+                onChange={handleInputChange('subject')}
+                error={!!errors.subject}
+                helperText={errors.subject}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  },
+                }}
+              />
+
+              {/* Sender Details Section */}
+              <Box>
+                <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+                  Sender Details
+                </Typography>
+                <Stack spacing={2}>
+                  <TextField
+                    fullWidth
+                    label="Sender Name"
+                    variant="outlined"
+                    value={formData.sender_details.name}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        sender_details: {
+                          ...prev.sender_details,
+                          name: e.target.value,
+                        },
+                      }))
+                    }
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <TextField
+                      fullWidth
+                      label="Email"
+                      variant="outlined"
+                      type="email"
+                      value={formData.sender_details.email}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          sender_details: {
+                            ...prev.sender_details,
+                            email: e.target.value,
+                          },
+                        }))
+                      }
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                        },
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Phone Number"
+                      variant="outlined"
+                      value={formData.sender_details.phone_number}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          sender_details: {
+                            ...prev.sender_details,
+                            phone_number: e.target.value,
+                          },
+                        }))
+                      }
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                        },
+                      }}
+                    />
+                  </Stack>
+                  <TextField
+                    fullWidth
+                    label="Address"
+                    variant="outlined"
+                    multiline
+                    rows={2}
+                    value={formData.sender_details.address}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        sender_details: {
+                          ...prev.sender_details,
+                          address: e.target.value,
+                        },
+                      }))
+                    }
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+                </Stack>
+              </Box>
+
+              {/* Priority and Mode of Arrival */}
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 <FormControl sx={{ minWidth: { xs: '100%', sm: '200px' } }}>
                   <InputLabel>Priority</InputLabel>
@@ -284,14 +407,53 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                   </Select>
                 </FormControl>
 
+                <FormControl sx={{ minWidth: { xs: '100%', sm: '200px' } }}>
+                  <InputLabel>Mode of Arrival</InputLabel>
+                  <Select
+                    value={formData.mode_of_arrival}
+                    label="Mode of Arrival"
+                    onChange={handleInputChange('mode_of_arrival')}
+                    sx={{
+                      borderRadius: 2,
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  >
+                    {modesOfArrival.map((mode) => (
+                      <MenuItem key={mode} value={mode}>
+                        {mode.replace(/_/g, ' ')}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Stack>
+
+              {/* Date Fields */}
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 <TextField
                   fullWidth
                   label="Receiving Date"
                   type="date"
-                  value={formData.receivingDate}
+                  value={formData.received_date}
                   onChange={(e) => handleDateChange(e.target.value)}
-                  error={!!errors.receivingDate}
-                  helperText={errors.receivingDate}
+                  error={!!errors.received_date}
+                  helperText={errors.received_date}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                    },
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  label="Sent Date (Optional)"
+                  type="date"
+                  value={formData.sent_date || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, sent_date: e.target.value || undefined }))}
                   InputLabelProps={{
                     shrink: true,
                   }}
@@ -303,30 +465,7 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                 />
               </Stack>
 
-              {/* Category */}
-              <FormControl fullWidth>
-                <InputLabel>Category</InputLabel>
-                <Select
-                  value={formData.category}
-                  label="Category"
-                  onChange={handleInputChange('category')}
-                  error={!!errors.category}
-                  sx={{
-                    borderRadius: 2,
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderRadius: 2,
-                    },
-                  }}
-                >
-                  {categories.map((category) => (
-                    <MenuItem key={category} value={category}>
-                      {category}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {/* Content */}
+              {/* Content/Description */}
               <TextField
                 fullWidth
                 label="Content"
@@ -388,10 +527,10 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                 </Button>
 
                 {/* Attached Files List */}
-                {formData.attachments.length > 0 && (
+                {(formData.attachments?.length || 0) > 0 && (
                   <Box sx={{ mt: 2 }}>
                     <Stack spacing={1}>
-                      {formData.attachments.map((file, index) => (
+                      {formData.attachments?.map((file, index) => (
                         <Chip
                           key={index}
                           icon={<AttachFileIcon />}

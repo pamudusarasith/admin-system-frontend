@@ -25,7 +25,14 @@ interface LetterAttachment {
 
 interface LetterAction {
   id: string
-  type: 'received' | 'assigned_to_division' | 'assigned_to_person' | 'forwarded' | 'replied' | 'returned' | 'status_change'
+  type:
+    | 'received'
+    | 'assigned_to_division'
+    | 'assigned_to_person'
+    | 'forwarded'
+    | 'replied'
+    | 'returned'
+    | 'status_change'
   description: string
   performedBy: {
     name: string
@@ -49,18 +56,33 @@ interface LetterAction {
 }
 
 interface Letter {
-  id: string
-  referenceNumber: string
+  id: number
+  reference: string
   subject: string
-  sender: {
+  senderDetails: {
     name: string
-    organization: string
     email: string
-    phone: string
+    phone_number: string
+    address: string
   }
-  receivedDate: string
-  priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
+  receivingDate: string
+  priority: 'NORMAL' | 'HIGH' | 'URGENT'
+  status:
+    | 'NEW'
+    | 'ASSIGNED_TO_DIVISION'
+    | 'ASSIGNED_TO_OFFICER'
+    | 'PENDING_ACCEPTANCE'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'RETURNED'
+  modeOfArrival:
+    | 'REGISTERED_POST'
+    | 'EMAIL'
+    | 'COURIER'
+    | 'HAND_DELIVERY'
+    | 'FAX'
+    | 'ONLINE_PORTAL'
+  content: string
   assignedDivision?: {
     id: string
     name: string
@@ -80,27 +102,28 @@ interface Letter {
       role: string
     }
   }
-  category: string
-  confidentialityLevel: 'Public' | 'Confidential' | 'Restricted' | 'Secret'
   actions: Array<LetterAction>
   originalAttachments: Array<LetterAttachment>
 }
 
 // Mock data
 const mockLetter: Letter = {
-  id: '1',
-  referenceNumber: 'MIN/EDU/2024/001',
+  id: 1,
+  reference: 'MIN/EDU/2024/001',
   subject:
     'Request for Educational Policy Review and Implementation Guidelines',
-  sender: {
+  senderDetails: {
     name: 'Dr. Priyanka Wickramasinghe',
-    organization: 'University of Colombo',
     email: 'priyanka.w@ucolombo.lk',
-    phone: '+94 11 250 3345',
+    phone_number: '+94 11 250 3345',
+    address: 'University of Colombo, Colombo 03',
   },
-  receivedDate: '2024-01-15T09:30:00Z',
-  priority: 'High',
-  status: 'In Progress',
+  receivingDate: '2024-01-15T09:30:00Z',
+  priority: 'HIGH',
+  status: 'IN_PROGRESS',
+  modeOfArrival: 'EMAIL',
+  content:
+    'This letter requests a comprehensive review of current educational policies and seeks implementation guidelines for new educational initiatives.',
   assignedDivision: {
     id: 'policy-dev',
     name: 'Policy Development Division',
@@ -120,8 +143,6 @@ const mockLetter: Letter = {
       role: 'Division Head',
     },
   },
-  category: 'Policy Matter',
-  confidentialityLevel: 'Confidential',
   originalAttachments: [
     {
       id: '1',
@@ -176,7 +197,8 @@ const mockLetter: Letter = {
     {
       id: '3',
       type: 'assigned_to_person',
-      description: 'Assigned to Nimal Perera within Policy Development Division',
+      description:
+        'Assigned to Nimal Perera within Policy Development Division',
       performedBy: {
         name: 'Sunil Jayasinghe',
         role: 'Division Head',
@@ -311,11 +333,11 @@ function LetterThreadView() {
         />
 
         <LetterDetailsGrid
-          sender={letter.sender}
+          sender={letter.senderDetails}
           assignedDivision={letter.assignedDivision}
           currentAssignee={letter.currentAssignee}
-          category={letter.category}
-          receivedDate={letter.receivedDate}
+          modeOfArrival={letter.modeOfArrival}
+          receivedDate={letter.receivingDate}
           originalAttachments={letter.originalAttachments}
           formatTimestamp={formatTimestamp}
         />

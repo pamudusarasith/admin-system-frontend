@@ -25,14 +25,19 @@ export const StatusCardsGrid: React.FC<StatusCardsGridProps> = ({
   const theme = useTheme()
   const getStatusIcon = (type: string) => {
     switch (type) {
-      case 'Pending':
+      case 'NEW':
         return <ScheduleIcon />
-      case 'In Progress':
+      case 'ASSIGNED_TO_DIVISION':
+        return <InboxIcon />
+      case 'PENDING_ACCEPTANCE':
         return <TrendingUpIcon />
-      case 'Completed':
+      case 'ASSIGNED_TO_OFFICER':
         return <AssignmentIcon />
-      case 'Returned':
+      case 'RETURNED_FROM_OFFICER':
+      case 'RETURNED_FROM_DIVISION':
         return <ReplyIcon />
+      case 'CLOSED':
+        return <AssignmentIcon />
       default:
         return <InboxIcon />
     }

@@ -38,147 +38,168 @@ export const Route = createFileRoute('/letters/')({
 })
 
 interface LetterSummary {
-  id: string
-  referenceNumber: string
-  subject: string
-  sender: {
+  id: number
+  reference: string
+  senderDetails: {
     name: string
-    organization: string
+    email: string | null
+    address: string | null
+    phone_number: string | null
   }
+  sentDate: string | null
   receivedDate: string
-  priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
-  assignedDivision?: {
-    name: string
-    assignedDate: string
-  }
-  currentAssignee?: {
-    name: string
-    division: string
-    assignedDate: string
-  }
-  category: string
-  confidentialityLevel: 'Public' | 'Confidential' | 'Restricted' | 'Secret'
-  daysOpen: number
-  hasAttachments: boolean
-  replyCount: number
+  modeOfArrival:
+    | 'REGISTERED_POST'
+    | 'UNREGISTERED_POST'
+    | 'EMAIL'
+    | 'WHATSAPP'
+    | 'HAND_DELIVERED'
+    | 'FAX'
+    | 'OTHER'
+  subject: string
+  content: string | null
+  priority: 'NORMAL' | 'HIGH' | 'URGENT'
+  status:
+    | 'NEW'
+    | 'ASSIGNED_TO_DIVISION'
+    | 'PENDING_ACCEPTANCE'
+    | 'ASSIGNED_TO_OFFICER'
+    | 'RETURNED_FROM_OFFICER'
+    | 'RETURNED_FROM_DIVISION'
+    | 'CLOSED'
+  assignedDivision: string | null
+  assignedUser: string | null
+  isAcceptedByUser: boolean
+  category?: string
+  daysOpen?: number
+  hasAttachments?: boolean
+  replyCount?: number
 }
 
 // Mock data
 const mockLetters: Array<LetterSummary> = [
   {
-    id: '1',
-    referenceNumber: 'MIN/EDU/2024/001',
+    id: 1,
+    reference: 'MIN/EDU/2024/001',
+    senderDetails: {
+      name: 'Dr. Priyanka Wickramasinghe',
+      email: 'priyanka.w@colombo.ac.lk',
+      address: 'University of Colombo, Colombo 3',
+      phone_number: '+94112581835',
+    },
+    sentDate: '2024-01-14',
+    receivedDate: '2024-01-15',
+    modeOfArrival: 'REGISTERED_POST',
     subject:
       'Request for Educational Policy Review and Implementation Guidelines',
-    sender: {
-      name: 'Dr. Priyanka Wickramasinghe',
-      organization: 'University of Colombo',
-    },
-    receivedDate: '2024-01-15T09:30:00Z',
-    priority: 'High',
-    status: 'In Progress',
-    assignedDivision: {
-      name: 'Policy Development Division',
-      assignedDate: '2024-01-15T10:15:00Z',
-    },
-    currentAssignee: {
-      name: 'Nimal Perera',
-      division: 'Policy Development Division',
-      assignedDate: '2024-01-16T08:30:00Z',
-    },
+    content:
+      'This letter requests a comprehensive review of current educational policies...',
+    priority: 'HIGH',
+    status: 'ASSIGNED_TO_OFFICER',
+    assignedDivision: 'Policy Development Division',
+    assignedUser: 'Nimal Perera',
+    isAcceptedByUser: true,
     category: 'Policy Matter',
-    confidentialityLevel: 'Confidential',
     daysOpen: 12,
     hasAttachments: true,
     replyCount: 3,
   },
   {
-    id: '2',
-    referenceNumber: 'MIN/EDU/2024/002',
-    subject: 'Budget Allocation for Infrastructure Development Projects',
-    sender: {
+    id: 2,
+    reference: 'MIN/EDU/2024/002',
+    senderDetails: {
       name: 'Eng. Saman Kumara',
-      organization: 'Provincial Education Office',
+      email: 'saman.k@education.gov.lk',
+      address: 'Provincial Education Office, Kandy',
+      phone_number: '+94812234567',
     },
-    receivedDate: '2024-01-18T14:20:00Z',
-    priority: 'Urgent',
-    status: 'Assigned to Division',
-    assignedDivision: {
-      name: 'Finance Division',
-      assignedDate: '2024-01-18T15:00:00Z',
-    },
+    sentDate: '2024-01-17',
+    receivedDate: '2024-01-18',
+    modeOfArrival: 'EMAIL',
+    subject: 'Budget Allocation for Infrastructure Development Projects',
+    content:
+      'We hereby request budget allocation for the following infrastructure projects...',
+    priority: 'URGENT',
+    status: 'ASSIGNED_TO_DIVISION',
+    assignedDivision: 'Finance Division',
+    assignedUser: null,
+    isAcceptedByUser: false,
     category: 'Financial Matter',
-    confidentialityLevel: 'Restricted',
     daysOpen: 9,
     hasAttachments: true,
     replyCount: 1,
   },
   {
-    id: '3',
-    referenceNumber: 'MIN/EDU/2024/003',
-    subject: 'Teacher Training Program Approval Request',
-    sender: {
+    id: 3,
+    reference: 'MIN/EDU/2024/003',
+    senderDetails: {
       name: 'Ms. Dilani Fernando',
-      organization: 'National Institute of Education',
+      email: 'dilani.f@nie.ac.lk',
+      address: 'National Institute of Education, Maharagama',
+      phone_number: '+94112850301',
     },
-    receivedDate: '2024-01-20T11:45:00Z',
-    priority: 'Normal',
-    status: 'Completed',
-    assignedDivision: {
-      name: 'Human Resources Division',
-      assignedDate: '2024-01-20T14:00:00Z',
-    },
-    currentAssignee: {
-      name: 'Rohana Jayasinghe',
-      division: 'Human Resources Division',
-      assignedDate: '2024-01-21T09:00:00Z',
-    },
+    sentDate: '2024-01-19',
+    receivedDate: '2024-01-20',
+    modeOfArrival: 'HAND_DELIVERED',
+    subject: 'Teacher Training Program Approval Request',
+    content:
+      'This is to request approval for the new teacher training program...',
+    priority: 'NORMAL',
+    status: 'CLOSED',
+    assignedDivision: 'Human Resources Division',
+    assignedUser: 'Rohana Jayasinghe',
+    isAcceptedByUser: true,
     category: 'Training & Development',
-    confidentialityLevel: 'Public',
     daysOpen: 7,
     hasAttachments: false,
     replyCount: 5,
   },
   {
-    id: '4',
-    referenceNumber: 'MIN/EDU/2024/004',
-    subject: 'Legal Opinion on New Education Act Amendment',
-    sender: {
+    id: 4,
+    reference: 'MIN/EDU/2024/004',
+    senderDetails: {
       name: 'Attorney Upul Ratnayake',
-      organization: "Attorney General's Department",
+      email: 'upul.r@attorneygeneral.gov.lk',
+      address: "Attorney General's Department, Colombo 12",
+      phone_number: '+94112445222',
     },
-    receivedDate: '2024-01-22T16:15:00Z',
-    priority: 'High',
-    status: 'Assigned to Person',
-    assignedDivision: {
-      name: 'Legal Division',
-      assignedDate: '2024-01-22T17:00:00Z',
-    },
-    currentAssignee: {
-      name: 'Anura Mendis',
-      division: 'Legal Division',
-      assignedDate: '2024-01-23T09:30:00Z',
-    },
+    sentDate: '2024-01-21',
+    receivedDate: '2024-01-22',
+    modeOfArrival: 'REGISTERED_POST',
+    subject: 'Legal Opinion on New Education Act Amendment',
+    content:
+      'We provide the following legal opinion regarding the proposed amendment...',
+    priority: 'HIGH',
+    status: 'PENDING_ACCEPTANCE',
+    assignedDivision: 'Legal Division',
+    assignedUser: 'Anura Mendis',
+    isAcceptedByUser: false,
     category: 'Legal Matter',
-    confidentialityLevel: 'Secret',
     daysOpen: 5,
     hasAttachments: true,
     replyCount: 2,
   },
   {
-    id: '5',
-    referenceNumber: 'MIN/EDU/2024/005',
-    subject: 'International Conference Participation Request',
-    sender: {
+    id: 5,
+    reference: 'MIN/EDU/2024/005',
+    senderDetails: {
       name: 'Prof. Chandrika Perera',
-      organization: 'University of Peradeniya',
+      email: 'chandrika.p@pdn.ac.lk',
+      address: 'University of Peradeniya, Peradeniya',
+      phone_number: '+94812392111',
     },
-    receivedDate: '2024-01-25T10:30:00Z',
-    priority: 'Normal',
-    status: 'Pending',
+    sentDate: null,
+    receivedDate: '2024-01-25',
+    modeOfArrival: 'EMAIL',
+    subject: 'International Conference Participation Request',
+    content:
+      'Request for permission and funding to attend the international education conference...',
+    priority: 'NORMAL',
+    status: 'NEW',
+    assignedDivision: null,
+    assignedUser: null,
+    isAcceptedByUser: false,
     category: 'International Affairs',
-    confidentialityLevel: 'Public',
     daysOpen: 2,
     hasAttachments: false,
     replyCount: 0,
@@ -220,8 +241,10 @@ function LettersPage() {
   const filteredLetters = letters.filter((letter) => {
     const matchesSearch =
       letter.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      letter.sender.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      letter.referenceNumber.toLowerCase().includes(searchTerm.toLowerCase())
+      letter.senderDetails.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      letter.reference.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus =
       statusFilter === 'All' || letter.status === statusFilter
@@ -235,10 +258,11 @@ function LettersPage() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'High':
+      case 'HIGH':
         return theme.palette.error.main
-      case 'Urgent':
+      case 'URGENT':
         return theme.palette.warning.main
+      case 'NORMAL':
       default:
         return theme.palette.success.main
     }
@@ -246,33 +270,22 @@ function LettersPage() {
 
   const getStatusColor = (statusType: string) => {
     switch (statusType) {
-      case 'Pending':
+      case 'NEW':
         return theme.palette.warning.main
-      case 'Assigned to Division':
+      case 'ASSIGNED_TO_DIVISION':
         return theme.palette.primary.main
-      case 'Assigned to Person':
-        return theme.palette.secondary.main
-      case 'In Progress':
+      case 'PENDING_ACCEPTANCE':
         return theme.palette.info.main
-      case 'Completed':
-        return theme.palette.success.main
-      case 'Returned':
+      case 'ASSIGNED_TO_OFFICER':
+        return theme.palette.secondary.main
+      case 'RETURNED_FROM_OFFICER':
+        return theme.palette.error.light
+      case 'RETURNED_FROM_DIVISION':
         return theme.palette.error.main
+      case 'CLOSED':
+        return theme.palette.success.main
       default:
         return theme.palette.grey[500]
-    }
-  }
-
-  const getConfidentialityColor = (level: string) => {
-    switch (level) {
-      case 'Secret':
-        return theme.palette.error.main
-      case 'Restricted':
-        return theme.palette.warning.main
-      case 'Confidential':
-        return theme.palette.info.main
-      default:
-        return theme.palette.grey[600]
     }
   }
 
@@ -330,12 +343,22 @@ function LettersPage() {
 
   const statusCounts = {
     All: letters.length,
-    Pending: letters.filter((l) => l.status === 'Pending').length,
-    'Assigned to Division': letters.filter((l) => l.status === 'Assigned to Division').length,
-    'Assigned to Person': letters.filter((l) => l.status === 'Assigned to Person').length,
-    'In Progress': letters.filter((l) => l.status === 'In Progress').length,
-    Completed: letters.filter((l) => l.status === 'Completed').length,
-    Returned: letters.filter((l) => l.status === 'Returned').length,
+    NEW: letters.filter((l) => l.status === 'NEW').length,
+    ASSIGNED_TO_DIVISION: letters.filter(
+      (l) => l.status === 'ASSIGNED_TO_DIVISION',
+    ).length,
+    PENDING_ACCEPTANCE: letters.filter((l) => l.status === 'PENDING_ACCEPTANCE')
+      .length,
+    ASSIGNED_TO_OFFICER: letters.filter(
+      (l) => l.status === 'ASSIGNED_TO_OFFICER',
+    ).length,
+    RETURNED_FROM_OFFICER: letters.filter(
+      (l) => l.status === 'RETURNED_FROM_OFFICER',
+    ).length,
+    RETURNED_FROM_DIVISION: letters.filter(
+      (l) => l.status === 'RETURNED_FROM_DIVISION',
+    ).length,
+    CLOSED: letters.filter((l) => l.status === 'CLOSED').length,
   }
 
   return (
@@ -483,7 +506,6 @@ function LettersPage() {
                 index={index}
                 getPriorityColor={getPriorityColor}
                 getStatusColor={getStatusColor}
-                getConfidentialityColor={getConfidentialityColor}
                 formatDate={formatDate}
                 formatTimeAgo={formatTimeAgo}
                 onCardClick={(id) => navigate({ to: `/letters/${id}` })}

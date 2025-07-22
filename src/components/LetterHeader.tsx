@@ -16,12 +16,18 @@ import {
 } from '@mui/icons-material'
 
 interface Letter {
-  id: string
-  referenceNumber: string
+  id: number
+  reference: string
   subject: string
-  priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
-  confidentialityLevel: 'Public' | 'Confidential' | 'Restricted' | 'Secret'
+  priority: 'NORMAL' | 'HIGH' | 'URGENT'
+  status:
+    | 'NEW'
+    | 'ASSIGNED_TO_DIVISION'
+    | 'ASSIGNED_TO_OFFICER'
+    | 'PENDING_ACCEPTANCE'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'RETURNED'
 }
 
 interface LetterHeaderProps {
@@ -56,7 +62,7 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
         <Link underline="hover" color="inherit" href="/letters">
           Letters
         </Link>
-        <Typography color="text.primary">{letter.referenceNumber}</Typography>
+        <Typography color="text.primary">{letter.reference}</Typography>
       </Breadcrumbs>
 
       {/* Letter Title Section */}
@@ -81,7 +87,7 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
               color="text.secondary"
               sx={{ mb: 2 }}
             >
-              Reference: {letter.referenceNumber}
+              Reference: {letter.reference}
             </Typography>
             <Box
               sx={{
@@ -108,12 +114,6 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
                   color: 'white',
                   fontWeight: 'bold',
                 }}
-              />
-              <Chip
-                label={letter.confidentialityLevel}
-                size="small"
-                variant="outlined"
-                sx={{ fontWeight: 'bold' }}
               />
             </Box>
           </Box>
