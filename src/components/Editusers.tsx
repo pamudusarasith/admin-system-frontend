@@ -11,7 +11,7 @@ import Switch from '@mui/material/Switch'
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import IconButton from '@mui/material/IconButton'
 
-function EUser() {
+export default function EUser() {
   const theme = useTheme()
 
   return (
