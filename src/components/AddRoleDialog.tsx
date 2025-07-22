@@ -19,9 +19,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material'
-import {
-  Close as CloseIcon,
-} from '@mui/icons-material'
+import { Close as CloseIcon } from '@mui/icons-material'
 
 interface AddRoleDialogProps {
   open: boolean
@@ -41,44 +39,44 @@ interface RoleFormData {
 // Available permission sections and their actions
 const PERMISSION_SECTIONS = [
   {
+    id: 'USER_MANAGEMENT',
+    label: 'User Management',
+    permissions: [
+      { id: 'user:read', label: 'Read' },
+      { id: 'user:create', label: 'Create' },
+      { id: 'user:update', label: 'Update' },
+      { id: 'user:delete', label: 'Delete' },
+    ],
+  },
+  {
     id: 'LETTER_MANAGEMENT',
     label: 'Letter Management',
     permissions: [
-      { id: 'LETTER_CREATE', label: 'Create' },
-      { id: 'LETTER_RETRIEVE', label: 'Retrieve' },
-      { id: 'LETTER_UPDATE', label: 'Update' },
-      { id: 'LETTER_DELETE', label: 'Delete' },
-    ]
+      { id: 'letter:read', label: 'Read' },
+      { id: 'letter:create', label: 'Create' },
+      { id: 'letter:update', label: 'Update' },
+      { id: 'letter:delete', label: 'Delete' },
+    ],
   },
   {
     id: 'CABINET_PAPER_MANAGEMENT',
     label: 'Cabinet Paper Management',
     permissions: [
-      { id: 'CABINET_PAPER_CREATE', label: 'Create' },
-      { id: 'CABINET_PAPER_RETRIEVE', label: 'Retrieve' },
-      { id: 'CABINET_PAPER_UPDATE', label: 'Update' },
-      { id: 'CABINET_PAPER_DELETE', label: 'Delete' },
-    ]
-  },
-  {
-    id: 'USER_MANAGEMENT',
-    label: 'User Management',
-    permissions: [
-      { id: 'USER_CREATE', label: 'Create' },
-      { id: 'USER_RETRIEVE', label: 'Retrieve' },
-      { id: 'USER_UPDATE', label: 'Update' },
-      { id: 'USER_DELETE', label: 'Delete' },
-    ]
+      { id: 'cabinetPaper:read', label: 'Read' },
+      { id: 'cabinetPaper:create', label: 'Create' },
+      { id: 'cabinetPaper:update', label: 'Update' },
+      { id: 'cabinetPaper:delete', label: 'Delete' },
+    ],
   },
   {
     id: 'DIVISION_MANAGEMENT',
     label: 'Division Management',
     permissions: [
-      { id: 'DIVISION_CREATE', label: 'Create' },
-      { id: 'DIVISION_RETRIEVE', label: 'Retrieve' },
-      { id: 'DIVISION_UPDATE', label: 'Update' },
-      { id: 'DIVISION_DELETE', label: 'Delete' },
-    ]
+      { id: 'division:read', label: 'Read' },
+      { id: 'division:create', label: 'Create' },
+      { id: 'division:update', label: 'Update' },
+      { id: 'division:delete', label: 'Delete' },
+    ],
   },
 ] as const
 
@@ -98,7 +96,9 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
     permissions: [],
   })
 
-  const [errors, setErrors] = useState<Partial<Record<keyof RoleFormData, string>>>({})
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof RoleFormData, string>>
+  >({})
 
   // Reset form data when dialog opens or initial data changes
   useEffect(() => {
@@ -135,7 +135,7 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
       const newPermissions = checked
         ? [...prev.permissions, permissionId]
         : prev.permissions.filter((id) => id !== permissionId)
-      
+
       return { ...prev, permissions: newPermissions }
     })
 
@@ -203,7 +203,6 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        
           <Typography
             variant="h5"
             sx={{
@@ -238,7 +237,6 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
         >
           <CardContent sx={{ p: 3 }}>
             <Stack spacing={3}>
-
               {/* Role Name */}
               <TextField
                 fullWidth
@@ -301,7 +299,11 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
                   Select the permissions that users with this role should have
                 </Typography>
 
-                <FormControl component="fieldset" variant="standard" error={!!errors.permissions}>
+                <FormControl
+                  component="fieldset"
+                  variant="standard"
+                  error={!!errors.permissions}
+                >
                   <FormGroup>
                     <Stack spacing={3}>
                       {PERMISSION_SECTIONS.map((section) => (
@@ -319,7 +321,10 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
                           <Box
                             sx={{
                               display: 'grid',
-                              gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' },
+                              gridTemplateColumns: {
+                                xs: '1fr 1fr',
+                                md: '1fr 1fr 1fr 1fr',
+                              },
                               gap: 1,
                               p: 2,
                               borderRadius: 2,
@@ -332,9 +337,14 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
                                 key={permission.id}
                                 control={
                                   <Checkbox
-                                    checked={formData.permissions.includes(permission.id)}
+                                    checked={formData.permissions.includes(
+                                      permission.id,
+                                    )}
                                     onChange={(event) =>
-                                      handlePermissionChange(permission.id, event.target.checked)
+                                      handlePermissionChange(
+                                        permission.id,
+                                        event.target.checked,
+                                      )
                                     }
                                     sx={{
                                       '&.Mui-checked': {
@@ -421,7 +431,6 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
                   </Box>
                 </Box>
               )} */}
-
             </Stack>
           </CardContent>
         </Card>
