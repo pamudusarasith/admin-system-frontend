@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getRoles, createRole, updateRole, deleteRole, type Role } from '@/api'
 import {
   Avatar,
   Box,
@@ -17,6 +18,7 @@ import {
   Stack,
   Typography,
   useTheme,
+  CircularProgress,
 } from '@mui/material'
 import {
   AdminPanelSettings as AdminIcon,
@@ -31,19 +33,16 @@ import {
 } from '@mui/icons-material'
 import { AddButton, SearchBar, SidebarLayout, AddRoleDialog } from '@/components'
 
+// We fetch user roles from backend using the getRoles function imported from '@/api'.
+// This is called inside the loadRoles function, which is triggered in a useEffect when the component mounts.
+
 export const Route = createFileRoute('/roles')({
   component: RolesPage,
 })
 
-interface UserRole {
-  id: string
-  name: string
-  description: string
+interface UserRole extends Role {
   userCount: number
-  permissions: Array<string>
   icon: React.ReactNode
-  createdDate: string
-  isActive: boolean
 }
 
 // Mock data for user roles
@@ -143,12 +142,46 @@ const mockRoles: Array<UserRole> = [
 function RolesPage() {
   const theme = useTheme()
   const [searchTerm, setSearchTerm] = useState('')
-  const [roles, setRoles] = useState<Array<UserRole>>(mockRoles)
+  const [roles, setRoles] = useState<Array<UserRole>>([])
+  const [loading, setLoading] = useState(true)
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [menuRole, setMenuRole] = useState<UserRole | null>(null)
   const [editMode, setEditMode] = useState(false)
+
+  // Load roles from API
+  useEffect(() => {
+    loadRoles()
+  }, [])
+
+  const loadRoles = async () => {
+    try {
+      setLoading(true)
+      const rolesData = await getRoles()
+      // Transform API roles to UserRole format with icons
+      const rolesWithIcons: UserRole[] = rolesData.map((role) => ({
+        ...role,
+        userCount: role.userCount || 0,
+        icon: getIconForRole(role.name),
+      }))
+      setRoles(rolesWithIcons)
+    } catch (error) {
+      console.error('Failed to load roles:', error)
+      // Fallback to mock data if API fails
+      setRoles(mockRoles)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getIconForRole = (roleName: string): React.ReactNode => {
+    const name = roleName.toLowerCase()
+    if (name.includes('admin')) return <AdminIcon />
+    if (name.includes('manager')) return <BusinessIcon />
+    if (name.includes('support')) return <SupportIcon />
+    return <PersonIcon />
+  }
 
   const filteredRoles = roles.filter(
     (role) =>
@@ -182,9 +215,17 @@ function RolesPage() {
     handleMenuClose()
   }
 
-  const handleDeleteRole = (role: UserRole) => {
-    setRoles((prev) => prev.filter((r) => r.id !== role.id))
-    handleMenuClose()
+  const handleDeleteRole = async (role: UserRole) => {
+    try {
+      await deleteRole(role.id)
+      await loadRoles() // Reload the roles list
+      handleMenuClose()
+    } catch (error) {
+      console.error('Failed to delete role:', error)
+      // Fallback to local state update if API fails
+      setRoles((prev) => prev.filter((r) => r.id !== role.id))
+      handleMenuClose()
+    }
   }
 
   const handleCloseDialog = () => {
@@ -193,35 +234,56 @@ function RolesPage() {
     setEditMode(false)
   }
 
-  const handleSubmitRole = (roleData: { name: string; description: string; permissions: string[] }) => {
-    if (editMode && selectedRole) {
-      // Update existing role
-      setRoles((prev) =>
-        prev.map((role) =>
-          role.id === selectedRole.id
-            ? { ...role, name: roleData.name, description: roleData.description, permissions: roleData.permissions }
-            : role
-        )
-      )
-    } else {
-      // Add new role
-      const newRole: UserRole = {
-        id: Date.now().toString(),
-        name: roleData.name,
-        description: roleData.description,
-        userCount: 0,
-        permissions: roleData.permissions,
-        icon: <PersonIcon />,
-        createdDate: new Date().toISOString().split('T')[0],
-        isActive: true,
+  const handleSubmitRole = async (roleData: { name: string; description: string; permissions: string[] }) => {
+    try {
+      if (editMode && selectedRole) {
+        // Update existing role
+        await updateRole(selectedRole.id, {
+          name: roleData.name,
+          description: roleData.description,
+          permissions: roleData.permissions,
+        })
+      } else {
+        // Add new role
+        await createRole({
+          name: roleData.name,
+          description: roleData.description,
+          permissions: roleData.permissions,
+          isActive: true,
+        })
       }
-      setRoles((prev) => [...prev, newRole])
+      await loadRoles() // Reload the roles list
+    } catch (error) {
+      console.error('Failed to save role:', error)
+      // Fallback to local state update if API fails
+      if (editMode && selectedRole) {
+        setRoles((prev) =>
+          prev.map((role) =>
+            role.id === selectedRole.id
+              ? { ...role, name: roleData.name, description: roleData.description, permissions: roleData.permissions }
+              : role
+          )
+        )
+      } else {
+        const newRole: UserRole = {
+          id: Date.now().toString(),
+          name: roleData.name,
+          description: roleData.description,
+          userCount: 0,
+          permissions: roleData.permissions,
+          icon: getIconForRole(roleData.name),
+          createdDate: new Date().toISOString().split('T')[0],
+          isActive: true,
+        }
+        setRoles((prev) => [...prev, newRole])
+      }
     }
   }
 
   const handleSearch = (value: string) => {
     setSearchTerm(value)
   }
+  console.log(filteredRoles)
 
   return (
     <SidebarLayout>
@@ -333,7 +395,35 @@ function RolesPage() {
             gap: 6,
           }}
         >
-          {filteredRoles.map((role) => (
+          {loading ? (
+            <Box
+              sx={{
+                gridColumn: '1 / -1',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                py: 8,
+              }}
+            >
+              <CircularProgress size={48} />
+            </Box>
+          ) : filteredRoles.length === 0 ? (
+            <Box
+              sx={{
+                gridColumn: '1 / -1',
+                textAlign: 'center',
+                py: 8,
+              }}
+            >
+              <Typography variant="h6" color="text.secondary">
+                No roles found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {searchTerm ? 'Try adjusting your search criteria' : 'Create your first role to get started'}
+              </Typography>
+            </Box>
+          ) : (
+            filteredRoles.map((role) => (
             <Card
               key={role.id}
               elevation={4}
@@ -489,10 +579,14 @@ function RolesPage() {
                     spacing={1}
                     sx={{ flexWrap: 'wrap', gap: 0.5 }}
                   >
-                    {role.permissions.slice(0, 2).map((permission) => (
-                      <Chip
-                        key={permission}
-                        label={permission.replace('_', ' ')}
+                    {role.permissions.slice(0, 2).map((permission, idx) => {
+                      // If permission is an object (key-value pair), display key or value as label
+                      if (typeof permission === 'object' && permission !== null) {
+                      const [key, value] = Object.entries(permission)[1]
+                      return (
+                        <Chip
+                        key={key + value + idx}
+                        label={`${value}`}
                         size="small"
                         variant="outlined"
                         sx={{
@@ -501,8 +595,11 @@ function RolesPage() {
                           borderColor: theme.palette.primary.main,
                           color: theme.palette.primary.main,
                         }}
-                      />
-                    ))}
+                        />
+                      )
+                      }
+                      
+                    })}
                     {role.permissions.length > 2 && (
                       <Chip
                         label={`+${role.permissions.length - 2} more`}
@@ -551,7 +648,8 @@ function RolesPage() {
                 </IconButton>
               </CardActions>
             </Card>
-          ))}
+          ))
+          )}
         </Box>
 
         {/* Floating Add Button */}
