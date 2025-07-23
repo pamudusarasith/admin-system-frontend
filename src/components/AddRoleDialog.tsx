@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -19,165 +19,124 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material'
-import {
-  Close as CloseIcon,
-} from '@mui/icons-material'
+import { Close as CloseIcon } from '@mui/icons-material'
+import { roleFormDataSchema, type RoleFormData } from '@/schemas/role'
+import { createRole, updateRole } from '@/api'
+import { useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 
 interface AddRoleDialogProps {
   open: boolean
   onClose: () => void
-  onSubmit?: (roleData: RoleFormData) => void
   editMode?: boolean
-  initialData?: RoleFormData
-}
-
-interface RoleFormData {
-  id?: string
-  name: string
-  description: string
-  permissions: string[]
+  initialData?: { id: string } & RoleFormData
+  onSuccess?: () => void
 }
 
 // Available permission sections and their actions
 const PERMISSION_SECTIONS = [
   {
+    id: 'USER_MANAGEMENT',
+    label: 'User Management',
+    permissions: [
+      { id: 'user:read', label: 'Read' },
+      { id: 'user:create', label: 'Create' },
+      { id: 'user:update', label: 'Update' },
+      { id: 'user:delete', label: 'Delete' },
+    ],
+  },
+  {
     id: 'LETTER_MANAGEMENT',
     label: 'Letter Management',
     permissions: [
-      { id: 'LETTER_CREATE', label: 'Create' },
-      { id: 'LETTER_RETRIEVE', label: 'Retrieve' },
-      { id: 'LETTER_UPDATE', label: 'Update' },
-      { id: 'LETTER_DELETE', label: 'Delete' },
-    ]
+      { id: 'letter:read', label: 'Read' },
+      { id: 'letter:create', label: 'Create' },
+      { id: 'letter:update', label: 'Update' },
+      { id: 'letter:delete', label: 'Delete' },
+    ],
   },
   {
     id: 'CABINET_PAPER_MANAGEMENT',
     label: 'Cabinet Paper Management',
     permissions: [
-      { id: 'CABINET_PAPER_CREATE', label: 'Create' },
-      { id: 'CABINET_PAPER_RETRIEVE', label: 'Retrieve' },
-      { id: 'CABINET_PAPER_UPDATE', label: 'Update' },
-      { id: 'CABINET_PAPER_DELETE', label: 'Delete' },
-    ]
-  },
-  {
-    id: 'USER_MANAGEMENT',
-    label: 'User Management',
-    permissions: [
-      { id: 'USER_CREATE', label: 'Create' },
-      { id: 'USER_RETRIEVE', label: 'Retrieve' },
-      { id: 'USER_UPDATE', label: 'Update' },
-      { id: 'USER_DELETE', label: 'Delete' },
-    ]
+      { id: 'cabinetPaper:read', label: 'Read' },
+      { id: 'cabinetPaper:create', label: 'Create' },
+      { id: 'cabinetPaper:update', label: 'Update' },
+      { id: 'cabinetPaper:delete', label: 'Delete' },
+    ],
   },
   {
     id: 'DIVISION_MANAGEMENT',
     label: 'Division Management',
     permissions: [
-      { id: 'DIVISION_CREATE', label: 'Create' },
-      { id: 'DIVISION_RETRIEVE', label: 'Retrieve' },
-      { id: 'DIVISION_UPDATE', label: 'Update' },
-      { id: 'DIVISION_DELETE', label: 'Delete' },
-    ]
+      { id: 'division:read', label: 'Read' },
+      { id: 'division:create', label: 'Create' },
+      { id: 'division:update', label: 'Update' },
+      { id: 'division:delete', label: 'Delete' },
+    ],
   },
 ] as const
 
 export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
   open,
   onClose,
-  onSubmit,
   editMode = false,
   initialData,
+  onSuccess,
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-  const [formData, setFormData] = useState<RoleFormData>({
-    name: '',
-    description: '',
-    permissions: [],
+  // Mutations for create and update
+  const createRoleMutation = useMutation({
+    mutationFn: createRole,
+    onSuccess: () => {
+      onSuccess?.()
+      handleClose()
+    },
   })
 
-  const [errors, setErrors] = useState<Partial<Record<keyof RoleFormData, string>>>({})
-
-  // Reset form data when dialog opens or initial data changes
-  useEffect(() => {
-    if (open) {
-      if (editMode && initialData) {
-        setFormData(initialData)
-      } else {
-        setFormData({
-          name: '',
-          description: '',
-          permissions: [],
-        })
-      }
-      setErrors({})
-    }
-  }, [open, editMode, initialData])
-
-  const handleInputChange =
-    (field: keyof RoleFormData) =>
-    (
-      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any,
-    ) => {
-      const value = event.target ? event.target.value : event
-      setFormData((prev) => ({ ...prev, [field]: value }))
-
-      // Clear error when user starts typing
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }))
-      }
-    }
-
-  const handlePermissionChange = (permissionId: string, checked: boolean) => {
-    setFormData((prev) => {
-      const newPermissions = checked
-        ? [...prev.permissions, permissionId]
-        : prev.permissions.filter((id) => id !== permissionId)
-      
-      return { ...prev, permissions: newPermissions }
-    })
-
-    // Clear permission error when user changes selection
-    if (errors.permissions) {
-      setErrors((prev) => ({ ...prev, permissions: undefined }))
-    }
-  }
-
-  const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof RoleFormData, string>> = {}
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Role name is required'
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required'
-    }
-    if (formData.permissions.length === 0) {
-      newErrors.permissions = 'At least one permission must be selected'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = () => {
-    if (validateForm()) {
-      onSubmit?.(formData)
+  const updateRoleMutation = useMutation({
+    mutationFn: ({ id, roleData }: { id: string; roleData: RoleFormData }) =>
+      updateRole(id, roleData),
+    onSuccess: () => {
+      onSuccess?.()
       handleClose()
-    }
-  }
+    },
+  })
+  console.log('initialData', initialData)
+  // Form setup with TanStack Form
+  const form = useForm({
+    defaultValues: {
+      name: initialData?.name || '',
+      description: initialData?.description || '',
+      permissions: initialData?.permissions || [],
+    } as RoleFormData,
+    validators: {
+      onChange: roleFormDataSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (editMode && initialData) {
+        // Assuming we have the role ID available somehow, you might need to pass it in initialData
+        // For now, let's assume initialData has an id property
+        updateRoleMutation.mutate({
+          id: initialData.id,
+          roleData: value,
+        })
+      } else {
+        createRoleMutation.mutate(value)
+      }
+    },
+  })
 
   const handleClose = () => {
-    setFormData({
-      name: '',
-      description: '',
-      permissions: [],
-    })
-    setErrors({})
+    form.reset()
     onClose()
   }
+
+  const isSubmitting =
+    createRoleMutation.isPending || updateRoleMutation.isPending
+  const error = createRoleMutation.error || updateRoleMutation.error
 
   return (
     <Dialog
@@ -203,7 +162,6 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        
           <Typography
             variant="h5"
             sx={{
@@ -237,192 +195,225 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
           }}
         >
           <CardContent sx={{ p: 3 }}>
-            <Stack spacing={3}>
-
-              {/* Role Name */}
-              <TextField
-                fullWidth
-                label="Role Name"
-                variant="outlined"
-                value={formData.name}
-                onChange={handleInputChange('name')}
-                error={!!errors.name}
-                helperText={errors.name}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                }}
-              />
-
-              {/* Description */}
-              <TextField
-                fullWidth
-                label="Description"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={formData.description}
-                onChange={handleInputChange('description')}
-                error={!!errors.description}
-                helperText={errors.description}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                }}
-              />
-
-              {/* Permissions Section */}
-              <Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    color: theme.palette.text.primary,
-                    mb: 1,
-                  }}
-                >
-                  Permissions
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    mb: 2,
-                  }}
-                >
-                  Select the permissions that users with this role should have
-                </Typography>
-
-                <FormControl component="fieldset" variant="standard" error={!!errors.permissions}>
-                  <FormGroup>
-                    <Stack spacing={3}>
-                      {PERMISSION_SECTIONS.map((section) => (
-                        <Box key={section.id}>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{
-                              fontWeight: 600,
-                              color: theme.palette.text.primary,
-                              mb: 1,
-                            }}
-                          >
-                            {section.label}
-                          </Typography>
-                          <Box
-                            sx={{
-                              display: 'grid',
-                              gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' },
-                              gap: 1,
-                              p: 2,
-                              borderRadius: 2,
-                              border: `1px solid ${theme.palette.divider}`,
-                              backgroundColor: theme.palette.background.default,
-                            }}
-                          >
-                            {section.permissions.map((permission) => (
-                              <FormControlLabel
-                                key={permission.id}
-                                control={
-                                  <Checkbox
-                                    checked={formData.permissions.includes(permission.id)}
-                                    onChange={(event) =>
-                                      handlePermissionChange(permission.id, event.target.checked)
-                                    }
-                                    sx={{
-                                      '&.Mui-checked': {
-                                        color: theme.palette.primary.main,
-                                      },
-                                    }}
-                                  />
-                                }
-                                label={
-                                  <Typography
-                                    variant="body2"
-                                    sx={{
-                                      fontWeight: 500,
-                                      color: theme.palette.text.primary,
-                                    }}
-                                  >
-                                    {permission.label}
-                                  </Typography>
-                                }
-                                sx={{
-                                  alignItems: 'center',
-                                  m: 0,
-                                  '& .MuiFormControlLabel-label': {
-                                    ml: 1,
-                                  },
-                                }}
-                              />
-                            ))}
-                          </Box>
-                        </Box>
-                      ))}
-                    </Stack>
-                  </FormGroup>
-                  {errors.permissions && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.error.main,
-                        mt: 1,
-                      }}
-                    >
-                      {errors.permissions}
-                    </Typography>
-                  )}
-                </FormControl>
-              </Box>
-
-              {/* Selected Permissions Summary */}
-              {/* {formData.permissions.length > 0 && (
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    backgroundColor: theme.palette.background.default,
-                    border: `1px solid ${theme.palette.divider}`,
-                  }}
-                >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                form.handleSubmit()
+              }}
+            >
+              <Stack spacing={3}>
+                {/* Display mutation error */}
+                {error && (
                   <Typography
                     variant="body2"
                     sx={{
-                      fontWeight: 600,
-                      color: theme.palette.text.primary,
-                      mb: 1,
+                      color: theme.palette.error.main,
+                      p: 2,
+                      borderRadius: 1,
+                      backgroundColor: `${theme.palette.error.main}10`,
                     }}
                   >
-                    Selected Permissions ({formData.permissions.length})
+                    {error instanceof Error
+                      ? error.message
+                      : 'An error occurred'}
                   </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {formData.permissions.map((permissionId) => {
-                      const permission = AVAILABLE_PERMISSIONS.find(p => p.id === permissionId)
-                      return (
-                        <Chip
-                          key={permissionId}
-                          label={permission?.label || permissionId}
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            borderColor: theme.palette.primary.main,
-                            color: theme.palette.primary.main,
-                          }}
-                        />
-                      )
-                    })}
-                  </Box>
-                </Box>
-              )} */}
+                )}
 
-            </Stack>
+                {/* Role Name Field */}
+                <form.Field name="name">
+                  {(field) => (
+                    <TextField
+                      fullWidth
+                      label="Role Name"
+                      variant="outlined"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!field.state.meta.isValid}
+                      helperText={
+                        field.state.meta.isTouched && !field.state.meta.isValid
+                          ? field.state.meta.errors.join(', ')
+                          : ''
+                      }
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </form.Field>
+
+                {/* Description Field */}
+                <form.Field name="description">
+                  {(field) => (
+                    <TextField
+                      fullWidth
+                      label="Description"
+                      variant="outlined"
+                      multiline
+                      rows={4}
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!field.state.meta.isValid}
+                      helperText={
+                        field.state.meta.isTouched && !field.state.meta.isValid
+                          ? field.state.meta.errors.join(', ')
+                          : ''
+                      }
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </form.Field>
+
+                {/* Permissions Field */}
+                <form.Field name="permissions">
+                  {(field) => (
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 600,
+                          color: theme.palette.text.primary,
+                          mb: 1,
+                        }}
+                      >
+                        Permissions
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          mb: 2,
+                        }}
+                      >
+                        Select the permissions that users with this role should
+                        have
+                      </Typography>
+
+                      <FormControl
+                        component="fieldset"
+                        variant="standard"
+                        error={!field.state.meta.isValid}
+                      >
+                        <FormGroup>
+                          <Stack spacing={3}>
+                            {PERMISSION_SECTIONS.map((section) => (
+                              <Box key={section.id}>
+                                <Typography
+                                  variant="subtitle1"
+                                  sx={{
+                                    fontWeight: 600,
+                                    color: theme.palette.text.primary,
+                                    mb: 1,
+                                  }}
+                                >
+                                  {section.label}
+                                </Typography>
+                                <Box
+                                  sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: {
+                                      xs: '1fr 1fr',
+                                      md: '1fr 1fr 1fr 1fr',
+                                    },
+                                    gap: 1,
+                                    p: 2,
+                                    borderRadius: 2,
+                                    border: `1px solid ${theme.palette.divider}`,
+                                    backgroundColor:
+                                      theme.palette.background.default,
+                                  }}
+                                >
+                                  {section.permissions.map((permission) => (
+                                    <FormControlLabel
+                                      key={permission.id}
+                                      control={
+                                        <Checkbox
+                                          checked={(() => {
+                                            console.log(
+                                              'pamudu',
+                                              field.state.value,
+                                            )
+                                            console.log('dinu', permission.id)
+                                            return field.state.value.includes(
+                                              permission.id,
+                                            )
+                                          })()}
+                                          onChange={(event) => {
+                                            const newPermissions = event.target
+                                              .checked
+                                              ? [
+                                                  ...field.state.value,
+                                                  permission.id,
+                                                ]
+                                              : field.state.value.filter(
+                                                  (id) => id !== permission.id,
+                                                )
+                                            field.handleChange(newPermissions)
+                                          }}
+                                          sx={{
+                                            '&.Mui-checked': {
+                                              color: theme.palette.primary.main,
+                                            },
+                                          }}
+                                        />
+                                      }
+                                      label={
+                                        <Typography
+                                          variant="body2"
+                                          sx={{
+                                            fontWeight: 500,
+                                            color: theme.palette.text.primary,
+                                          }}
+                                        >
+                                          {permission.label}
+                                        </Typography>
+                                      }
+                                      sx={{
+                                        alignItems: 'center',
+                                        m: 0,
+                                        '& .MuiFormControlLabel-label': {
+                                          ml: 1,
+                                        },
+                                      }}
+                                    />
+                                  ))}
+                                </Box>
+                              </Box>
+                            ))}
+                          </Stack>
+                        </FormGroup>
+                        {field.state.meta.isTouched &&
+                          !field.state.meta.isValid && (
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: theme.palette.error.main,
+                                mt: 1,
+                              }}
+                            >
+                              {field.state.meta.errors.join(', ')}
+                            </Typography>
+                          )}
+                      </FormControl>
+                    </Box>
+                  )}
+                </form.Field>
+              </Stack>
+            </form>
           </CardContent>
         </Card>
       </DialogContent>
@@ -437,6 +428,7 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
         <Button
           onClick={handleClose}
           variant="outlined"
+          disabled={isSubmitting}
           sx={{
             borderRadius: 2,
             textTransform: 'none',
@@ -446,24 +438,37 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
         >
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          sx={{
-            borderRadius: 2,
-            textTransform: 'none',
-            fontWeight: 600,
-            minWidth: 120,
-            boxShadow: theme.shadows[2],
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: theme.shadows[4],
-            },
-          }}
+        <form.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
         >
-          {editMode ? 'Update Role' : 'Create Role'}
-        </Button>
+          {([canSubmit, formIsSubmitting]) => (
+            <Button
+              onClick={() => form.handleSubmit()}
+              variant="contained"
+              disabled={!canSubmit || isSubmitting || formIsSubmitting}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                minWidth: 120,
+                boxShadow: theme.shadows[2],
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: theme.shadows[4],
+                },
+              }}
+            >
+              {isSubmitting || formIsSubmitting
+                ? editMode
+                  ? 'Updating...'
+                  : 'Creating...'
+                : editMode
+                  ? 'Update Role'
+                  : 'Create Role'}
+            </Button>
+          )}
+        </form.Subscribe>
       </DialogActions>
     </Dialog>
   )

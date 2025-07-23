@@ -21,3 +21,9 @@ export { LetterActionMenu } from './LetterActionMenu'
 export { LetterDialogs } from './LetterDialogs'
 export { AddCabinetPaperDialog } from './AddCabinetPaperDialog'
 export { AddDivisionDialog } from './AddDivisionDialog'
+export { DeleteConfirmationBox } from './DeleteConfirmationBox'
+
+export { default as ViewRoleDetails } from './ViewRoleDetails'
+
+export { AdminDashboard } from './AdminDashboard'
+
