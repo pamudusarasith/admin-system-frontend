@@ -25,7 +25,14 @@ interface LetterAttachment {
 
 interface LetterAction {
   id: string
-  type: 'received' | 'assigned_to_division' | 'assigned_to_person' | 'forwarded' | 'replied' | 'returned' | 'status_change'
+  type:
+    | 'received'
+    | 'assigned_to_division'
+    | 'assigned_to_person'
+    | 'forwarded'
+    | 'replied'
+    | 'returned'
+    | 'status_change'
   description: string
   performedBy: {
     name: string
@@ -60,7 +67,13 @@ interface Letter {
   }
   receivedDate: string
   priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
+  status:
+    | 'Pending'
+    | 'Assigned to Division'
+    | 'Assigned to Person'
+    | 'In Progress'
+    | 'Completed'
+    | 'Returned'
   assignedDivision?: {
     id: string
     name: string
@@ -176,7 +189,8 @@ const mockLetter: Letter = {
     {
       id: '3',
       type: 'assigned_to_person',
-      description: 'Assigned to Nimal Perera within Policy Development Division',
+      description:
+        'Assigned to Nimal Perera within Policy Development Division',
       performedBy: {
         name: 'Sunil Jayasinghe',
         role: 'Division Head',

@@ -47,7 +47,13 @@ interface LetterSummary {
   }
   receivedDate: string
   priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
+  status:
+    | 'Pending'
+    | 'Assigned to Division'
+    | 'Assigned to Person'
+    | 'In Progress'
+    | 'Completed'
+    | 'Returned'
   assignedDivision?: {
     name: string
     assignedDate: string
@@ -331,8 +337,12 @@ function LettersPage() {
   const statusCounts = {
     All: letters.length,
     Pending: letters.filter((l) => l.status === 'Pending').length,
-    'Assigned to Division': letters.filter((l) => l.status === 'Assigned to Division').length,
-    'Assigned to Person': letters.filter((l) => l.status === 'Assigned to Person').length,
+    'Assigned to Division': letters.filter(
+      (l) => l.status === 'Assigned to Division',
+    ).length,
+    'Assigned to Person': letters.filter(
+      (l) => l.status === 'Assigned to Person',
+    ).length,
     'In Progress': letters.filter((l) => l.status === 'In Progress').length,
     Completed: letters.filter((l) => l.status === 'Completed').length,
     Returned: letters.filter((l) => l.status === 'Returned').length,

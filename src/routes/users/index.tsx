@@ -39,7 +39,7 @@ import {
   MoreVert as MoreVertIcon,
   Search as SearchIcon,
 } from '@mui/icons-material'
-import { CreateUser, SidebarLayout, AddButton } from '@/components'
+import { AddButton, CreateUser, SidebarLayout } from '@/components'
 
 export const Route = createFileRoute('/users/')({
   component: RouteComponent,
@@ -127,7 +127,7 @@ function RouteComponent() {
     status: 'Active' | 'Pending' | 'Banned' | 'Rejected',
   ) => {
     let bgColor = ''
-    let textColor = '#FFFFFF'
+    const textColor = '#FFFFFF'
     switch (status) {
       case 'Active':
         bgColor = '#2E7D32'

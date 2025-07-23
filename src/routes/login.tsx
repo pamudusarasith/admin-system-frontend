@@ -222,10 +222,10 @@ function LoginPage() {
                   borderRadius: 2,
                 }}
               >
-                {authError || 
-                 (loginMutation.error instanceof Error
-                   ? loginMutation.error.message
-                   : 'Login failed. Please check your credentials.')}
+                {authError ||
+                  (loginMutation.error instanceof Error
+                    ? loginMutation.error.message
+                    : 'Login failed. Please check your credentials.')}
               </Alert>
             )}
 

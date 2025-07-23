@@ -1,10 +1,4 @@
 import {
-  AddButton,
-  SearchBar,
-  SidebarLayout,
-  AddDivisionDialog,
-} from '@/components'
-import {
   Box,
   Container,
   Divider,
@@ -20,13 +14,19 @@ import {
 } from '@mui/material'
 import {
   Edit as EditIcon,
-  MoreVert as MoreVertIcon,
   KeyboardArrowLeft as KeyboardArrowLeftIcon,
   KeyboardArrowRight as KeyboardArrowRightIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
+import {
+  AddButton,
+  AddDivisionDialog,
+  SearchBar,
+  SidebarLayout,
+} from '@/components'
 
 export const Route = createFileRoute('/divisions')({
   component: divisionpage,

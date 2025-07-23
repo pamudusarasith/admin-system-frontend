@@ -5,26 +5,27 @@ import {
   Box,
   Button,
   CardContent,
+  Chip,
   Container,
+  Divider,
   IconButton,
   Paper,
   Stack,
   Typography,
   useTheme,
-  Chip,
-  Divider,
 } from '@mui/material'
 import {
+  Business as BusinessIcon,
+  CalendarToday as CalendarIcon,
+  Camera as CameraIcon,
   Edit as EditIcon,
   Email as EmailIcon,
-  Phone as PhoneIcon,
-  Business as BusinessIcon,
-  Camera as CameraIcon,
   LocationOn as LocationIcon,
-  CalendarToday as CalendarIcon,
+  Phone as PhoneIcon,
 } from '@mui/icons-material'
 
-import { SidebarLayout, EditProfileForm } from '@/components'
+import { EditProfileForm, SidebarLayout } from '@/components'
+
 export const Route = createFileRoute('/profile')({
   component: ProfilePage,
 })

@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { getRoles, createRole, updateRole, deleteRole, type Role } from '@/api'
+import { useEffect, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -9,6 +8,7 @@ import {
   CardActions,
   CardContent,
   Chip,
+  CircularProgress,
   Container,
   Divider,
   IconButton,
@@ -18,7 +18,6 @@ import {
   Stack,
   Typography,
   useTheme,
-  CircularProgress,
 } from '@mui/material'
 import {
   AdminPanelSettings as AdminIcon,
@@ -31,7 +30,14 @@ import {
   Security as SecurityIcon,
   Support as SupportIcon,
 } from '@mui/icons-material'
-import { AddButton, SearchBar, SidebarLayout, AddRoleDialog } from '@/components'
+import type { Role } from '@/api'
+import { createRole, deleteRole, getRoles, updateRole } from '@/api'
+import {
+  AddButton,
+  AddRoleDialog,
+  SearchBar,
+  SidebarLayout,
+} from '@/components'
 
 // We fetch user roles from backend using the getRoles function imported from '@/api'.
 // This is called inside the loadRoles function, which is triggered in a useEffect when the component mounts.
@@ -53,10 +59,22 @@ const mockRoles: Array<UserRole> = [
     description: 'Full system access with all administrative privileges',
     userCount: 2,
     permissions: [
-      'LETTER_CREATE', 'LETTER_RETRIEVE', 'LETTER_UPDATE', 'LETTER_DELETE',
-      'CABINET_PAPER_CREATE', 'CABINET_PAPER_RETRIEVE', 'CABINET_PAPER_UPDATE', 'CABINET_PAPER_DELETE',
-      'USER_CREATE', 'USER_RETRIEVE', 'USER_UPDATE', 'USER_DELETE',
-      'DIVISION_CREATE', 'DIVISION_RETRIEVE', 'DIVISION_UPDATE', 'DIVISION_DELETE'
+      'LETTER_CREATE',
+      'LETTER_RETRIEVE',
+      'LETTER_UPDATE',
+      'LETTER_DELETE',
+      'CABINET_PAPER_CREATE',
+      'CABINET_PAPER_RETRIEVE',
+      'CABINET_PAPER_UPDATE',
+      'CABINET_PAPER_DELETE',
+      'USER_CREATE',
+      'USER_RETRIEVE',
+      'USER_UPDATE',
+      'USER_DELETE',
+      'DIVISION_CREATE',
+      'DIVISION_RETRIEVE',
+      'DIVISION_UPDATE',
+      'DIVISION_DELETE',
     ],
     icon: <AdminIcon />,
     createdDate: '2024-01-15',
@@ -68,10 +86,17 @@ const mockRoles: Array<UserRole> = [
     description: 'Administrative access to manage users and system settings',
     userCount: 5,
     permissions: [
-      'LETTER_CREATE', 'LETTER_RETRIEVE', 'LETTER_UPDATE',
-      'CABINET_PAPER_RETRIEVE', 'CABINET_PAPER_UPDATE',
-      'USER_CREATE', 'USER_RETRIEVE', 'USER_UPDATE', 'USER_DELETE',
-      'DIVISION_RETRIEVE', 'DIVISION_UPDATE'
+      'LETTER_CREATE',
+      'LETTER_RETRIEVE',
+      'LETTER_UPDATE',
+      'CABINET_PAPER_RETRIEVE',
+      'CABINET_PAPER_UPDATE',
+      'USER_CREATE',
+      'USER_RETRIEVE',
+      'USER_UPDATE',
+      'USER_DELETE',
+      'DIVISION_RETRIEVE',
+      'DIVISION_UPDATE',
     ],
     icon: <SecurityIcon />,
     createdDate: '2024-01-20',
@@ -83,10 +108,13 @@ const mockRoles: Array<UserRole> = [
     description: 'Manage team members and view departmental reports',
     userCount: 12,
     permissions: [
-      'LETTER_CREATE', 'LETTER_RETRIEVE', 'LETTER_UPDATE',
+      'LETTER_CREATE',
+      'LETTER_RETRIEVE',
+      'LETTER_UPDATE',
       'CABINET_PAPER_RETRIEVE',
-      'USER_RETRIEVE', 'USER_UPDATE',
-      'DIVISION_RETRIEVE'
+      'USER_RETRIEVE',
+      'USER_UPDATE',
+      'DIVISION_RETRIEVE',
     ],
     icon: <BusinessIcon />,
     createdDate: '2024-02-01',
@@ -101,7 +129,7 @@ const mockRoles: Array<UserRole> = [
       'LETTER_RETRIEVE',
       'CABINET_PAPER_RETRIEVE',
       'USER_RETRIEVE',
-      'DIVISION_RETRIEVE'
+      'DIVISION_RETRIEVE',
     ],
     icon: <PersonIcon />,
     createdDate: '2024-02-10',
@@ -113,10 +141,11 @@ const mockRoles: Array<UserRole> = [
     description: 'Customer support access with ticket management',
     userCount: 8,
     permissions: [
-      'LETTER_RETRIEVE', 'LETTER_UPDATE',
+      'LETTER_RETRIEVE',
+      'LETTER_UPDATE',
       'CABINET_PAPER_RETRIEVE',
       'USER_RETRIEVE',
-      'DIVISION_RETRIEVE'
+      'DIVISION_RETRIEVE',
     ],
     icon: <SupportIcon />,
     createdDate: '2024-02-15',
@@ -131,7 +160,7 @@ const mockRoles: Array<UserRole> = [
       'LETTER_RETRIEVE',
       'CABINET_PAPER_RETRIEVE',
       'USER_RETRIEVE',
-      'DIVISION_RETRIEVE'
+      'DIVISION_RETRIEVE',
     ],
     icon: <PeopleIcon />,
     createdDate: '2024-03-01',
@@ -234,7 +263,11 @@ function RolesPage() {
     setEditMode(false)
   }
 
-  const handleSubmitRole = async (roleData: { name: string; description: string; permissions: string[] }) => {
+  const handleSubmitRole = async (roleData: {
+    name: string
+    description: string
+    permissions: string[]
+  }) => {
     try {
       if (editMode && selectedRole) {
         // Update existing role
@@ -260,9 +293,14 @@ function RolesPage() {
         setRoles((prev) =>
           prev.map((role) =>
             role.id === selectedRole.id
-              ? { ...role, name: roleData.name, description: roleData.description, permissions: roleData.permissions }
-              : role
-          )
+              ? {
+                  ...role,
+                  name: roleData.name,
+                  description: roleData.description,
+                  permissions: roleData.permissions,
+                }
+              : role,
+          ),
         )
       } else {
         const newRole: UserRole = {
@@ -419,236 +457,241 @@ function RolesPage() {
                 No roles found
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {searchTerm ? 'Try adjusting your search criteria' : 'Create your first role to get started'}
+                {searchTerm
+                  ? 'Try adjusting your search criteria'
+                  : 'Create your first role to get started'}
               </Typography>
             </Box>
           ) : (
             filteredRoles.map((role) => (
-            <Card
-              key={role.id}
-              elevation={4}
-              sx={{
-                height: '100%',
-                borderRadius: 3,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-8px)',
-                  boxShadow: `0 12px 30px ${theme.palette.primary.main}20`,
-                },
-                border: `1px solid ${theme.palette.divider}`,
-                position: 'relative',
-                overflow: 'visible',
-              }}
-            >
-              {/* Role Status Badge */}
-              <Chip
-                label={role.isActive ? 'Active' : 'Inactive'}
-                size="small"
-                color={role.isActive ? 'success' : 'default'}
+              <Card
+                key={role.id}
+                elevation={4}
                 sx={{
-                  position: 'absolute',
-                  top: 12,
-                  right: 12,
-                  zIndex: 1,
+                  height: '100%',
+                  borderRadius: 3,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    boxShadow: `0 12px 30px ${theme.palette.primary.main}20`,
+                  },
+                  border: `1px solid ${theme.palette.divider}`,
+                  position: 'relative',
+                  overflow: 'visible',
                 }}
-              />
-
-              <CardContent sx={{ p: 3, pb: 1 }}>
-                {/* Role Header */}
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  alignItems="center"
-                  sx={{ mb: 2 }}
-                >
-                  <Avatar
-                    sx={{
-                      bgcolor: theme.palette.primary.main,
-                      width: 48,
-                      height: 48,
-                    }}
-                  >
-                    {role.icon}
-                  </Avatar>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        color: theme.palette.text.primary,
-                        mb: 0.5,
-                      }}
-                    >
-                      {role.name}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: theme.palette.text.secondary,
-                        fontSize: '0.85rem',
-                      }}
-                    >
-                      Created: {new Date(role.createdDate).toLocaleDateString()}
-                    </Typography>
-                  </Box>
-                </Stack>
-
-                {/* Description */}
-                <Typography
-                  variant="body2"
+              >
+                {/* Role Status Badge */}
+                <Chip
+                  label={role.isActive ? 'Active' : 'Inactive'}
+                  size="small"
+                  color={role.isActive ? 'success' : 'default'}
                   sx={{
-                    color: theme.palette.text.secondary,
-                    mb: 2,
-                    lineHeight: 1.5,
-                    minHeight: 40,
+                    position: 'absolute',
+                    top: 12,
+                    right: 12,
+                    zIndex: 1,
                   }}
-                >
-                  {role.description}
-                </Typography>
+                />
 
-                {/* Stats */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    p: 2,
-                    bgcolor: theme.palette.background.default,
-                    borderRadius: 2,
-                    mb: 2,
-                  }}
-                >
-                  <Box textAlign="center">
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        color: theme.palette.primary.main,
-                      }}
-                    >
-                      {role.userCount}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.text.secondary,
-                        fontWeight: 500,
-                      }}
-                    >
-                      Users
-                    </Typography>
-                  </Box>
-                  <Divider orientation="vertical" flexItem />
-                  <Box textAlign="center">
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        color: theme.palette.primary.main,
-                      }}
-                    >
-                      {role.permissions.length}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.text.secondary,
-                        fontWeight: 500,
-                      }}
-                    >
-                      Permissions
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* Permissions Preview */}
-                <Box sx={{ mb: 1 }}>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontWeight: 600,
-                      mb: 1,
-                      display: 'block',
-                    }}
-                  >
-                    KEY PERMISSIONS:
-                  </Typography>
+                <CardContent sx={{ p: 3, pb: 1 }}>
+                  {/* Role Header */}
                   <Stack
                     direction="row"
-                    spacing={1}
-                    sx={{ flexWrap: 'wrap', gap: 0.5 }}
+                    spacing={2}
+                    alignItems="center"
+                    sx={{ mb: 2 }}
                   >
-                    {role.permissions.slice(0, 2).map((permission, idx) => {
-                      // If permission is an object (key-value pair), display key or value as label
-                      if (typeof permission === 'object' && permission !== null) {
-                      const [key, value] = Object.entries(permission)[1]
-                      return (
-                        <Chip
-                        key={key + value + idx}
-                        label={`${value}`}
-                        size="small"
-                        variant="outlined"
+                    <Avatar
+                      sx={{
+                        bgcolor: theme.palette.primary.main,
+                        width: 48,
+                        height: 48,
+                      }}
+                    >
+                      {role.icon}
+                    </Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="h6"
                         sx={{
-                          fontSize: '0.7rem',
-                          height: 24,
-                          borderColor: theme.palette.primary.main,
-                          color: theme.palette.primary.main,
+                          fontWeight: 700,
+                          color: theme.palette.text.primary,
+                          mb: 0.5,
                         }}
-                        />
-                      )
-                      }
-                      
-                    })}
-                    {role.permissions.length > 2 && (
-                      <Chip
-                        label={`+${role.permissions.length - 2} more`}
-                        size="small"
-                        variant="filled"
+                      >
+                        {role.name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
                         sx={{
-                          fontSize: '0.7rem',
-                          height: 24,
-                          bgcolor: `${theme.palette.primary.main}20`,
-                          color: theme.palette.primary.main,
+                          color: theme.palette.text.secondary,
+                          fontSize: '0.85rem',
                         }}
-                      />
-                    )}
+                      >
+                        Created:{' '}
+                        {new Date(role.createdDate).toLocaleDateString()}
+                      </Typography>
+                    </Box>
                   </Stack>
-                </Box>
-              </CardContent>
 
-              <CardActions sx={{ px: 3, pb: 3, pt: 0 }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  sx={{
-                    borderColor: theme.palette.primary.main,
-                    color: theme.palette.primary.main,
-                    backgroundColor: theme.palette.action.hover,
-                    '&:hover': {
+                  {/* Description */}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      mb: 2,
+                      lineHeight: 1.5,
+                      minHeight: 40,
+                    }}
+                  >
+                    {role.description}
+                  </Typography>
+
+                  {/* Stats */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      p: 2,
+                      bgcolor: theme.palette.background.default,
+                      borderRadius: 2,
+                      mb: 2,
+                    }}
+                  >
+                    <Box textAlign="center">
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 700,
+                          color: theme.palette.primary.main,
+                        }}
+                      >
+                        {role.userCount}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          fontWeight: 500,
+                        }}
+                      >
+                        Users
+                      </Typography>
+                    </Box>
+                    <Divider orientation="vertical" flexItem />
+                    <Box textAlign="center">
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 700,
+                          color: theme.palette.primary.main,
+                        }}
+                      >
+                        {role.permissions.length}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          fontWeight: 500,
+                        }}
+                      >
+                        Permissions
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Permissions Preview */}
+                  <Box sx={{ mb: 1 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        fontWeight: 600,
+                        mb: 1,
+                        display: 'block',
+                      }}
+                    >
+                      KEY PERMISSIONS:
+                    </Typography>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{ flexWrap: 'wrap', gap: 0.5 }}
+                    >
+                      {role.permissions.slice(0, 2).map((permission, idx) => {
+                        // If permission is an object (key-value pair), display key or value as label
+                        if (
+                          typeof permission === 'object' &&
+                          permission !== null
+                        ) {
+                          const [key, value] = Object.entries(permission)[1]
+                          return (
+                            <Chip
+                              key={key + value + idx}
+                              label={`${value}`}
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                fontSize: '0.7rem',
+                                height: 24,
+                                borderColor: theme.palette.primary.main,
+                                color: theme.palette.primary.main,
+                              }}
+                            />
+                          )
+                        }
+                      })}
+                      {role.permissions.length > 2 && (
+                        <Chip
+                          label={`+${role.permissions.length - 2} more`}
+                          size="small"
+                          variant="filled"
+                          sx={{
+                            fontSize: '0.7rem',
+                            height: 24,
+                            bgcolor: `${theme.palette.primary.main}20`,
+                            color: theme.palette.primary.main,
+                          }}
+                        />
+                      )}
+                    </Stack>
+                  </Box>
+                </CardContent>
+
+                <CardActions sx={{ px: 3, pb: 3, pt: 0 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    sx={{
                       borderColor: theme.palette.primary.main,
-                      bgcolor: `${theme.palette.primary.main}10`,
-                    },
-                  }}
-                >
-                  View Details
-                </Button>
-                <IconButton
-                  onClick={(e) => handleMenuOpen(e, role)}
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    '&:hover': {
-                      bgcolor: `${theme.palette.primary.main}10`,
                       color: theme.palette.primary.main,
-                    },
-                  }}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-              </CardActions>
-            </Card>
-          ))
+                      backgroundColor: theme.palette.action.hover,
+                      '&:hover': {
+                        borderColor: theme.palette.primary.main,
+                        bgcolor: `${theme.palette.primary.main}10`,
+                      },
+                    }}
+                  >
+                    View Details
+                  </Button>
+                  <IconButton
+                    onClick={(e) => handleMenuOpen(e, role)}
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      '&:hover': {
+                        bgcolor: `${theme.palette.primary.main}10`,
+                        color: theme.palette.primary.main,
+                      },
+                    }}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                </CardActions>
+              </Card>
+            ))
           )}
         </Box>
 
@@ -678,11 +721,15 @@ function RolesPage() {
           onClose={handleCloseDialog}
           onSubmit={handleSubmitRole}
           editMode={editMode}
-          initialData={selectedRole ? { 
-            name: selectedRole.name, 
-            description: selectedRole.description,
-            permissions: selectedRole.permissions 
-          } : undefined}
+          initialData={
+            selectedRole
+              ? {
+                  name: selectedRole.name,
+                  description: selectedRole.description,
+                  permissions: selectedRole.permissions,
+                }
+              : undefined
+          }
         />
       </Container>
     </SidebarLayout>
