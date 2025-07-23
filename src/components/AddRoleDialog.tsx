@@ -33,7 +33,7 @@ interface RoleFormData {
   id?: string
   name: string
   description: string
-  permissions: string[]
+  permissions: Array<string>
 }
 
 // Available permission sections and their actions

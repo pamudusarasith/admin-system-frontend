@@ -189,7 +189,7 @@ function RolesPage() {
       setLoading(true)
       const rolesData = await getRoles()
       // Transform API roles to UserRole format with icons
-      const rolesWithIcons: UserRole[] = rolesData.map((role) => ({
+      const rolesWithIcons: Array<UserRole> = rolesData.map((role) => ({
         ...role,
         userCount: role.userCount || 0,
         icon: getIconForRole(role.name),
@@ -266,7 +266,7 @@ function RolesPage() {
   const handleSubmitRole = async (roleData: {
     name: string
     description: string
-    permissions: string[]
+    permissions: Array<string>
   }) => {
     try {
       if (editMode && selectedRole) {
@@ -624,6 +624,7 @@ function RolesPage() {
                         // If permission is an object (key-value pair), display key or value as label
                         if (
                           typeof permission === 'object' &&
+                          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                           permission !== null
                         ) {
                           const [key, value] = Object.entries(permission)[1]

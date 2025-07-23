@@ -5,7 +5,7 @@ export interface Role {
   id: string
   name: string
   description: string
-  permissions: string[]
+  permissions: Array<string>
   userCount?: number
   createdDate: string
   isActive: boolean
@@ -14,18 +14,18 @@ export interface Role {
 export interface CreateRoleRequest {
   name: string
   description: string
-  permissions: string[]
+  permissions: Array<string>
   isActive?: boolean
 }
 
 export interface UpdateRoleRequest {
   name?: string
   description?: string
-  permissions?: string[]
+  permissions?: Array<string>
   isActive?: boolean
 }
 
-export async function getRoles(): Promise<Role[]> {
+export async function getRoles(): Promise<Array<Role>> {
   try {
     const response = await client.get('/roles')
     return response.data

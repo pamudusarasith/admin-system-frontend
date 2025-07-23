@@ -39,7 +39,7 @@ interface CabinetPaperFormData {
   about: string
   status: 'Approved' | 'Submitted' | 'Considered'
   category: string
-  attachments: File[]
+  attachments: Array<File>
 }
 
 export const AddCabinetPaperDialog: React.FC<AddCabinetPaperDialogProps> = ({

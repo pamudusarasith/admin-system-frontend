@@ -39,7 +39,7 @@ interface LetterFormData {
   receivingDate: string
   content: string
   category: string
-  attachments: File[]
+  attachments: Array<File>
 }
 
 export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
