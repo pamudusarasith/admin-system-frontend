@@ -3,6 +3,7 @@ import {
   SearchBar,
   SidebarLayout,
   AddDivisionDialog,
+  DeleteConfirmationBox,
 } from '@/components'
 import {
   Box,
@@ -56,6 +57,10 @@ function DivisionPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [editingDivision, setEditingDivision] = useState<Division | null>(null)
   const [isEditMode, setIsEditMode] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [divisionToDelete, setDivisionToDelete] = useState<Division | null>(
+    null,
+  )
   const queryClient = useQueryClient()
 
   // React Query to fetch divisions
@@ -147,14 +152,27 @@ function DivisionPage() {
     setIsAddDialogOpen(true)
   }
 
-  const handleDeleteDivision = async (divisionId: string) => {
-    if (window.confirm('Are you sure you want to delete this division?')) {
-      try {
-        await deleteDivisionMutation.mutateAsync(divisionId)
-      } catch (error) {
-        console.error('Error deleting division:', error)
-      }
+  const handleDeleteDivision = (division: Division) => {
+    setDivisionToDelete(division)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteDivision = async () => {
+    if (!divisionToDelete) return
+
+    try {
+      await deleteDivisionMutation.mutateAsync(divisionToDelete.id)
+      setDeleteDialogOpen(false)
+      setDivisionToDelete(null)
+    } catch (error) {
+      console.error('Error deleting division:', error)
+      // Keep dialog open on error to show error message
     }
+  }
+
+  const cancelDeleteDivision = () => {
+    setDeleteDialogOpen(false)
+    setDivisionToDelete(null)
   }
 
   const handleSubmitDivision = async (divisionData: any) => {
@@ -485,7 +503,7 @@ function DivisionPage() {
                           </IconButton>
                           <IconButton
                             size="small"
-                            onClick={() => handleDeleteDivision(division.id)}
+                            onClick={() => handleDeleteDivision(division)}
                             disabled={deleteDivisionMutation.isPending}
                           >
                             <DeleteIcon fontSize="small" />
@@ -561,6 +579,16 @@ function DivisionPage() {
                 }
               : undefined
           }
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteConfirmationBox
+          open={deleteDialogOpen}
+          onClose={cancelDeleteDivision}
+          onConfirm={confirmDeleteDivision}
+          title="Delete Division"
+          itemName={divisionToDelete ? `${divisionToDelete.name}` : undefined}
+          loading={deleteDivisionMutation.isPending}
         />
       </Container>
     </SidebarLayout>
