@@ -91,110 +91,6 @@ export function CreateUser({ onClose }: CreateUserProps) {
             >
               <div>
                 <TextField
-                  name="fullName"
-                  label="Full Name"
-                  placeholder="Please insert the full name here..."
-                  variant="outlined"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonOutlineIcon
-                          sx={{ color: theme.palette.grey[600] }}
-                        />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <TextField
-                  name="phone"
-                  label="Phone"
-                  placeholder="Please insert the phone here..."
-                  variant="outlined"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PhoneOutlinedIcon
-                          sx={{ color: theme.palette.grey[600] }}
-                        />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <FormControl variant="outlined">
-                  <InputLabel>Branch</InputLabel>
-                  <Select name="branch" label="Branch">
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value="Discipline Branch">
-                      Discipline Branch
-                    </MenuItem>
-                    <MenuItem value="Building Management Branch">
-                      Building Management Branch
-                    </MenuItem>
-                    <MenuItem value="Translation Unit">
-                      Translation Unit
-                    </MenuItem>
-                    <MenuItem value="Legal Branch">Legal Branch</MenuItem>
-                    <MenuItem value="Parliamentary Affairs Branch">
-                      Parliamentary Affairs Branch
-                    </MenuItem>
-                    <MenuItem value="Transport Branch">
-                      Transport Branch
-                    </MenuItem>
-                    <MenuItem value="Non-formal and Special Education Branch">
-                      Non-formal and Special Education Branch
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-
-                <FormControl variant="outlined">
-                  <InputLabel>Role</InputLabel>
-                  <Select name="role" label="Role">
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value="Minister of Education">
-                      Minister of Education
-                    </MenuItem>
-                    <MenuItem value="Permanent Secretary">
-                      Permanent Secretary
-                    </MenuItem>
-                    <MenuItem value="Additional Secretary">
-                      Additional Secretary
-                    </MenuItem>
-                    <MenuItem value="Parliamentary Secretary">
-                      Parliamentary Secretary
-                    </MenuItem>
-                    <MenuItem value="Director Generals">
-                      Director Generals
-                    </MenuItem>
-                    <MenuItem value="Director of Education">
-                      Director of Education
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </div>
-            </Box>
-          </Grid>
-          <Grid size={6} color={theme.palette.text.primary}>
-            <Box
-              component="form"
-              sx={{
-                '& .MuiTextField-root': {
-                  m: 1,
-                  width: 'calc(100% - 16px)',
-                },
-                '& .MuiFormControl-root': {
-                  m: 1,
-                  width: 'calc(100% - 16px)',
-                },
-              }}
-              noValidate
-              autoComplete="off"
-            >
-              <div>
-                <TextField
                   name="username"
                   label="Username"
                   placeholder="Please insert the username here..."
@@ -225,6 +121,83 @@ export function CreateUser({ onClose }: CreateUserProps) {
                     ),
                   }}
                 />
+                {/* <TextField
+                  name="fullName"
+                  label="Full Name"
+                  placeholder="Please insert the full name here..."
+                  variant="outlined"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonOutlineIcon
+                          sx={{ color: theme.palette.grey[600] }}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
+                /> */}
+                {/* <TextField
+                  name="phone"
+                  label="Phone"
+                  placeholder="Please insert the phone here..."
+                  variant="outlined"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneOutlinedIcon
+                          sx={{ color: theme.palette.grey[600] }}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
+                /> */}
+                {/* <FormControl variant="outlined">
+                  <InputLabel>Branch</InputLabel>
+                  <Select name="branch" label="Branch">
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    <MenuItem value="Discipline Branch">
+                      Discipline Branch
+                    </MenuItem>
+                    <MenuItem value="Building Management Branch">
+                      Building Management Branch
+                    </MenuItem>
+                    <MenuItem value="Translation Unit">
+                      Translation Unit
+                    </MenuItem>
+                    <MenuItem value="Legal Branch">Legal Branch</MenuItem>
+                    <MenuItem value="Parliamentary Affairs Branch">
+                      Parliamentary Affairs Branch
+                    </MenuItem>
+                    <MenuItem value="Transport Branch">
+                      Transport Branch
+                    </MenuItem>
+                    <MenuItem value="Non-formal and Special Education Branch">
+                      Non-formal and Special Education Branch
+                    </MenuItem>
+                  </Select>
+                </FormControl> */}
+              </div>
+            </Box>
+          </Grid>
+          <Grid size={6} color={theme.palette.text.primary}>
+            <Box
+              component="form"
+              sx={{
+                '& .MuiTextField-root': {
+                  m: 1,
+                  width: 'calc(100% - 16px)',
+                },
+                '& .MuiFormControl-root': {
+                  m: 1,
+                  width: 'calc(100% - 16px)',
+                },
+              }}
+              noValidate
+              autoComplete="off"
+            >
+              <div>
                 <FormControl variant="outlined">
                   <InputLabel>Division</InputLabel>
                   <Select name="division" label="Division">
@@ -245,6 +218,32 @@ export function CreateUser({ onClose }: CreateUserProps) {
                     </MenuItem>
                     <MenuItem value="Education Quality Development Division">
                       Education Quality Development Division
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl variant="outlined">
+                  <InputLabel>Role</InputLabel>
+                  <Select name="role" label="Role">
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    <MenuItem value="Minister of Education">
+                      Minister of Education
+                    </MenuItem>
+                    <MenuItem value="Permanent Secretary">
+                      Permanent Secretary
+                    </MenuItem>
+                    <MenuItem value="Additional Secretary">
+                      Additional Secretary
+                    </MenuItem>
+                    <MenuItem value="Parliamentary Secretary">
+                      Parliamentary Secretary
+                    </MenuItem>
+                    <MenuItem value="Director Generals">
+                      Director Generals
+                    </MenuItem>
+                    <MenuItem value="Director of Education">
+                      Director of Education
                     </MenuItem>
                   </Select>
                 </FormControl>
