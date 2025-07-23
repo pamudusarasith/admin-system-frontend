@@ -1,45 +1,40 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Box,
+  Button,
   Card,
   CardContent,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Button,
-  Typography,
-  Box,
-  Stack,
-  IconButton,
   Chip,
-  useTheme,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
   useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
-  Close as CloseIcon,
-  CloudUpload as UploadIcon,
   AttachFile as AttachFileIcon,
+  Close as CloseIcon,
   Delete as DeleteIcon,
+  CloudUpload as UploadIcon,
 } from '@mui/icons-material'
+import { useForm } from '@tanstack/react-form'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createLetter } from '../api/letters'
+import type { LetterFormData } from '../schemas/letter'
 
 interface AddLetterDialogProps {
   open: boolean
   onClose: () => void
   onSubmit?: (letterData: LetterFormData) => void
-}
-
-interface LetterFormData {
-  title: string
-  priority: 'High' | 'Medium' | 'Low'
-  receivingDate: string
-  content: string
-  category: string
-  attachments: File[]
 }
 
 export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
@@ -49,33 +44,59 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const queryClient = useQueryClient()
 
-  const [formData, setFormData] = useState<LetterFormData>({
-    title: '',
-    priority: 'Medium',
-    receivingDate: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
-    content: '',
-    category: '',
-    attachments: [],
+  // TanStack Query mutation for creating a letter
+  const createLetterMutation = useMutation({
+    mutationFn: createLetter,
+    onSuccess: (data) => {
+      // Invalidate and refetch letters query
+      queryClient.invalidateQueries({ queryKey: ['letters'] })
+      onSubmit?.(data)
+      handleClose()
+    },
+    onError: (error) => {
+      console.error('Failed to create letter:', error)
+    },
   })
 
-  const [errors, setErrors] = useState<Partial<LetterFormData>>({})
-
-  const categories = [
-    'Finance',
-    'HR',
-    'Procurement',
-    'General',
-    'Training',
-    'Security',
-    'Legal',
-    'Operations',
-  ]
+  // TanStack Form setup
+  const form = useForm({
+    defaultValues: {
+      reference: '',
+      sender_details: {
+        name: '',
+        email: '',
+        phone_number: '',
+        address: '',
+      },
+      priority: 'NORMAL',
+      mode_of_arrival: 'REGISTERED_POST',
+      received_date: new Date().toISOString().split('T')[0],
+      sent_date: undefined,
+      subject: '',
+      content: '',
+      attachments: undefined,
+    } as LetterFormData,
+    onSubmit: ({ value }) => {
+      createLetterMutation.mutate(value)
+    },
+  })
 
   const priorities = [
-    { value: 'High', color: theme.palette.error.main },
-    { value: 'Medium', color: theme.palette.warning.main },
-    { value: 'Low', color: theme.palette.success.main },
+    { value: 'NORMAL', color: theme.palette.success.main, label: 'Normal' },
+    { value: 'HIGH', color: theme.palette.error.main, label: 'High' },
+    { value: 'URGENT', color: theme.palette.warning.main, label: 'Urgent' },
+  ]
+
+  const modesOfArrival = [
+    'REGISTERED_POST',
+    'UNREGISTERED_POST',
+    'EMAIL',
+    'WHATSAPP',
+    'HAND_DELIVERED',
+    'FAX',
+    'OTHER',
   ]
 
   const allowedFileTypes = [
@@ -85,27 +106,6 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   ]
 
-  const handleInputChange =
-    (field: keyof LetterFormData) =>
-    (
-      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any,
-    ) => {
-      const value = event.target ? event.target.value : event
-      setFormData((prev) => ({ ...prev, [field]: value }))
-
-      // Clear error when user starts typing
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }))
-      }
-    }
-
-  const handleDateChange = (date: string) => {
-    setFormData((prev) => ({ ...prev, receivingDate: date }))
-    if (errors.receivingDate) {
-      setErrors((prev) => ({ ...prev, receivingDate: undefined }))
-    }
-  }
-
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
     const validFiles = files.filter(
@@ -113,56 +113,20 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
         allowedFileTypes.includes(file.type) && file.size <= 10 * 1024 * 1024, // 10MB limit
     )
 
-    setFormData((prev) => ({
-      ...prev,
-      attachments: [...prev.attachments, ...validFiles],
-    }))
+    form.setFieldValue('attachments', (prev: Array<File> | undefined) => [
+      ...(prev || []),
+      ...validFiles,
+    ])
   }
 
   const removeAttachment = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index),
-    }))
-  }
-
-  const validateForm = (): boolean => {
-    const newErrors: Partial<LetterFormData> = {}
-
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required'
-    }
-    if (!formData.category.trim()) {
-      newErrors.category = 'Category is required'
-    }
-    if (!formData.content.trim()) {
-      newErrors.content = 'Content is required'
-    }
-    if (!formData.receivingDate) {
-      newErrors.receivingDate = 'Receiving date is required'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = () => {
-    if (validateForm()) {
-      onSubmit?.(formData)
-      handleClose()
-    }
+    form.setFieldValue('attachments', (prev: Array<File> | undefined) =>
+      (prev || []).filter((_, i) => i !== index),
+    )
   }
 
   const handleClose = () => {
-    setFormData({
-      title: '',
-      priority: 'Medium',
-      receivingDate: new Date().toISOString().split('T')[0],
-      content: '',
-      category: '',
-      attachments: [],
-    })
-    setErrors({})
+    form.reset()
     onClose()
   }
 
@@ -229,191 +193,397 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
           }}
         >
           <CardContent sx={{ p: 3 }}>
-            <Stack spacing={3}>
-              {/* Letter Title */}
-              <TextField
-                fullWidth
-                label="Letter Title"
-                variant="outlined"
-                value={formData.title}
-                onChange={handleInputChange('title')}
-                error={!!errors.title}
-                helperText={errors.title}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                }}
-              />
-
-              {/* Priority and Date Row */}
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <FormControl sx={{ minWidth: { xs: '100%', sm: '200px' } }}>
-                  <InputLabel>Priority</InputLabel>
-                  <Select
-                    value={formData.priority}
-                    label="Priority"
-                    onChange={handleInputChange('priority')}
-                    sx={{
-                      borderRadius: 2,
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderRadius: 2,
-                      },
-                    }}
-                  >
-                    {priorities.map((priority) => (
-                      <MenuItem key={priority.value} value={priority.value}>
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
-                          <Box
-                            sx={{
-                              width: 12,
-                              height: 12,
-                              borderRadius: '50%',
-                              backgroundColor: priority.color,
-                            }}
-                          />
-                          {priority.value}
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <TextField
-                  fullWidth
-                  label="Receiving Date"
-                  type="date"
-                  value={formData.receivingDate}
-                  onChange={(e) => handleDateChange(e.target.value)}
-                  error={!!errors.receivingDate}
-                  helperText={errors.receivingDate}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              </Stack>
-
-              {/* Category */}
-              <FormControl fullWidth>
-                <InputLabel>Category</InputLabel>
-                <Select
-                  value={formData.category}
-                  label="Category"
-                  onChange={handleInputChange('category')}
-                  error={!!errors.category}
-                  sx={{
-                    borderRadius: 2,
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderRadius: 2,
-                    },
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                form.handleSubmit()
+              }}
+            >
+              <Stack spacing={3}>
+                {/* Reference Number */}
+                <form.Field
+                  name="reference"
+                  validators={{
+                    onChange: ({ value }) =>
+                      !value.trim() ? 'Reference number is required' : undefined,
                   }}
                 >
-                  {categories.map((category) => (
-                    <MenuItem key={category} value={category}>
-                      {category}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  {(field) => (
+                    <TextField
+                      fullWidth
+                      label="Reference Number"
+                      variant="outlined"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!field.state.meta.isValid}
+                      helperText={field.state.meta.errors.join(', ')}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </form.Field>
 
-              {/* Content */}
-              <TextField
-                fullWidth
-                label="Content"
-                variant="outlined"
-                multiline
-                rows={4}
-                value={formData.content}
-                onChange={handleInputChange('content')}
-                error={!!errors.content}
-                helperText={errors.content}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                }}
-              />
-
-              {/* File Attachments */}
-              <Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 600,
-                    color: theme.palette.text.primary,
-                    mb: 2,
+                {/* Subject */}
+                <form.Field
+                  name="subject"
+                  validators={{
+                    onChange: ({ value }) =>
+                      !value.trim() ? 'Subject is required' : undefined,
                   }}
                 >
-                  Attachments
-                </Typography>
+                  {(field) => (
+                    <TextField
+                      fullWidth
+                      label="Subject"
+                      variant="outlined"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!field.state.meta.isValid}
+                      helperText={field.state.meta.errors.join(', ')}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </form.Field>
 
-                <Button
-                  component="label"
-                  variant="outlined"
-                  startIcon={<UploadIcon />}
-                  sx={{
-                    borderRadius: 2,
-                    borderStyle: 'dashed',
-                    borderColor: theme.palette.primary.main,
-                    color: theme.palette.primary.main,
-                    padding: 2,
-                    '&:hover': {
-                      backgroundColor: `${theme.palette.primary.main}10`,
-                      borderColor: theme.palette.primary.dark,
-                    },
-                  }}
-                  fullWidth
-                >
-                  Upload Files (PNG, JPEG, PDF, DOCX)
-                  <input
-                    type="file"
-                    hidden
-                    multiple
-                    accept=".png,.jpg,.jpeg,.pdf,.docx"
-                    onChange={handleFileUpload}
-                  />
-                </Button>
-
-                {/* Attached Files List */}
-                {formData.attachments.length > 0 && (
-                  <Box sx={{ mt: 2 }}>
-                    <Stack spacing={1}>
-                      {formData.attachments.map((file, index) => (
-                        <Chip
-                          key={index}
-                          icon={<AttachFileIcon />}
-                          label={`${file.name} (${formatFileSize(file.size)})`}
-                          onDelete={() => removeAttachment(index)}
-                          deleteIcon={<DeleteIcon />}
+                {/* Sender Details Section */}
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+                    Sender Details
+                  </Typography>
+                  <Stack spacing={2}>
+                    <form.Field
+                      name="sender_details.name"
+                      validators={{
+                        onChange: ({ value }) =>
+                          !value.trim() ? 'Sender name is required' : undefined,
+                      }}
+                    >
+                      {(field) => (
+                        <TextField
+                          fullWidth
+                          label="Sender Name"
                           variant="outlined"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          error={!field.state.meta.isValid}
+                          helperText={field.state.meta.errors.join(', ')}
                           sx={{
-                            justifyContent: 'space-between',
-                            '& .MuiChip-label': {
-                              maxWidth: { xs: '200px', sm: '300px' },
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
                             },
                           }}
                         />
-                      ))}
+                      )}
+                    </form.Field>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                      <form.Field name="sender_details.email">
+                        {(field) => (
+                          <TextField
+                            fullWidth
+                            label="Email"
+                            variant="outlined"
+                            type="email"
+                            value={field.state.value || ''}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            error={!field.state.meta.isValid}
+                            helperText={field.state.meta.errors.join(', ')}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                              },
+                            }}
+                          />
+                        )}
+                      </form.Field>
+                      <form.Field name="sender_details.phone_number">
+                        {(field) => (
+                          <TextField
+                            fullWidth
+                            label="Phone Number"
+                            variant="outlined"
+                            value={field.state.value || ''}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            error={!field.state.meta.isValid}
+                            helperText={field.state.meta.errors.join(', ')}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                              },
+                            }}
+                          />
+                        )}
+                      </form.Field>
                     </Stack>
-                  </Box>
-                )}
-              </Box>
-            </Stack>
+                    <form.Field name="sender_details.address">
+                      {(field) => (
+                        <TextField
+                          fullWidth
+                          label="Address"
+                          variant="outlined"
+                          multiline
+                          rows={2}
+                          value={field.state.value || ''}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          error={!field.state.meta.isValid}
+                          helperText={field.state.meta.errors.join(', ')}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                            },
+                          }}
+                        />
+                      )}
+                    </form.Field>
+                  </Stack>
+                </Box>
+
+                {/* Priority and Mode of Arrival */}
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <form.Field name="priority">
+                    {(field) => (
+                      <FormControl sx={{ minWidth: { xs: '100%', sm: '200px' } }}>
+                        <InputLabel>Priority</InputLabel>
+                        <Select
+                          value={field.state.value}
+                          label="Priority"
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          error={!field.state.meta.isValid}
+                          sx={{
+                            borderRadius: 2,
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderRadius: 2,
+                            },
+                          }}
+                        >
+                          {priorities.map((priority) => (
+                            <MenuItem key={priority.value} value={priority.value}>
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 1,
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: '50%',
+                                    backgroundColor: priority.color,
+                                  }}
+                                />
+                                {priority.value}
+                              </Box>
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  </form.Field>
+
+                  <form.Field name="mode_of_arrival">
+                    {(field) => (
+                      <FormControl sx={{ minWidth: { xs: '100%', sm: '200px' } }}>
+                        <InputLabel>Mode of Arrival</InputLabel>
+                        <Select
+                          value={field.state.value}
+                          label="Mode of Arrival"
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          error={!field.state.meta.isValid}
+                          sx={{
+                            borderRadius: 2,
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderRadius: 2,
+                            },
+                          }}
+                        >
+                          {modesOfArrival.map((mode) => (
+                            <MenuItem key={mode} value={mode}>
+                              {mode.replace(/_/g, ' ')}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  </form.Field>
+                </Stack>
+
+                {/* Date Fields */}
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <form.Field
+                    name="received_date"
+                    validators={{
+                      onChange: ({ value }) =>
+                        !value ? 'Receiving date is required' : undefined,
+                    }}
+                  >
+                    {(field) => (
+                      <TextField
+                        fullWidth
+                        label="Receiving Date"
+                        type="date"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        error={!field.state.meta.isValid}
+                        helperText={field.state.meta.errors.join(', ')}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                          },
+                        }}
+                      />
+                    )}
+                  </form.Field>
+                  <form.Field name="sent_date">
+                    {(field) => (
+                      <TextField
+                        fullWidth
+                        label="Sent Date (Optional)"
+                        type="date"
+                        value={field.state.value || ''}
+                        onChange={(e) =>
+                          field.handleChange(e.target.value || undefined)
+                        }
+                        onBlur={field.handleBlur}
+                        error={!field.state.meta.isValid}
+                        helperText={field.state.meta.errors.join(', ')}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                          },
+                        }}
+                      />
+                    )}
+                  </form.Field>
+                </Stack>
+
+                {/* Content/Description */}
+                <form.Field name="content">
+                  {(field) => (
+                    <TextField
+                      fullWidth
+                      label="Content"
+                      variant="outlined"
+                      multiline
+                      rows={4}
+                      value={field.state.value || ''}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!field.state.meta.isValid}
+                      helperText={field.state.meta.errors.join(', ')}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </form.Field>
+
+                {/* File Attachments */}
+                <form.Field name="attachments">
+                  {(field) => (
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          color: theme.palette.text.primary,
+                          mb: 2,
+                        }}
+                      >
+                        Attachments
+                      </Typography>
+
+                      <Button
+                        component="label"
+                        variant="outlined"
+                        startIcon={<UploadIcon />}
+                        sx={{
+                          borderRadius: 2,
+                          borderStyle: 'dashed',
+                          borderColor: theme.palette.primary.main,
+                          color: theme.palette.primary.main,
+                          padding: 2,
+                          '&:hover': {
+                            backgroundColor: `${theme.palette.primary.main}10`,
+                            borderColor: theme.palette.primary.dark,
+                          },
+                        }}
+                        fullWidth
+                      >
+                        Upload Files (PNG, JPEG, PDF, DOCX)
+                        <input
+                          type="file"
+                          hidden
+                          multiple
+                          accept=".png,.jpg,.jpeg,.pdf,.docx"
+                          onChange={handleFileUpload}
+                        />
+                      </Button>
+
+                      {/* Attached Files List */}
+                      {(field.state.value?.length || 0) > 0 && (
+                        <Box sx={{ mt: 2 }}>
+                          <Stack spacing={1}>
+                            {field.state.value?.map((file, index) => (
+                              <Chip
+                                key={index}
+                                icon={<AttachFileIcon />}
+                                label={`${file.name} (${formatFileSize(file.size)})`}
+                                onDelete={() => removeAttachment(index)}
+                                deleteIcon={<DeleteIcon />}
+                                variant="outlined"
+                                sx={{
+                                  justifyContent: 'space-between',
+                                  '& .MuiChip-label': {
+                                    maxWidth: { xs: '200px', sm: '300px' },
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                  },
+                                }}
+                              />
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                </form.Field>
+              </Stack>
+            </form>
           </CardContent>
         </Card>
       </DialogContent>
@@ -437,24 +607,33 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
         >
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          sx={{
-            borderRadius: 2,
-            textTransform: 'none',
-            fontWeight: 600,
-            minWidth: 120,
-            boxShadow: theme.shadows[2],
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: theme.shadows[4],
-            },
-          }}
+        <form.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
         >
-          Submit Letter
-        </Button>
+          {([canSubmit, isSubmitting]) => (
+            <Button
+              onClick={form.handleSubmit}
+              variant="contained"
+              disabled={!canSubmit || createLetterMutation.isPending}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                minWidth: 120,
+                boxShadow: theme.shadows[2],
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: theme.shadows[4],
+                },
+              }}
+            >
+              {createLetterMutation.isPending || isSubmitting
+                ? 'Submitting...'
+                : 'Submit Letter'}
+            </Button>
+          )}
+        </form.Subscribe>
       </DialogActions>
     </Dialog>
   )

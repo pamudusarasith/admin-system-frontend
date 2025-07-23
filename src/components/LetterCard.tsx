@@ -22,48 +22,56 @@ import {
   AttachFile as AttachFileIcon,
   Forward as ForwardIcon,
   MoreVert as MoreVertIcon,
-  Reply as ReplyIcon,
   Schedule as ScheduleIcon,
-  Security as SecurityIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material'
+import type { LetterResponse } from '@/api/letters'
 
-interface LetterSummary {
-  id: string
-  referenceNumber: string
-  subject: string
-  sender: {
-    name: string
-    organization: string
-  }
-  receivedDate: string
-  priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
-  assignedDivision?: {
-    name: string
-    assignedDate: string
-  }
-  currentAssignee?: {
-    name: string
-    division: string
-    assignedDate: string
-  }
-  category: string
-  confidentialityLevel: 'Public' | 'Confidential' | 'Restricted' | 'Secret'
-  daysOpen: number
-  hasAttachments: boolean
-  replyCount: number
-}
+// interface LetterSummary {
+//   id: number
+//   reference: string
+//   senderDetails: {
+//     name: string
+//     email: string | null
+//     address: string | null
+//     phone_number: string | null
+//   }
+//   sentDate: string | null
+//   receivedDate: string
+//   modeOfArrival:
+//     | 'REGISTERED_POST'
+//     | 'UNREGISTERED_POST'
+//     | 'EMAIL'
+//     | 'WHATSAPP'
+//     | 'HAND_DELIVERED'
+//     | 'FAX'
+//     | 'OTHER'
+//   subject: string
+//   content: string | null
+//   priority: 'NORMAL' | 'HIGH' | 'URGENT'
+//   status:
+//     | 'NEW'
+//     | 'ASSIGNED_TO_DIVISION'
+//     | 'PENDING_ACCEPTANCE'
+//     | 'ASSIGNED_TO_OFFICER'
+//     | 'RETURNED_FROM_OFFICER'
+//     | 'RETURNED_FROM_DIVISION'
+//     | 'CLOSED'
+//   assignedDivision: string | null
+//   assignedUser: string | null
+//   isAcceptedByUser: boolean
+//   daysOpen?: number
+//   hasAttachments?: boolean
+// }
 
 interface LetterCardProps {
-  letter: LetterSummary
+  letter: LetterResponse
   index: number
   getPriorityColor: (priority: string) => string
   getStatusColor: (status: string) => string
-  getConfidentialityColor: (level: string) => string
   formatDate: (dateString: string) => string
   formatTimeAgo: (dateString: string) => string
-  onCardClick: (id: string) => void
+  onCardClick: (id: number) => void
 }
 
 export const LetterCard: React.FC<LetterCardProps> = ({
@@ -71,7 +79,6 @@ export const LetterCard: React.FC<LetterCardProps> = ({
   index,
   getPriorityColor,
   getStatusColor,
-  getConfidentialityColor,
   formatDate,
   formatTimeAgo,
   onCardClick,
@@ -93,24 +100,30 @@ export const LetterCard: React.FC<LetterCardProps> = ({
   const handleMenuAction = (action: string, event: React.MouseEvent) => {
     event.stopPropagation()
     setAnchorEl(null)
-    
+
     // Handle different actions
     switch (action) {
       case 'view':
         onCardClick(letter.id)
         break
-      case 'reply':
-        console.log('Reply to letter:', letter.id)
+      case 'assign_to_division':
+        console.log('Assign to division:', letter.id)
         break
-      case 'forward':
-        console.log('Forward letter:', letter.id)
-        break
-      case 'assign':
-        console.log('Assign letter:', letter.id)
+      case 'assign_to_officer':
+        console.log('Assign to officer:', letter.id)
         break
       default:
         break
     }
+  }
+
+  const getDaysOpen = (receivedDate: string): number => {
+    return receivedDate
+      ? Math.floor(
+          (new Date().getTime() - new Date(receivedDate).getTime()) /
+            (1000 * 60 * 60 * 24),
+        )
+      : 0
   }
 
   return (
@@ -153,7 +166,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
               variant="subtitle1"
               sx={{ fontWeight: 'bold', color: 'primary.main' }}
             >
-              {letter.referenceNumber}
+              {letter.reference}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ display: 'flex', gap: 1 }}>
@@ -169,7 +182,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                   }}
                 />
                 <Chip
-                  label={letter.status}
+                  label={letter.status.replace(/_/g, ' ')}
                   size="small"
                   sx={{
                     backgroundColor: getStatusColor(letter.status),
@@ -204,18 +217,20 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                   <VisibilityIcon sx={{ mr: 1, fontSize: 18 }} />
                   View Details
                 </MenuItem>
-                <MenuItem onClick={(e) => handleMenuAction('reply', e)}>
-                  <ReplyIcon sx={{ mr: 1, fontSize: 18 }} />
-                  Reply
-                </MenuItem>
-                <MenuItem onClick={(e) => handleMenuAction('forward', e)}>
-                  <ForwardIcon sx={{ mr: 1, fontSize: 18 }} />
-                  Forward
-                </MenuItem>
-                {letter.status === 'Pending' && (
-                  <MenuItem onClick={(e) => handleMenuAction('assign', e)}>
+                {!letter.assignedDivision && (
+                  <MenuItem
+                    onClick={(e) => handleMenuAction('assign_to_division', e)}
+                  >
+                    <ForwardIcon sx={{ mr: 1, fontSize: 18 }} />
+                    Assign to Division
+                  </MenuItem>
+                )}
+                {letter.status === 'ASSIGNED_TO_DIVISION' && (
+                  <MenuItem
+                    onClick={(e) => handleMenuAction('assign_to_officer', e)}
+                  >
                     <AssignmentIcon sx={{ mr: 1, fontSize: 18 }} />
-                    Assign
+                    Assign to Officer
                   </MenuItem>
                 )}
               </Menu>
@@ -223,37 +238,11 @@ export const LetterCard: React.FC<LetterCardProps> = ({
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <Chip
-              label={letter.confidentialityLevel}
-              size="small"
-              icon={<SecurityIcon sx={{ fontSize: 12 }} />}
-              sx={{
-                backgroundColor: getConfidentialityColor(
-                  letter.confidentialityLevel,
-                ),
-                color: 'white',
-                fontSize: '0.7rem',
-                height: 22,
-                fontWeight: 500,
-                '& .MuiChip-icon': { color: 'white' },
-              }}
-            />
-            {letter.hasAttachments && (
+            {letter.noOfAttachments > 0 && (
               <Tooltip title="Has attachments">
                 <Chip
                   icon={<AttachFileIcon sx={{ fontSize: 12 }} />}
-                  label="Attachments"
-                  size="small"
-                  variant="outlined"
-                  sx={{ height: 22, fontSize: '0.7rem' }}
-                />
-              </Tooltip>
-            )}
-            {letter.replyCount > 0 && (
-              <Tooltip title={`${letter.replyCount} replies/comments`}>
-                <Chip
-                  icon={<ReplyIcon sx={{ fontSize: 12 }} />}
-                  label={`${letter.replyCount} replies`}
+                  label={`${letter.noOfAttachments} attachments`}
                   size="small"
                   variant="outlined"
                   sx={{ height: 22, fontSize: '0.7rem' }}
@@ -261,11 +250,13 @@ export const LetterCard: React.FC<LetterCardProps> = ({
               </Tooltip>
             )}
             <Chip
-              label={`${letter.daysOpen} days open`}
+              label={`${getDaysOpen(letter.receivedDate)} days open`}
               size="small"
               icon={<ScheduleIcon sx={{ fontSize: 12 }} />}
-              color={letter.daysOpen > 7 ? 'error' : 'default'}
-              variant={letter.daysOpen > 7 ? 'filled' : 'outlined'}
+              color={getDaysOpen(letter.receivedDate) > 7 ? 'error' : 'default'}
+              variant={
+                getDaysOpen(letter.receivedDate) > 7 ? 'filled' : 'outlined'
+              }
               sx={{ height: 22, fontSize: '0.7rem' }}
             />
           </Box>
@@ -292,16 +283,24 @@ export const LetterCard: React.FC<LetterCardProps> = ({
               {letter.subject}
             </Typography>
 
-            {/* Category */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <AssignmentIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                Category:
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {letter.category}
-              </Typography>
-            </Box>
+            {/* Content */}
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 4,
+                WebkitBoxOrient: 'vertical',
+                maxHeight: '5.6em',
+                lineHeight: 1.4,
+              }}
+            >
+              {letter.content && letter.content.length > 350
+                ? `${letter.content.slice(0, 350)}...`
+                : letter.content || 'No content available.'}
+            </Typography>
           </Box>
 
           {/* Two Column Layout for Contact Info */}
@@ -333,7 +332,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                     fontWeight: 'bold',
                   }}
                 >
-                  {letter.sender.name
+                  {letter.senderDetails.name
                     .split(' ')
                     .map((n) => n[0])
                     .join('')}
@@ -349,7 +348,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {letter.sender.name}
+                    {letter.senderDetails.name}
                   </Typography>
                   <Typography
                     variant="body2"
@@ -361,7 +360,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {letter.sender.organization}
+                    {letter.senderDetails.email || 'No email provided'}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <AccessTimeIcon
@@ -383,7 +382,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
               >
                 👤 ASSIGNMENT STATUS
               </Typography>
-              {letter.currentAssignee ? (
+              {letter.assignedUser ? (
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
                   <Avatar
                     sx={{
@@ -395,7 +394,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                       fontWeight: 'bold',
                     }}
                   >
-                    {letter.currentAssignee.name
+                    {letter.assignedUser.fullName
                       .split(' ')
                       .map((n) => n[0])
                       .join('')}
@@ -411,7 +410,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {letter.currentAssignee.name}
+                      {letter.assignedUser.fullName}
                     </Typography>
                     <Typography
                       variant="body2"
@@ -423,10 +422,13 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {letter.currentAssignee.division}
+                      {letter.assignedDivision?.name || 'Unknown Division'}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Assigned: {formatDate(letter.currentAssignee.assignedDate)}
+                      Status:{' '}
+                      {letter.isAcceptedByUser
+                        ? 'Accepted'
+                        : 'Pending Acceptance'}
                     </Typography>
                   </Box>
                 </Box>
@@ -470,7 +472,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                       Division Assignment
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Assigned: {formatDate(letter.assignedDivision.assignedDate)}
+                      Mode: {letter.modeOfArrival.replace(/_/g, ' ')}
                     </Typography>
                   </Box>
                 </Box>

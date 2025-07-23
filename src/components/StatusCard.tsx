@@ -1,9 +1,5 @@
 import React from 'react'
-import {
-  Box,
-  Typography,
-  useTheme,
-} from '@mui/material'
+import { Box, Typography, useTheme } from '@mui/material'
 
 interface StatusCardProps {
   statusText: string
@@ -36,7 +32,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
         cursor: 'pointer',
         borderRadius: 3,
         border: `1px solid ${theme.palette.divider}`,
-        backgroundColor: isSelected 
+        backgroundColor: isSelected
           ? `${color}20` // Very subtle background tint when selected
           : theme.palette.background.paper,
         '&:hover': {
@@ -48,8 +44,8 @@ export const StatusCard: React.FC<StatusCardProps> = ({
       }}
     >
       {/* Icon */}
-      <Box 
-        sx={{ 
+      <Box
+        sx={{
           color: isSelected ? color : theme.palette.text.secondary,
           fontSize: 20,
           mb: 0.5,
@@ -59,9 +55,9 @@ export const StatusCard: React.FC<StatusCardProps> = ({
       </Box>
 
       {/* Value */}
-      <Typography 
-        variant="h6" 
-        sx={{ 
+      <Typography
+        variant="h6"
+        sx={{
           fontWeight: 600,
           color: isSelected ? color : theme.palette.text.primary,
           fontSize: { xs: '1rem', sm: '1.125rem' },
@@ -72,9 +68,9 @@ export const StatusCard: React.FC<StatusCardProps> = ({
       </Typography>
 
       {/* Status Type */}
-      <Typography 
-        variant="caption" 
-        sx={{ 
+      <Typography
+        variant="caption"
+        sx={{
           fontWeight: 500,
           color: theme.palette.text.secondary,
           textAlign: 'center',
@@ -82,7 +78,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
           lineHeight: 1.2,
         }}
       >
-        {statusText}
+        {statusText.replace(/_/g, ' ')}
       </Typography>
     </Box>
   )
