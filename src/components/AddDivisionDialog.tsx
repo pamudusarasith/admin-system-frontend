@@ -25,7 +25,6 @@ interface AddDivisionDialogProps {
 }
 
 interface DivisionFormData {
-  divisionID: string
   divisionName: string
   description: string
 }
@@ -41,7 +40,6 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const [formData, setFormData] = useState<DivisionFormData>({
-    divisionID: initialData?.divisionID || '',
     divisionName: initialData?.divisionName || '',
     description: initialData?.description || '',
   })
@@ -52,13 +50,11 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
   useEffect(() => {
     if (initialData) {
       setFormData({
-        divisionID: initialData.divisionID || '',
         divisionName: initialData.divisionName || '',
         description: initialData.description || '',
       })
     } else {
       setFormData({
-        divisionID: '',
         divisionName: '',
         description: '',
       })
@@ -84,10 +80,6 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Partial<DivisionFormData> = {}
 
-    // Only validate Division ID if not in edit mode
-    if (!editMode && !formData.divisionID.trim()) {
-      newErrors.divisionID = 'Division ID is required'
-    }
     if (!formData.divisionName.trim()) {
       newErrors.divisionName = 'Division name is required'
     }
@@ -108,7 +100,6 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
 
   const handleClose = () => {
     setFormData({
-      divisionID: '',
       divisionName: '',
       description: '',
     })
@@ -172,27 +163,6 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
         >
           <CardContent sx={{ p: 3 }}>
             <Stack spacing={3}>
-              {/* Division ID */}
-              <TextField
-                fullWidth
-                label="Division ID"
-                variant="outlined"
-                placeholder="Enter the division ID"
-                value={formData.divisionID}
-                onChange={handleInputChange('divisionID')}
-                error={!!errors.divisionID}
-                helperText={errors.divisionID}
-                disabled={editMode}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                }}
-              />
-
               {/* Division Name */}
               <TextField
                 fullWidth
