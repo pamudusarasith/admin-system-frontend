@@ -31,8 +31,8 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { getDivisions } from '@/api'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getDivisions, createDivision, type CreateDivisionRequest } from '@/api'
 
 export const Route = createFileRoute('/divisions')({
   component: DivisionPage,
@@ -48,6 +48,7 @@ function DivisionPage() {
   const theme = useTheme()
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const queryClient = useQueryClient()
 
   // React Query to fetch divisions
   const {
@@ -61,6 +62,19 @@ function DivisionPage() {
     queryFn: getDivisions,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
+  })
+
+  // Mutation for creating divisions
+  const createDivisionMutation = useMutation({
+    mutationFn: createDivision,
+    onSuccess: () => {
+      // Invalidate and refetch divisions data
+      queryClient.invalidateQueries({ queryKey: ['divisions'] })
+      setIsAddDialogOpen(false)
+    },
+    onError: (error) => {
+      console.error('Failed to create division:', error)
+    },
   })
 
   // Filter divisions based on search term
@@ -89,11 +103,21 @@ function DivisionPage() {
 
   const handleSubmitDivision = async (divisionData: any) => {
     console.log('New division submitted:', divisionData)
-    // Here you would typically send the data to your backend
-    // You could also update the local state to add the new division to the list
 
-    // After successfully adding the division, refetch the data
-    await refetch()
+    try {
+      // Map form data to API request format
+      const createRequest: CreateDivisionRequest = {
+        id: divisionData.divisionID,
+        name: divisionData.divisionName || divisionData.name,
+        description: divisionData.description,
+      }
+
+      await createDivisionMutation.mutateAsync(createRequest)
+      // The onSuccess callback will handle closing the dialog and refetching data
+    } catch (error) {
+      console.error('Error creating division:', error)
+      // The onError callback will handle error logging
+    }
   }
   return (
     <SidebarLayout>
@@ -136,6 +160,7 @@ function DivisionPage() {
               label="Add new Division"
               tooltip="Add a new division"
               onClick={handleOpenAddDialog}
+              disabled={createDivisionMutation.isPending}
             />
           </Box>
         </Box>
@@ -184,6 +209,20 @@ function DivisionPage() {
           >
             Failed to load divisions.{' '}
             {error instanceof Error ? error.message : 'Please try again.'}
+          </Alert>
+        )}
+
+        {/* Create Division Error Alert */}
+        {createDivisionMutation.isError && (
+          <Alert
+            severity="error"
+            sx={{ maxWidth: '1300px', mx: 'auto', mb: 2 }}
+            onClose={() => createDivisionMutation.reset()}
+          >
+            Failed to create division.{' '}
+            {createDivisionMutation.error instanceof Error
+              ? createDivisionMutation.error.message
+              : 'Please try again.'}
           </Alert>
         )}
 
