@@ -14,12 +14,11 @@ export async function getUsers(): Promise<any> {
 export interface CreateUserPayload {
   username: string
   email: string
-  role: string
   division: string
+  role: string
 }
 
 export const createUser = async (data: CreateUserPayload) => {
-  const res = await axios.post("http://localhost:8080/users", data)
+  const res = await client.post('/users', data)
   return res.data
 }
-
