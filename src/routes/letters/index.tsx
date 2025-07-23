@@ -21,240 +21,161 @@ import {
   Inbox as InboxIcon,
 } from '@mui/icons-material'
 import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
+import type { GetLettersParams } from '@/api/letters'
+import {
   AddLetterDialog,
   Filters,
   LetterCard,
   SidebarLayout,
   StatusCardsGrid,
 } from '@/components'
+import { getLetters } from '@/api/letters'
 
 export const Route = createFileRoute('/letters/')({
   component: LettersPage,
   validateSearch: (search: Record<string, unknown>) => {
     return {
       status: (search.status as string) || 'All',
+      page: Number(search.page) || 1,
+      priority: (search.priority as string) || 'All',
+      search: (search.search as string) || '',
     }
   },
 })
 
-interface LetterSummary {
-  id: number
-  reference: string
-  senderDetails: {
-    name: string
-    email: string | null
-    address: string | null
-    phone_number: string | null
-  }
-  sentDate: string | null
-  receivedDate: string
-  modeOfArrival:
-    | 'REGISTERED_POST'
-    | 'UNREGISTERED_POST'
-    | 'EMAIL'
-    | 'WHATSAPP'
-    | 'HAND_DELIVERED'
-    | 'FAX'
-    | 'OTHER'
-  subject: string
-  content: string | null
-  priority: 'NORMAL' | 'HIGH' | 'URGENT'
-  status:
-    | 'NEW'
-    | 'ASSIGNED_TO_DIVISION'
-    | 'PENDING_ACCEPTANCE'
-    | 'ASSIGNED_TO_OFFICER'
-    | 'RETURNED_FROM_OFFICER'
-    | 'RETURNED_FROM_DIVISION'
-    | 'CLOSED'
-  assignedDivision: string | null
-  assignedUser: string | null
-  isAcceptedByUser: boolean
-  category?: string
-  daysOpen?: number
-  hasAttachments?: boolean
-  replyCount?: number
-}
-
-// Mock data
-const mockLetters: Array<LetterSummary> = [
-  {
-    id: 1,
-    reference: 'MIN/EDU/2024/001',
-    senderDetails: {
-      name: 'Dr. Priyanka Wickramasinghe',
-      email: 'priyanka.w@colombo.ac.lk',
-      address: 'University of Colombo, Colombo 3',
-      phone_number: '+94112581835',
-    },
-    sentDate: '2024-01-14',
-    receivedDate: '2024-01-15',
-    modeOfArrival: 'REGISTERED_POST',
-    subject:
-      'Request for Educational Policy Review and Implementation Guidelines',
-    content:
-      'This letter requests a comprehensive review of current educational policies...',
-    priority: 'HIGH',
-    status: 'ASSIGNED_TO_OFFICER',
-    assignedDivision: 'Policy Development Division',
-    assignedUser: 'Nimal Perera',
-    isAcceptedByUser: true,
-    category: 'Policy Matter',
-    daysOpen: 12,
-    hasAttachments: true,
-    replyCount: 3,
-  },
-  {
-    id: 2,
-    reference: 'MIN/EDU/2024/002',
-    senderDetails: {
-      name: 'Eng. Saman Kumara',
-      email: 'saman.k@education.gov.lk',
-      address: 'Provincial Education Office, Kandy',
-      phone_number: '+94812234567',
-    },
-    sentDate: '2024-01-17',
-    receivedDate: '2024-01-18',
-    modeOfArrival: 'EMAIL',
-    subject: 'Budget Allocation for Infrastructure Development Projects',
-    content:
-      'We hereby request budget allocation for the following infrastructure projects...',
-    priority: 'URGENT',
-    status: 'ASSIGNED_TO_DIVISION',
-    assignedDivision: 'Finance Division',
-    assignedUser: null,
-    isAcceptedByUser: false,
-    category: 'Financial Matter',
-    daysOpen: 9,
-    hasAttachments: true,
-    replyCount: 1,
-  },
-  {
-    id: 3,
-    reference: 'MIN/EDU/2024/003',
-    senderDetails: {
-      name: 'Ms. Dilani Fernando',
-      email: 'dilani.f@nie.ac.lk',
-      address: 'National Institute of Education, Maharagama',
-      phone_number: '+94112850301',
-    },
-    sentDate: '2024-01-19',
-    receivedDate: '2024-01-20',
-    modeOfArrival: 'HAND_DELIVERED',
-    subject: 'Teacher Training Program Approval Request',
-    content:
-      'This is to request approval for the new teacher training program...',
-    priority: 'NORMAL',
-    status: 'CLOSED',
-    assignedDivision: 'Human Resources Division',
-    assignedUser: 'Rohana Jayasinghe',
-    isAcceptedByUser: true,
-    category: 'Training & Development',
-    daysOpen: 7,
-    hasAttachments: false,
-    replyCount: 5,
-  },
-  {
-    id: 4,
-    reference: 'MIN/EDU/2024/004',
-    senderDetails: {
-      name: 'Attorney Upul Ratnayake',
-      email: 'upul.r@attorneygeneral.gov.lk',
-      address: "Attorney General's Department, Colombo 12",
-      phone_number: '+94112445222',
-    },
-    sentDate: '2024-01-21',
-    receivedDate: '2024-01-22',
-    modeOfArrival: 'REGISTERED_POST',
-    subject: 'Legal Opinion on New Education Act Amendment',
-    content:
-      'We provide the following legal opinion regarding the proposed amendment...',
-    priority: 'HIGH',
-    status: 'PENDING_ACCEPTANCE',
-    assignedDivision: 'Legal Division',
-    assignedUser: 'Anura Mendis',
-    isAcceptedByUser: false,
-    category: 'Legal Matter',
-    daysOpen: 5,
-    hasAttachments: true,
-    replyCount: 2,
-  },
-  {
-    id: 5,
-    reference: 'MIN/EDU/2024/005',
-    senderDetails: {
-      name: 'Prof. Chandrika Perera',
-      email: 'chandrika.p@pdn.ac.lk',
-      address: 'University of Peradeniya, Peradeniya',
-      phone_number: '+94812392111',
-    },
-    sentDate: null,
-    receivedDate: '2024-01-25',
-    modeOfArrival: 'EMAIL',
-    subject: 'International Conference Participation Request',
-    content:
-      'Request for permission and funding to attend the international education conference...',
-    priority: 'NORMAL',
-    status: 'NEW',
-    assignedDivision: null,
-    assignedUser: null,
-    isAcceptedByUser: false,
-    category: 'International Affairs',
-    daysOpen: 2,
-    hasAttachments: false,
-    replyCount: 0,
-  },
-]
-
 function LettersPage() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { status } = Route.useSearch()
+  const queryClient = useQueryClient()
+  const searchParams = Route.useSearch()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const [letters] = useState<Array<LetterSummary>>(mockLetters)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState(status)
-  const [priorityFilter, setPriorityFilter] = useState('All')
-  const [categoryFilter, setCategoryFilter] = useState('All')
-  const [page, setPage] = useState(1)
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.search || '')
+  const [statusFilter, setStatusFilter] = useState(searchParams.status || 'All')
+  const [priorityFilter, setPriorityFilter] = useState(
+    searchParams.priority || 'All',
+  )
+  const [page, setPage] = useState(searchParams.page || 1)
   const [itemsPerPage] = useState(10)
-  const [isLoading] = useState(false)
   const [isAddLetterDialogOpen, setIsAddLetterDialogOpen] = useState(false)
+
+  // TanStack Query for fetching letters
+  const {
+    data: lettersResponse,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: [
+      'letters',
+      {
+        page: page - 1, // API uses 0-based pagination
+        itemsPerPage,
+        ...(statusFilter !== 'All' && { status: statusFilter }),
+        ...(priorityFilter !== 'All' && { priority: priorityFilter }),
+        ...(searchTerm && { search: searchTerm }),
+      },
+    ],
+    queryFn: ({ queryKey }) => {
+      const [, params] = queryKey as [string, GetLettersParams]
+      return getLetters(params)
+    },
+    placeholderData: keepPreviousData,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  // Transform API response to component format
+  const letters = lettersResponse?.data || []
+  const pagination = lettersResponse?.pagination
 
   const handleStatusFilterChange = (newStatus: string) => {
     setStatusFilter(newStatus)
-    if (newStatus === 'All') {
-      navigate({ to: '/letters', search: { status: 'All' } })
-    } else {
-      navigate({ to: '/letters', search: { status: newStatus } })
-    }
+    setPage(1)
+    navigate({
+      to: '/letters',
+      search: {
+        status: newStatus,
+        page: 1,
+        priority: priorityFilter,
+        search: searchTerm,
+      },
+    })
+  }
+
+  const handlePriorityFilterChange = (newPriority: string) => {
+    setPriorityFilter(newPriority)
+    setPage(1)
+    navigate({
+      to: '/letters',
+      search: {
+        status: statusFilter,
+        page: 1,
+        priority: newPriority,
+        search: searchTerm,
+      },
+    })
+  }
+
+  const handleSearchChange = (newSearch: string) => {
+    setSearchTerm(newSearch)
+    setPage(1)
+    navigate({
+      to: '/letters',
+      search: {
+        status: statusFilter,
+        page: 1,
+        priority: priorityFilter,
+        search: newSearch,
+      },
+    })
   }
 
   const handleClearFilters = () => {
     setStatusFilter('All')
     setPriorityFilter('All')
-    setCategoryFilter('All')
     setSearchTerm('')
-    navigate({ to: '/letters', search: { status: 'All' } })
+    setPage(1)
+    navigate({
+      to: '/letters',
+      search: {
+        status: 'All',
+        page: 1,
+        priority: 'All',
+        search: '',
+      },
+    })
   }
 
-  const filteredLetters = letters.filter((letter) => {
-    const matchesSearch =
-      letter.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      letter.senderDetails.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      letter.reference.toLowerCase().includes(searchTerm.toLowerCase())
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    newPage: number,
+  ) => {
+    setPage(newPage)
+    navigate({
+      to: '/letters',
+      search: {
+        status: statusFilter,
+        page: newPage,
+        priority: priorityFilter,
+        search: searchTerm,
+      },
+    })
+  }
 
-    const matchesStatus =
-      statusFilter === 'All' || letter.status === statusFilter
-    const matchesPriority =
-      priorityFilter === 'All' || letter.priority === priorityFilter
-    const matchesCategory =
-      categoryFilter === 'All' || letter.category === categoryFilter
-
-    return matchesSearch && matchesStatus && matchesPriority && matchesCategory
-  })
+  const handleAddLetterSubmit = async (letterData: any) => {
+    try {
+      console.log('New letter data:', letterData)
+      // The mutation will be handled by the AddLetterDialog component
+      // After successful creation, invalidate the letters query
+      await queryClient.invalidateQueries({ queryKey: ['letters'] })
+      setIsAddLetterDialogOpen(false)
+    } catch (error) {
+      console.error('Failed to create letter:', error)
+    }
+  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -311,36 +232,7 @@ function LettersPage() {
     return formatDate(dateString)
   }
 
-  const handleChangePage = (
-    _event: React.ChangeEvent<unknown>,
-    newPage: number,
-  ) => {
-    setPage(newPage)
-  }
-
-  const handleAddLetterSubmit = (letterData: any) => {
-    // TODO: Implement API call to create new letter
-    console.log('New letter data:', letterData)
-
-    // For now, we'll just show a success message
-    // In a real application, you would send this data to your backend API
-    // and then refresh the letters list or add the new letter to the state
-
-    // Close the dialog
-    setIsAddLetterDialogOpen(false)
-
-    // You could also show a success snackbar here
-    // setSnackbarMessage('Letter added successfully!')
-    // setSnackbarOpen(true)
-  }
-
-  const totalPages = Math.ceil(filteredLetters.length / itemsPerPage)
-  const startIndex = (page - 1) * itemsPerPage
-  const paginatedLetters = filteredLetters.slice(
-    startIndex,
-    startIndex + itemsPerPage,
-  )
-
+  // Calculate status counts from actual data
   const statusCounts = {
     All: letters.length,
     NEW: letters.filter((l) => l.status === 'NEW').length,
@@ -360,6 +252,14 @@ function LettersPage() {
     ).length,
     CLOSED: letters.filter((l) => l.status === 'CLOSED').length,
   }
+
+  const totalPages = pagination?.totalPages || 1
+  const currentPage = page
+  // Calculate total count estimate based on current page and items per page
+  const totalCount = pagination
+    ? pagination.totalPages * pagination.itemsPerPage
+    : 0
+  const rowsPerPage = itemsPerPage
 
   return (
     <SidebarLayout>
@@ -430,11 +330,9 @@ function LettersPage() {
               searchTerm={searchTerm}
               statusFilter={statusFilter}
               priorityFilter={priorityFilter}
-              categoryFilter={categoryFilter}
-              onSearchChange={setSearchTerm}
+              onSearchChange={handleSearchChange}
               onStatusFilterChange={handleStatusFilterChange}
-              onPriorityFilterChange={setPriorityFilter}
-              onCategoryFilterChange={setCategoryFilter}
+              onPriorityFilterChange={handlePriorityFilterChange}
               onClearAllFilters={handleClearFilters}
             />
           </div>
@@ -468,7 +366,7 @@ function LettersPage() {
                 </CardContent>
               </Card>
             ))
-          ) : paginatedLetters.length === 0 ? (
+          ) : letters.length === 0 ? (
             <Fade in timeout={800}>
               <Paper
                 sx={{
@@ -499,7 +397,7 @@ function LettersPage() {
               </Paper>
             </Fade>
           ) : (
-            paginatedLetters.map((letter, index) => (
+            letters.map((letter, index) => (
               <LetterCard
                 key={letter.id}
                 letter={letter}
@@ -512,10 +410,19 @@ function LettersPage() {
               />
             ))
           )}
+
+          {/* Loading indicator for background fetching */}
+          {isFetching && !isLoading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Updating...
+              </Typography>
+            </Box>
+          )}
         </Stack>
 
         {/* Enhanced Pagination */}
-        {filteredLetters.length > itemsPerPage && (
+        {!isLoading && letters.length > 0 && (
           <Fade in timeout={1200}>
             <Box
               sx={{
@@ -532,14 +439,14 @@ function LettersPage() {
               }}
             >
               <Typography variant="body2" color="text.secondary">
-                Showing {startIndex + 1}-
-                {Math.min(startIndex + itemsPerPage, filteredLetters.length)} of{' '}
-                {filteredLetters.length} letters
+                Showing {(currentPage - 1) * rowsPerPage + 1}-
+                {Math.min(currentPage * rowsPerPage, totalCount)} of{' '}
+                {totalCount} letters
               </Typography>
               <Pagination
                 count={totalPages}
-                page={page}
-                onChange={handleChangePage}
+                page={currentPage}
+                onChange={handlePageChange}
                 color="primary"
                 size={isMobile ? 'medium' : 'large'}
                 showFirstButton

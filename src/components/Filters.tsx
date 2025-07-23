@@ -25,11 +25,9 @@ interface FiltersProps {
   searchTerm: string
   statusFilter: string
   priorityFilter: string
-  categoryFilter: string
   onSearchChange: (value: string) => void
   onStatusFilterChange: (value: string) => void
   onPriorityFilterChange: (value: string) => void
-  onCategoryFilterChange: (value: string) => void
   onClearAllFilters: () => void
 }
 
@@ -37,21 +35,16 @@ export const Filters: React.FC<FiltersProps> = ({
   searchTerm,
   statusFilter,
   priorityFilter,
-  categoryFilter,
   onSearchChange,
   onStatusFilterChange,
   onPriorityFilterChange,
-  onCategoryFilterChange,
   onClearAllFilters,
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const hasActiveFilters =
-    statusFilter !== 'All' ||
-    priorityFilter !== 'All' ||
-    categoryFilter !== 'All' ||
-    searchTerm
+    statusFilter !== 'All' || priorityFilter !== 'All' || searchTerm
 
   return (
     <Paper
@@ -137,27 +130,6 @@ export const Filters: React.FC<FiltersProps> = ({
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 150 }}>
-            <InputLabel>Category</InputLabel>
-            <Select
-              value={categoryFilter}
-              label="Category"
-              onChange={(e) => onCategoryFilterChange(e.target.value)}
-              sx={{ borderRadius: 2 }}
-            >
-              <MenuItem value="All">All Categories</MenuItem>
-              <MenuItem value="Policy Matter">Policy Matter</MenuItem>
-              <MenuItem value="Financial Matter">Financial Matter</MenuItem>
-              <MenuItem value="Legal Matter">Legal Matter</MenuItem>
-              <MenuItem value="Training & Development">
-                Training & Development
-              </MenuItem>
-              <MenuItem value="International Affairs">
-                International Affairs
-              </MenuItem>
-            </Select>
-          </FormControl>
-
           <Button
             variant="outlined"
             startIcon={<FilterListIcon />}
@@ -221,16 +193,6 @@ export const Filters: React.FC<FiltersProps> = ({
               label={`Priority: ${priorityFilter}`}
               onDelete={() => onPriorityFilterChange('All')}
               color="info"
-              variant="outlined"
-              size="small"
-              sx={{ fontWeight: 500 }}
-            />
-          )}
-          {categoryFilter !== 'All' && (
-            <Chip
-              label={`Category: ${categoryFilter}`}
-              onDelete={() => onCategoryFilterChange('All')}
-              color="success"
               variant="outlined"
               size="small"
               sx={{ fontWeight: 500 }}
