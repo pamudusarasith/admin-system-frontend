@@ -1,7 +1,19 @@
-import axios from "axios"
 import { client } from './client'
+import type { CreateUserPayload } from '@/schemas/users'
 
-export async function getUsers(): Promise<any> {
+// Define the User interface based on the API response
+export interface User {
+  id: number
+  username: string
+  email: string | null
+  fullName: string | null
+  phoneNumber: string | null
+  role: string
+  division: string
+  isActive: boolean | null
+}
+
+export async function getUsers(): Promise<Array<User>> {
   try {
     const response = await client.get('/users')
     return response.data
@@ -9,13 +21,6 @@ export async function getUsers(): Promise<any> {
     console.error('Failed to fetch users:', error)
     throw error
   }
-}
-
-export interface CreateUserPayload {
-  username: string
-  email: string
-  division: string
-  role: string
 }
 
 export const createUser = async (data: CreateUserPayload) => {
