@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -20,6 +20,8 @@ interface AddDivisionDialogProps {
   open: boolean
   onClose: () => void
   onSubmit?: (divisionData: DivisionFormData) => void
+  editMode?: boolean
+  initialData?: DivisionFormData
 }
 
 interface DivisionFormData {
@@ -32,17 +34,38 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
   open,
   onClose,
   onSubmit,
+  editMode = false,
+  initialData,
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const [formData, setFormData] = useState<DivisionFormData>({
-    divisionID: '',
-    divisionName: '',
-    description: '',
+    divisionID: initialData?.divisionID || '',
+    divisionName: initialData?.divisionName || '',
+    description: initialData?.description || '',
   })
 
   const [errors, setErrors] = useState<Partial<DivisionFormData>>({})
+
+  // Update form data when initialData changes (for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        divisionID: initialData.divisionID || '',
+        divisionName: initialData.divisionName || '',
+        description: initialData.description || '',
+      })
+    } else {
+      setFormData({
+        divisionID: '',
+        divisionName: '',
+        description: '',
+      })
+    }
+    // Clear any existing errors when switching modes
+    setErrors({})
+  }, [initialData])
 
   const handleInputChange =
     (field: keyof DivisionFormData) =>
@@ -61,7 +84,8 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Partial<DivisionFormData> = {}
 
-    if (!formData.divisionID.trim()) {
+    // Only validate Division ID if not in edit mode
+    if (!editMode && !formData.divisionID.trim()) {
       newErrors.divisionID = 'Division ID is required'
     }
     if (!formData.divisionName.trim()) {
@@ -78,8 +102,7 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
   const handleSubmit = () => {
     if (validateForm()) {
       onSubmit?.(formData)
-      console.log('Division Data:', formData)
-      handleClose()
+      // Don't call handleClose() here - let the parent component handle it via onSuccess
     }
   }
 
@@ -123,7 +146,7 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
             color: theme.palette.text.primary,
           }}
         >
-          Add New Division
+          {editMode ? 'Edit Division' : 'Add New Division'}
         </Typography>
         <IconButton
           onClick={handleClose}
@@ -159,6 +182,7 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
                 onChange={handleInputChange('divisionID')}
                 error={!!errors.divisionID}
                 helperText={errors.divisionID}
+                disabled={editMode}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
@@ -250,7 +274,7 @@ export const AddDivisionDialog: React.FC<AddDivisionDialogProps> = ({
             },
           }}
         >
-          Submit Division
+          {editMode ? 'Update Division' : 'Submit Division'}
         </Button>
       </DialogActions>
     </Dialog>
