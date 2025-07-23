@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { getRoles, createRole, updateRole, deleteRole, type Role } from '@/api'
+import { useState } from 'react'
+import { getRoles, deleteRole, type Role } from '@/api'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Avatar,
   Box,
@@ -28,7 +29,6 @@ import {
   MoreVert as MoreVertIcon,
   People as PeopleIcon,
   Person as PersonIcon,
-  Security as SecurityIcon,
   Support as SupportIcon,
 } from '@mui/icons-material'
 import {
@@ -36,6 +36,7 @@ import {
   SearchBar,
   SidebarLayout,
   AddRoleDialog,
+  DeleteConfirmationBox,
 } from '@/components'
 
 // We fetch user roles from backend using the getRoles function imported from '@/api'.
@@ -50,142 +51,26 @@ interface UserRole extends Role {
   icon: React.ReactNode
 }
 
-// Mock data for user roles
-const mockRoles: Array<UserRole> = [
-  {
-    id: '1',
-    name: 'Super Admin',
-    description: 'Full system access with all administrative privileges',
-    userCount: 2,
-    permissions: [
-      'LETTER_CREATE',
-      'LETTER_RETRIEVE',
-      'LETTER_UPDATE',
-      'LETTER_DELETE',
-      'CABINET_PAPER_CREATE',
-      'CABINET_PAPER_RETRIEVE',
-      'CABINET_PAPER_UPDATE',
-      'CABINET_PAPER_DELETE',
-      'USER_CREATE',
-      'USER_RETRIEVE',
-      'USER_UPDATE',
-      'USER_DELETE',
-      'DIVISION_CREATE',
-      'DIVISION_RETRIEVE',
-      'DIVISION_UPDATE',
-      'DIVISION_DELETE',
-    ],
-    icon: <AdminIcon />,
-    createdDate: '2024-01-15',
-    isActive: true,
-  },
-  {
-    id: '2',
-    name: 'Admin',
-    description: 'Administrative access to manage users and system settings',
-    userCount: 5,
-    permissions: [
-      'LETTER_CREATE',
-      'LETTER_RETRIEVE',
-      'LETTER_UPDATE',
-      'CABINET_PAPER_RETRIEVE',
-      'CABINET_PAPER_UPDATE',
-      'USER_CREATE',
-      'USER_RETRIEVE',
-      'USER_UPDATE',
-      'USER_DELETE',
-      'DIVISION_RETRIEVE',
-      'DIVISION_UPDATE',
-    ],
-    icon: <SecurityIcon />,
-    createdDate: '2024-01-20',
-    isActive: true,
-  },
-  {
-    id: '3',
-    name: 'Manager',
-    description: 'Manage team members and view departmental reports',
-    userCount: 12,
-    permissions: [
-      'LETTER_CREATE',
-      'LETTER_RETRIEVE',
-      'LETTER_UPDATE',
-      'CABINET_PAPER_RETRIEVE',
-      'USER_RETRIEVE',
-      'USER_UPDATE',
-      'DIVISION_RETRIEVE',
-    ],
-    icon: <BusinessIcon />,
-    createdDate: '2024-02-01',
-    isActive: true,
-  },
-  {
-    id: '4',
-    name: 'Employee',
-    description: 'Standard user access with basic system functionality',
-    userCount: 156,
-    permissions: [
-      'LETTER_RETRIEVE',
-      'CABINET_PAPER_RETRIEVE',
-      'USER_RETRIEVE',
-      'DIVISION_RETRIEVE',
-    ],
-    icon: <PersonIcon />,
-    createdDate: '2024-02-10',
-    isActive: true,
-  },
-  {
-    id: '5',
-    name: 'Support Agent',
-    description: 'Customer support access with ticket management',
-    userCount: 8,
-    permissions: [
-      'LETTER_RETRIEVE',
-      'LETTER_UPDATE',
-      'CABINET_PAPER_RETRIEVE',
-      'USER_RETRIEVE',
-      'DIVISION_RETRIEVE',
-    ],
-    icon: <SupportIcon />,
-    createdDate: '2024-02-15',
-    isActive: true,
-  },
-  {
-    id: '6',
-    name: 'Viewer',
-    description: 'Read-only access to reports and system information',
-    userCount: 23,
-    permissions: [
-      'LETTER_RETRIEVE',
-      'CABINET_PAPER_RETRIEVE',
-      'USER_RETRIEVE',
-      'DIVISION_RETRIEVE',
-    ],
-    icon: <PeopleIcon />,
-    createdDate: '2024-03-01',
-    isActive: false,
-  },
-]
-
 function RolesPage() {
   const theme = useTheme()
+  const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
-  const [roles, setRoles] = useState<Array<UserRole>>([])
-  const [loading, setLoading] = useState(true)
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [menuRole, setMenuRole] = useState<UserRole | null>(null)
   const [editMode, setEditMode] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [roleToDelete, setRoleToDelete] = useState<UserRole | null>(null)
 
-  // Load roles from API
-  useEffect(() => {
-    loadRoles()
-  }, [])
-
-  const loadRoles = async () => {
-    try {
-      setLoading(true)
+  // TanStack Query for fetching roles
+  const {
+    data: roles = [],
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ['roles'],
+    queryFn: async () => {
       const rolesData = await getRoles()
       // Transform API roles to UserRole format with icons
       const rolesWithIcons: UserRole[] = rolesData.map((role) => ({
@@ -193,15 +78,23 @@ function RolesPage() {
         userCount: role.userCount || 0,
         icon: getIconForRole(role.name),
       }))
-      setRoles(rolesWithIcons)
-    } catch (error) {
-      console.error('Failed to load roles:', error)
-      // Fallback to mock data if API fails
-      setRoles(mockRoles)
-    } finally {
-      setLoading(false)
-    }
-  }
+      return rolesWithIcons
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  })
+
+  // Delete role mutation
+  const deleteRoleMutation = useMutation({
+    mutationFn: deleteRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['roles'] })
+      handleMenuClose()
+    },
+    onError: (error) => {
+      console.error('Failed to delete role:', error)
+    },
+  })
 
   const getIconForRole = (roleName: string): React.ReactNode => {
     const name = roleName.toLowerCase()
@@ -243,17 +136,28 @@ function RolesPage() {
     handleMenuClose()
   }
 
-  const handleDeleteRole = async (role: UserRole) => {
+  const handleDeleteRole = (role: UserRole) => {
+    setRoleToDelete(role)
+    setDeleteDialogOpen(true)
+    handleMenuClose()
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!roleToDelete) return
+    
     try {
-      await deleteRole(role.id)
-      await loadRoles() // Reload the roles list
-      handleMenuClose()
+      await deleteRoleMutation.mutateAsync(roleToDelete.id)
+      setDeleteDialogOpen(false)
+      setRoleToDelete(null)
     } catch (error) {
       console.error('Failed to delete role:', error)
-      // Fallback to local state update if API fails
-      setRoles((prev) => prev.filter((r) => r.id !== role.id))
-      handleMenuClose()
+      // Keep dialog open on error so user can retry
     }
+  }
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false)
+    setRoleToDelete(null)
   }
 
   const handleCloseDialog = () => {
@@ -262,10 +166,47 @@ function RolesPage() {
     setEditMode(false)
   }
 
+  const handleRoleSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['roles'] })
+  }
+
   const handleSearch = (value: string) => {
     setSearchTerm(value)
   }
-  console.log(filteredRoles)
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <SidebarLayout>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" color="error" gutterBottom>
+              Unable to connect to server
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Please make sure the backend server is running and try again.
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 3, display: 'block' }}>
+              Error: {error instanceof Error ? error.message : 'An error occurred'}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => queryClient.invalidateQueries({ queryKey: ['roles'] })}
+              sx={{ mr: 2 }}
+            >
+              Retry Connection
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => window.location.reload()}
+            >
+              Refresh Page
+            </Button>
+          </Box>
+        </Container>
+      </SidebarLayout>
+    )
+  }
 
   return (
     <SidebarLayout>
@@ -424,18 +365,7 @@ function RolesPage() {
                   overflow: 'visible',
                 }}
               >
-                {/* Role Status Badge */}
-                <Chip
-                  label={role.isActive ? 'Active' : 'Inactive'}
-                  size="small"
-                  color={role.isActive ? 'success' : 'default'}
-                  sx={{
-                    position: 'absolute',
-                    top: 12,
-                    right: 12,
-                    zIndex: 1,
-                  }}
-                />
+                
 
                 <CardContent sx={{ p: 3, pb: 1 }}>
                   {/* Role Header */}
@@ -465,16 +395,7 @@ function RolesPage() {
                       >
                         {role.name}
                       </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: theme.palette.text.secondary,
-                          fontSize: '0.85rem',
-                        }}
-                      >
-                        Created:{' '}
-                        {new Date(role.createdDate).toLocaleDateString()}
-                      </Typography>
+                      
                     </Box>
                   </Stack>
 
@@ -546,62 +467,8 @@ function RolesPage() {
                     </Box>
                   </Box>
 
-                  {/* Permissions Preview */}
-                  <Box sx={{ mb: 1 }}>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.text.secondary,
-                        fontWeight: 600,
-                        mb: 1,
-                        display: 'block',
-                      }}
-                    >
-                      KEY PERMISSIONS:
-                    </Typography>
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      sx={{ flexWrap: 'wrap', gap: 0.5 }}
-                    >
-                      {role.permissions.slice(0, 2).map((permission, idx) => {
-                        // If permission is an object (key-value pair), display key or value as label
-                        if (
-                          typeof permission === 'object' &&
-                          permission !== null
-                        ) {
-                          const [key, value] = Object.entries(permission)[1]
-                          return (
-                            <Chip
-                              key={key + value + idx}
-                              label={`${value}`}
-                              size="small"
-                              variant="outlined"
-                              sx={{
-                                fontSize: '0.7rem',
-                                height: 24,
-                                borderColor: theme.palette.primary.main,
-                                color: theme.palette.primary.main,
-                              }}
-                            />
-                          )
-                        }
-                      })}
-                      {role.permissions.length > 2 && (
-                        <Chip
-                          label={`+${role.permissions.length - 2} more`}
-                          size="small"
-                          variant="filled"
-                          sx={{
-                            fontSize: '0.7rem',
-                            height: 24,
-                            bgcolor: `${theme.palette.primary.main}20`,
-                            color: theme.palette.primary.main,
-                          }}
-                        />
-                      )}
-                    </Stack>
-                  </Box>
+                  
+                  
                 </CardContent>
 
                 <CardActions sx={{ px: 3, pb: 3, pt: 0 }}>
@@ -674,6 +541,18 @@ function RolesPage() {
                 }
               : undefined
           }
+          onSuccess={handleRoleSuccess}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteConfirmationBox
+          open={deleteDialogOpen}
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          title="Delete Role"
+          itemName={roleToDelete?.name}
+          message={`Are you sure you want to delete the role "${roleToDelete?.name}"? This action cannot be undone and will affect ${roleToDelete?.userCount || 0} user(s).`}
+          loading={deleteRoleMutation.isPending}
         />
       </Container>
     </SidebarLayout>
