@@ -55,7 +55,10 @@ export async function createRole(roleData: CreateRoleRequest): Promise<Role> {
   }
 }
 
-export async function updateRole(id: string, roleData: UpdateRoleRequest): Promise<Role> {
+export async function updateRole(
+  id: string,
+  roleData: UpdateRoleRequest,
+): Promise<Role> {
   try {
     const response = await client.put(`/roles/${id}`, roleData)
     return response.data
@@ -74,7 +77,10 @@ export async function deleteRole(id: string): Promise<void> {
   }
 }
 
-export async function assignRoleToUser(userId: string, roleId: string): Promise<void> {
+export async function assignRoleToUser(
+  userId: string,
+  roleId: string,
+): Promise<void> {
   try {
     await client.post(`/users/${userId}/roles`, { roleId })
   } catch (error) {
@@ -83,7 +89,10 @@ export async function assignRoleToUser(userId: string, roleId: string): Promise<
   }
 }
 
-export async function removeRoleFromUser(userId: string, roleId: string): Promise<void> {
+export async function removeRoleFromUser(
+  userId: string,
+  roleId: string,
+): Promise<void> {
   try {
     await client.delete(`/users/${userId}/roles/${roleId}`)
   } catch (error) {

@@ -1,31 +1,31 @@
 import {
+  Avatar,
   Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
+  IconButton,
+  InputAdornment,
   Stack,
   TextField,
   Typography,
-  useTheme,
-  Avatar,
-  IconButton,
-  Divider,
-  InputAdornment,
   alpha,
+  useTheme,
 } from '@mui/material'
 import {
-  Person as PersonIcon,
-  Save as SaveIcon,
+  Business as BusinessIcon,
+  Camera as CameraIcon,
   Cancel as CancelIcon,
+  Close as CloseIcon,
   Edit as EditIcon,
   Email as EmailIcon,
-  Phone as PhoneIcon,
-  Business as BusinessIcon,
   LocationOn as LocationIcon,
-  Camera as CameraIcon,
-  Close as CloseIcon,
+  Person as PersonIcon,
+  Phone as PhoneIcon,
+  Save as SaveIcon,
 } from '@mui/icons-material'
 
 interface UserProfile {
@@ -60,14 +60,14 @@ export function EditProfileForm({
   const theme = useTheme()
 
   // Generate initials for avatar placeholder
-//   const getInitials = (name: string) => {
-//     return name
-//       .split(' ')
-//       .map((word) => word.charAt(0))
-//       .join('')
-//       .toUpperCase()
-//       .slice(0, 2)
-//   }
+  //   const getInitials = (name: string) => {
+  //     return name
+  //       .split(' ')
+  //       .map((word) => word.charAt(0))
+  //       .join('')
+  //       .toUpperCase()
+  //       .slice(0, 2)
+  //   }
 
   return (
     <Dialog

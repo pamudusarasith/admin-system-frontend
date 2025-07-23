@@ -38,7 +38,13 @@ interface LetterSummary {
   }
   receivedDate: string
   priority: 'Normal' | 'Urgent' | 'High'
-  status: 'Pending' | 'Assigned to Division' | 'Assigned to Person' | 'In Progress' | 'Completed' | 'Returned'
+  status:
+    | 'Pending'
+    | 'Assigned to Division'
+    | 'Assigned to Person'
+    | 'In Progress'
+    | 'Completed'
+    | 'Returned'
   assignedDivision?: {
     name: string
     assignedDate: string
@@ -93,7 +99,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
   const handleMenuAction = (action: string, event: React.MouseEvent) => {
     event.stopPropagation()
     setAnchorEl(null)
-    
+
     // Handle different actions
     switch (action) {
       case 'view':
@@ -426,7 +432,8 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                       {letter.currentAssignee.division}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Assigned: {formatDate(letter.currentAssignee.assignedDate)}
+                      Assigned:{' '}
+                      {formatDate(letter.currentAssignee.assignedDate)}
                     </Typography>
                   </Box>
                 </Box>
@@ -470,7 +477,8 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                       Division Assignment
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Assigned: {formatDate(letter.assignedDivision.assignedDate)}
+                      Assigned:{' '}
+                      {formatDate(letter.assignedDivision.assignedDate)}
                     </Typography>
                   </Box>
                 </Box>
