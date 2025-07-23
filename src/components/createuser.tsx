@@ -213,6 +213,46 @@ export function CreateUser({ onClose }: CreateUserProps) {
             type="submit"
             variant="contained"
             sx={{ borderRadius: 2, px: 4 }}
+            onClick={async () => {
+              // Collect form data
+              const username = (
+                document.querySelector(
+                  'input[name="username"]',
+                ) as HTMLInputElement
+              ).value
+              const email = (
+                document.querySelector(
+                  'input[name="email"]',
+                ) as HTMLInputElement
+              ).value
+              const division = (
+                document.querySelector(
+                  'select[name="division"]',
+                ) as HTMLSelectElement
+              ).value
+              const role = (
+                document.querySelector(
+                  'select[name="role"]',
+                ) as HTMLSelectElement
+              ).value
+
+              // Send to /users API
+              try {
+                const response = await fetch('/users', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ username, email, division, role }),
+                })
+                if (response.ok) {
+                  alert('User created!')
+                  if (onClose) onClose()
+                } else {
+                  alert('Failed to create user')
+                }
+              } catch (error) {
+                alert('Error creating user')
+              }
+            }}
           >
             Create
           </Button>

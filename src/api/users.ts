@@ -9,3 +9,13 @@ export async function getUsers(): Promise<any> {
     throw error
   }
 }
+
+export async function createUser(userData: any): Promise<any> {
+  try {
+    const response = await client.post('/users', userData)
+    return response.data
+  } catch (error) {
+    console.error('Failed to create user:', error)
+    throw error
+  }
+}
