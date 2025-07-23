@@ -248,6 +248,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                         <MenuItem value="Administration Division">
                           Administration Division
                         </MenuItem>
+                        <MenuItem value="IT Division">IT Division</MenuItem>
                         <MenuItem value="Finance Division">
                           Finance Division
                         </MenuItem>
@@ -300,6 +301,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                         <MenuItem value="Minister of Education">
                           Minister of Education
                         </MenuItem>
+                        <MenuItem value="admin">Admin</MenuItem>
                         <MenuItem value="Permanent Secretary">
                           Permanent Secretary
                         </MenuItem>
