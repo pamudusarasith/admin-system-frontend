@@ -19,9 +19,9 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import { SearchBar, SidebarLayout, AddCabinetPaperDialog } from '@/components'
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
+import { AddCabinetPaperDialog, SearchBar, SidebarLayout } from '@/components'
 
 export const Route = createFileRoute('/papers')({
   component: cabinetPaperPage,
@@ -63,7 +63,7 @@ function cabinetPaperPage() {
     category: string
     submissionDate: string
   }
-  const cabinetPapers: CabinetPaper[] = [
+  const cabinetPapers: Array<CabinetPaper> = [
     {
       id: 'CP-2025-015',
       title: 'Policy on University Staff International Training Programs',
@@ -108,7 +108,7 @@ function cabinetPaperPage() {
     },
   ]
 
-  //status badge colors
+  // status badge colors
   const getStatusColor = (status: CabinetPaper['status']) => {
     switch (status) {
       case 'Approved':
