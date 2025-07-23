@@ -1,3 +1,4 @@
+import axios from "axios"
 import { client } from './client'
 
 export async function getUsers(): Promise<any> {
@@ -10,12 +11,15 @@ export async function getUsers(): Promise<any> {
   }
 }
 
-export async function createUser(userData: any): Promise<any> {
-  try {
-    const response = await client.post('/users', userData)
-    return response.data
-  } catch (error) {
-    console.error('Failed to create user:', error)
-    throw error
-  }
+export interface CreateUserPayload {
+  username: string
+  email: string
+  role: string
+  division: string
 }
+
+export const createUser = async (data: CreateUserPayload) => {
+  const res = await axios.post("http://localhost:8080/users", data)
+  return res.data
+}
+
