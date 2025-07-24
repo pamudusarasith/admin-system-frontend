@@ -122,8 +122,7 @@ function DivisionPage() {
   const filteredDivisions = divisions.filter(
     (division: Division) =>
       division.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      division.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      division.id.toString().toLowerCase().includes(searchTerm.toLowerCase()),
+      division.description.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const handleRefresh = () => {
@@ -191,7 +190,6 @@ function DivisionPage() {
       } else {
         // Create new division
         const createRequest: CreateDivisionRequest = {
-          id: divisionData.divisionID,
           name: divisionData.divisionName || divisionData.name,
           description: divisionData.description,
         }
@@ -274,7 +272,7 @@ function DivisionPage() {
             <Box sx={{ flex: 1, width: '100%' }}>
               <Box>
                 <SearchBar
-                  placeholder="Search divisions by name, description, or ID..."
+                  placeholder="Search divisions by name or description..."
                   value={searchTerm}
                   onChange={setSearchTerm}
                   onSearch={handleSearch}
@@ -398,15 +396,6 @@ function DivisionPage() {
                           : theme.palette.grey[100],
                     }}
                   >
-                    <TableCell sx={{ minWidth: 120 }}>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                      >
-                        <Typography variant="subtitle2" fontWeight="bold">
-                          Division ID
-                        </Typography>
-                      </Box>
-                    </TableCell>
                     <TableCell sx={{ minWidth: 200 }}>
                       <Box
                         sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
@@ -437,7 +426,7 @@ function DivisionPage() {
                   {filteredDivisions.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={4}
+                        colSpan={3}
                         sx={{ textAlign: 'center', py: 4 }}
                       >
                         <Typography variant="body2" color="text.secondary">
@@ -454,15 +443,6 @@ function DivisionPage() {
                           '&:last-child td, &:last-child th': { border: 0 },
                         }}
                       >
-                        <TableCell sx={{ minWidth: 120 }}>
-                          <Typography
-                            variant="body2"
-                            fontWeight="medium"
-                            sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
-                          >
-                            {division.id}
-                          </Typography>
-                        </TableCell>
                         <TableCell sx={{ minWidth: 200 }}>
                           <Box>
                             <Typography
@@ -573,7 +553,6 @@ function DivisionPage() {
           initialData={
             editingDivision
               ? {
-                  divisionID: editingDivision.id,
                   divisionName: editingDivision.name,
                   description: editingDivision.description,
                 }

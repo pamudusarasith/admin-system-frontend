@@ -37,6 +37,7 @@ import {
   SidebarLayout,
   AddRoleDialog,
   DeleteConfirmationBox,
+  ViewRoleDetails,
 } from '@/components'
 
 // We fetch user roles from backend using the getRoles function imported from '@/api'.
@@ -62,6 +63,8 @@ function RolesPage() {
   const [editMode, setEditMode] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [roleToDelete, setRoleToDelete] = useState<UserRole | null>(null)
+  const [viewDetailsOpen, setViewDetailsOpen] = useState(false)
+  const [roleToView, setRoleToView] = useState<UserRole | null>(null)
 
   // TanStack Query for fetching roles
   const {
@@ -164,6 +167,16 @@ function RolesPage() {
     setOpenDialog(false)
     setSelectedRole(null)
     setEditMode(false)
+  }
+
+  const handleViewDetails = (role: UserRole) => {
+    setRoleToView(role)
+    setViewDetailsOpen(true)
+  }
+
+  const handleCloseViewDetails = () => {
+    setViewDetailsOpen(false)
+    setRoleToView(null)
   }
 
   const handleRoleSuccess = () => {
@@ -476,6 +489,7 @@ function RolesPage() {
                     variant="outlined"
                     size="small"
                     fullWidth
+                    onClick={() => handleViewDetails(role)}
                     sx={{
                       borderColor: theme.palette.primary.main,
                       color: theme.palette.primary.main,
@@ -553,6 +567,13 @@ function RolesPage() {
           itemName={roleToDelete?.name}
           message={`Are you sure you want to delete the role "${roleToDelete?.name}"? This action cannot be undone and will affect ${roleToDelete?.userCount || 0} user(s).`}
           loading={deleteRoleMutation.isPending}
+        />
+
+        {/* View Role Details Dialog */}
+        <ViewRoleDetails
+          open={viewDetailsOpen}
+          onClose={handleCloseViewDetails}
+          role={roleToView}
         />
       </Container>
     </SidebarLayout>

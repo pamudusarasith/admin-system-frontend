@@ -7,7 +7,6 @@ export interface Division {
 }
 
 export interface CreateDivisionRequest {
-  id: string
   name: string
   description: string
 }

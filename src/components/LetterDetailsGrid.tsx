@@ -24,9 +24,9 @@ interface LetterAttachment {
 
 interface LetterSender {
   name: string
-  organization: string
   email: string
-  phone: string
+  phone_number: string
+  address: string
 }
 
 interface LetterAssignee {
@@ -54,7 +54,7 @@ interface LetterDetailsGridProps {
   sender: LetterSender
   assignedDivision?: LetterDivision
   currentAssignee?: LetterAssignee
-  category: string
+  modeOfArrival: string
   receivedDate: string
   originalAttachments: Array<LetterAttachment>
   formatTimestamp: (timestamp: string) => string
@@ -64,7 +64,7 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
   sender,
   assignedDivision,
   currentAssignee,
-  category,
+  modeOfArrival,
   receivedDate,
   originalAttachments,
   formatTimestamp,
@@ -104,13 +104,13 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
                 {sender.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {sender.organization}
+                {sender.address}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {sender.email}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {sender.phone}
+                {sender.phone_number}
               </Typography>
             </Box>
           </Box>
@@ -204,9 +204,11 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
           <Stack spacing={2}>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Category
+                Mode of Arrival
               </Typography>
-              <Typography variant="body1">{category}</Typography>
+              <Typography variant="body1">
+                {modeOfArrival.replace(/_/g, ' ')}
+              </Typography>
             </Box>
             <Box>
               <Typography variant="body2" color="text.secondary">

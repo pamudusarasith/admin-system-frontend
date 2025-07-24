@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import {
+  Alert,
   Avatar,
   Box,
   Breadcrumbs,
   Checkbox,
+  CircularProgress,
   Container,
   Divider,
   FormControl,
@@ -39,81 +42,29 @@ import {
   MoreVert as MoreVertIcon,
   Search as SearchIcon,
 } from '@mui/icons-material'
-import { CreateUser, SidebarLayout, AddButton } from '@/components'
+import type { User } from '@/api/users'
+import { AddButton, CreateUser, SidebarLayout } from '@/components'
+import { getUsers } from '@/api/users'
 
 export const Route = createFileRoute('/users/')({
   component: RouteComponent,
 })
 
-function createData(
-  id: string,
-  name: string,
-  email: string,
-  phone: string,
-  branch: string,
-  role: string,
-  status: 'Active' | 'Pending' | 'Banned' | 'Rejected',
-  avatarUrl: string,
-) {
-  return { id, name, email, phone, branch, role, status, avatarUrl }
-}
-
-const rows = [
-  createData(
-    '1',
-    'Nimal Perera',
-    'nimal.p@email.lk',
-    '+94 77 123 4567',
-    'Language Translation Branch ',
-    'Minister of Education',
-    'Active',
-    'broken-image.jpg',
-  ),
-  createData(
-    '2',
-    'Kamala Silva',
-    'kamala.s@email.lk',
-    '+94 71 987 6543',
-    'Legal Branch',
-    'Permanent Secretary',
-    'Pending',
-    'https://placehold.co/40x40/33FF57/FFFFFF?text=KS',
-  ),
-  createData(
-    '3',
-    'Saman Kumara',
-    'saman.k@email.lk',
-    '+94 76 234 5678',
-    'Transport Branch',
-    'Additional Secretary',
-    'Banned',
-    'https://placehold.co/40x40/3357FF/FFFFFF?text=SK',
-  ),
-  createData(
-    '4',
-    'Dilani Fernando',
-    'dilani.f@email.lk',
-    '+94 72 345 6789',
-    'Parliamentary Affairs',
-    'Parliamentary Secretary',
-    'Rejected',
-    'https://placehold.co/40x40/FF33E9/FFFFFF?text=DF',
-  ),
-  createData(
-    '5',
-    'Ranjith Bandara',
-    'ranjith.b@email.lk',
-    '+94 70 456 7890',
-    'General Administration Branch',
-    'Director Generals',
-    'Pending',
-    'https://placehold.co/40x40/E9FF33/FFFFFF?text=RB',
-  ),
-]
-
 function RouteComponent() {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Fetch users using TanStack Query
+  const {
+    data: users = [],
+    isLoading,
+    error,
+  } = useQuery<Array<User>>({
+    queryKey: ['users'],
+    queryFn: getUsers,
+  })
 
   const handleOpen = () => {
     setOpen(true)
@@ -123,27 +74,45 @@ function RouteComponent() {
     setOpen(false)
   }
 
-  const getStatusBadge = (
-    status: 'Active' | 'Pending' | 'Banned' | 'Rejected',
-  ) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue)
+  }
+
+  // Filter users based on active tab and search query
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.division.toLowerCase().includes(searchQuery.toLowerCase())
+
+    if (activeTab === 1) return user.isActive === true && matchesSearch
+    if (activeTab === 2) return user.isActive === false && matchesSearch
+    return matchesSearch // All users
+  })
+
+  // Count users by status
+  const allCount = users.length
+  const activeCount = users.filter((user) => user.isActive === true).length
+  const inactiveCount = users.filter((user) => user.isActive === false).length
+
+  const getStatusBadge = (isActive: boolean | null) => {
     let bgColor = ''
-    let textColor = '#FFFFFF'
-    switch (status) {
-      case 'Active':
-        bgColor = '#2E7D32'
-        break
-      case 'Pending':
-        bgColor = '#F57F17'
-        break
-      case 'Banned':
-        bgColor = '#D32F2F'
-        break
-      case 'Rejected':
-        bgColor = '#7B1FA2'
-        break
-      default:
-        bgColor = '#424242'
+    const textColor = '#FFFFFF'
+    let label = ''
+
+    if (isActive === true) {
+      bgColor = '#2E7D32'
+      label = 'Active'
+    } else if (isActive === false) {
+      bgColor = '#D32F2F'
+      label = 'Inactive'
+    } else {
+      bgColor = '#424242'
+      label = 'Unknown'
     }
+
     return (
       <Box
         component="span"
@@ -161,9 +130,21 @@ function RouteComponent() {
           minWidth: 60,
         }}
       >
-        {status}
+        {label}
       </Box>
     )
+  }
+
+  const generateAvatarUrl = (user: User) => {
+    const initials = user.fullName
+      ? user.fullName
+          .split(' ')
+          .map((name) => name[0])
+          .join('')
+          .substring(0, 2)
+          .toUpperCase()
+      : user.username.substring(0, 2).toUpperCase()
+    return `https://placehold.co/40x40/3357FF/FFFFFF?text=${initials}`
   }
 
   return (
@@ -239,12 +220,19 @@ function RouteComponent() {
           elevation={3}
           sx={{ display: 'flex', flexDirection: 'column', borderRadius: 2 }}
         >
+          {error && (
+            <Alert severity="error" sx={{ m: 2 }}>
+              Failed to load users:{' '}
+              {error instanceof Error ? error.message : 'Unknown error'}
+            </Alert>
+          )}
+
           <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs
-                value={0}
-                onChange={() => {}}
-                aria-label="basic tabs example"
+                value={activeTab}
+                onChange={handleTabChange}
+                aria-label="user status tabs"
                 textColor="inherit"
                 indicatorColor="primary"
                 variant="scrollable"
@@ -263,11 +251,11 @@ function RouteComponent() {
                         color={theme.palette.primary.contrastText}
                         sx={{ textAlign: 'center' }}
                       >
-                        20
+                        {allCount}
                       </Box>
                     </Box>
                   }
-                ></Tab>
+                />
                 <Tab
                   label={
                     <Box display={'flex'} gap={1} alignItems={'center'}>
@@ -280,32 +268,15 @@ function RouteComponent() {
                         px={0.8}
                         color={theme.palette.success.dark}
                       >
-                        4
+                        {activeCount}
                       </Box>
                     </Box>
                   }
-                ></Tab>
+                />
                 <Tab
                   label={
                     <Box display={'flex'} gap={1} alignItems={'center'}>
-                      Pending{' '}
-                      <Box
-                        bgcolor={theme.palette.warning.light}
-                        borderRadius={1.4}
-                        minWidth={24}
-                        sx={{ textAlign: 'center' }}
-                        px={0.8}
-                        color={theme.palette.warning.dark}
-                      >
-                        10
-                      </Box>
-                    </Box>
-                  }
-                ></Tab>
-                <Tab
-                  label={
-                    <Box display={'flex'} gap={1} alignItems={'center'}>
-                      Banned{' '}
+                      Inactive{' '}
                       <Box
                         bgcolor={theme.palette.error.light}
                         borderRadius={1.4}
@@ -314,28 +285,11 @@ function RouteComponent() {
                         px={0.8}
                         color={theme.palette.error.dark}
                       >
-                        7
+                        {inactiveCount}
                       </Box>
                     </Box>
                   }
-                ></Tab>
-                <Tab
-                  label={
-                    <Box display={'flex'} gap={1} alignItems={'center'}>
-                      Rejected{' '}
-                      <Box
-                        bgcolor={theme.palette.grey[400]}
-                        borderRadius={1.4}
-                        minWidth={24}
-                        sx={{ textAlign: 'center' }}
-                        px={0.8}
-                        color={theme.palette.grey[700]}
-                      >
-                        2
-                      </Box>
-                    </Box>
-                  }
-                ></Tab>
+                />
               </Tabs>
             </Box>
 
@@ -365,6 +319,8 @@ function RouteComponent() {
                 variant="outlined"
                 size="small"
                 fullWidth
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 sx={{ borderRadius: 2 }}
                 InputProps={{
                   startAdornment: (
@@ -374,7 +330,7 @@ function RouteComponent() {
                   ),
                   sx: { borderRadius: 2 },
                 }}
-              ></TextField>
+              />
             </Box>
 
             <TableContainer
@@ -449,87 +405,116 @@ function RouteComponent() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
-                      <TableCell
-                        padding="checkbox"
-                        sx={{ display: { xs: 'none', sm: 'table-cell' } }}
-                      >
-                        <Checkbox color="primary" />
-                      </TableCell>
-                      <TableCell
-                        component="th"
-                        scope="row"
-                        sx={{ minWidth: 200 }}
-                      >
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Avatar
-                            src={row.avatarUrl}
-                            alt={row.name}
-                            sx={{ width: 32, height: 32 }}
-                          />
-                          <Box>
-                            <Typography
-                              variant="subtitle2"
-                              fontWeight="medium"
-                              sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
-                            >
-                              {row.name}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                              }}
-                            >
-                              {row.email}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                                display: { xs: 'block', md: 'none' },
-                              }}
-                            >
-                              {row.phone}
-                            </Typography>
-                          </Box>
-                        </Stack>
-                      </TableCell>
-                      <TableCell
-                        sx={{ display: { xs: 'none', md: 'table-cell' } }}
-                      >
-                        {row.phone}
-                      </TableCell>
-                      <TableCell
-                        sx={{ display: { xs: 'none', lg: 'table-cell' } }}
-                      >
-                        {row.branch}
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
-                        >
-                          {row.role}
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                        <CircularProgress />
+                        <Typography variant="body2" sx={{ mt: 2 }}>
+                          Loading users...
                         </Typography>
                       </TableCell>
-                      <TableCell>{getStatusBadge(row.status)}</TableCell>
-                      <TableCell align="right">
-                        <IconButton size="small">
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small">
-                          <MoreVertIcon fontSize="small" />
-                        </IconButton>
+                    </TableRow>
+                  ) : filteredUsers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {searchQuery
+                            ? 'No users found matching your search.'
+                            : 'No users found.'}
+                        </Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <TableRow
+                        key={user.id}
+                        sx={{
+                          '&:last-child td, &:last-child th': { border: 0 },
+                        }}
+                      >
+                        <TableCell
+                          padding="checkbox"
+                          sx={{ display: { xs: 'none', sm: 'table-cell' } }}
+                        >
+                          <Checkbox color="primary" />
+                        </TableCell>
+                        <TableCell
+                          component="th"
+                          scope="row"
+                          sx={{ minWidth: 200 }}
+                        >
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1}
+                          >
+                            <Avatar
+                              src={generateAvatarUrl(user)}
+                              alt={user.fullName || user.username}
+                              sx={{ width: 32, height: 32 }}
+                            />
+                            <Box>
+                              <Typography
+                                variant="subtitle2"
+                                fontWeight="medium"
+                                sx={{
+                                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                                }}
+                              >
+                                {user.fullName || user.username}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{
+                                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                }}
+                              >
+                                {user.email || 'No email'}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{
+                                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                  display: { xs: 'block', md: 'none' },
+                                }}
+                              >
+                                {user.phoneNumber || 'No phone'}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </TableCell>
+                        <TableCell
+                          sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                        >
+                          {user.phoneNumber || 'No phone'}
+                        </TableCell>
+                        <TableCell
+                          sx={{ display: { xs: 'none', lg: 'table-cell' } }}
+                        >
+                          {user.division}
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                          >
+                            {user.role}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(user.isActive)}</TableCell>
+                        <TableCell align="right">
+                          <IconButton size="small">
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small">
+                            <MoreVertIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                   <Divider />
                 </TableBody>
               </Table>
@@ -577,7 +562,7 @@ function RouteComponent() {
                     fontSize: { xs: '0.75rem', sm: '0.875rem' },
                   }}
                 >
-                  1-10 of {rows.length}
+                  1-{filteredUsers.length} of {filteredUsers.length}
                 </Typography>
                 <IconButton size="small" disabled>
                   <KeyboardArrowLeftIcon />

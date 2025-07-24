@@ -13,47 +13,59 @@ import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
+import type { CreateUserPayload } from '@/schemas/users'
 import { createUser } from '@/api/users'
+import { getRoles } from '@/api/roles'
+import { getDivisions } from '@/api/divisions'
+import { createUserSchema } from '@/schemas/users'
 
 interface CreateUserProps {
   onClose?: () => void
 }
-
-// Validation schema using Zod
-const createUserSchema = z.object({
-  username: z
-    .string()
-    .min(1, 'Username is required')
-    .min(3, 'Username must be at least 3 characters'),
-  email: z.string().min(1, 'Email is required').email('Invalid email format'),
-  division: z.string().min(1, 'Division is required'),
-  role: z.string().min(1, 'Role is required'),
-})
-
-type CreateUserForm = z.infer<typeof createUserSchema>
 
 export function CreateUser({ onClose }: CreateUserProps) {
   const theme = useTheme()
   const createMutation = useMutation({
     mutationFn: createUser,
   })
+  const queryClient = useQueryClient()
+
+  // Fetch roles and divisions using TanStack Query
+  const {
+    data: roles = [],
+    isLoading: rolesLoading,
+    error: rolesError,
+  } = useQuery({
+    queryKey: ['roles'],
+    queryFn: getRoles,
+  })
+
+  const {
+    data: divisions = [],
+    isLoading: divisionsLoading,
+    error: divisionsError,
+  } = useQuery({
+    queryKey: ['divisions'],
+    queryFn: getDivisions,
+  })
 
   const form = useForm({
     defaultValues: {
       username: '',
       email: '',
-      division: '',
-      role: '',
-    } as CreateUserForm,
+      divisionId: 0,
+      roleId: 0,
+    } as CreateUserPayload,
     onSubmit: async ({ value }) => {
       try {
         // Validate the form data
         const validatedData = createUserSchema.parse(value)
         await createMutation.mutateAsync(validatedData)
         alert('User created successfully')
+        queryClient.invalidateQueries({ queryKey: ['users'] })
         if (onClose) onClose()
       } catch (error) {
         console.error(error)
@@ -112,6 +124,23 @@ export function CreateUser({ onClose }: CreateUserProps) {
         }}
       > */}
       <Box sx={{ width: '100%' }}>
+        {/* Loading state */}
+        {(rolesLoading || divisionsLoading) && (
+          <Box sx={{ textAlign: 'center', py: 2 }}>
+            <Typography>Loading roles and divisions...</Typography>
+          </Box>
+        )}
+
+        {/* Error state */}
+        {(rolesError || divisionsError) && (
+          <Box sx={{ textAlign: 'center', py: 2 }}>
+            <Typography color="error">
+              Error loading data:{' '}
+              {rolesError?.message || divisionsError?.message}
+            </Typography>
+          </Box>
+        )}
+
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -222,7 +251,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                 }}
               >
                 <form.Field
-                  name="division"
+                  name="divisionId"
                   validators={{
                     onChange: ({ value }) => {
                       if (!value) return 'Division is required'
@@ -233,6 +262,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                     <FormControl
                       variant="outlined"
                       error={field.state.meta.errors.length > 0}
+                      disabled={divisionsLoading}
                     >
                       <InputLabel>Division</InputLabel>
                       <Select
@@ -245,21 +275,17 @@ export function CreateUser({ onClose }: CreateUserProps) {
                         <MenuItem value="">
                           <em>None</em>
                         </MenuItem>
-                        <MenuItem value="Administration Division">
-                          Administration Division
-                        </MenuItem>
-                        <MenuItem value="Finance Division">
-                          Finance Division
-                        </MenuItem>
-                        <MenuItem value="Establishment Division">
-                          Establishment Division
-                        </MenuItem>
-                        <MenuItem value="Planning Division">
-                          Planning Division
-                        </MenuItem>
-                        <MenuItem value="Education Quality Development Division">
-                          Education Quality Development Division
-                        </MenuItem>
+                        {divisionsError ? (
+                          <MenuItem disabled>
+                            <em>Error loading divisions</em>
+                          </MenuItem>
+                        ) : (
+                          divisions.map((division) => (
+                            <MenuItem key={division.id} value={division.id}>
+                              {division.name}
+                            </MenuItem>
+                          ))
+                        )}
                       </Select>
                       {field.state.meta.errors.length > 0 && (
                         <Typography
@@ -274,7 +300,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                   )}
                 />
                 <form.Field
-                  name="role"
+                  name="roleId"
                   validators={{
                     onChange: ({ value }) => {
                       if (!value) return 'Role is required'
@@ -285,6 +311,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                     <FormControl
                       variant="outlined"
                       error={field.state.meta.errors.length > 0}
+                      disabled={rolesLoading}
                     >
                       <InputLabel>Role</InputLabel>
                       <Select
@@ -297,24 +324,17 @@ export function CreateUser({ onClose }: CreateUserProps) {
                         <MenuItem value="">
                           <em>None</em>
                         </MenuItem>
-                        <MenuItem value="Minister of Education">
-                          Minister of Education
-                        </MenuItem>
-                        <MenuItem value="Permanent Secretary">
-                          Permanent Secretary
-                        </MenuItem>
-                        <MenuItem value="Additional Secretary">
-                          Additional Secretary
-                        </MenuItem>
-                        <MenuItem value="Parliamentary Secretary">
-                          Parliamentary Secretary
-                        </MenuItem>
-                        <MenuItem value="Director Generals">
-                          Director Generals
-                        </MenuItem>
-                        <MenuItem value="Director of Education">
-                          Director of Education
-                        </MenuItem>
+                        {rolesError ? (
+                          <MenuItem disabled>
+                            <em>Error loading roles</em>
+                          </MenuItem>
+                        ) : (
+                          roles.map((role) => (
+                            <MenuItem key={role.id} value={role.id}>
+                              {role.name}
+                            </MenuItem>
+                          ))
+                        )}
                       </Select>
                       {field.state.meta.errors.length > 0 && (
                         <Typography
@@ -355,13 +375,21 @@ export function CreateUser({ onClose }: CreateUserProps) {
                   type="submit"
                   variant="contained"
                   disabled={
-                    !canSubmit || isSubmitting || createMutation.isPending
+                    !canSubmit ||
+                    isSubmitting ||
+                    createMutation.isPending ||
+                    rolesLoading ||
+                    divisionsLoading ||
+                    !!rolesError ||
+                    !!divisionsError
                   }
                   sx={{ borderRadius: 2, px: 4 }}
                 >
                   {isSubmitting || createMutation.isPending
                     ? 'Creating...'
-                    : 'Create'}
+                    : rolesLoading || divisionsLoading
+                      ? 'Loading...'
+                      : 'Create'}
                 </Button>
               )}
             />

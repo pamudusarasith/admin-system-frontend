@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SidebarLayout } from '@/components'
+import { SidebarLayout, AdminDashboard } from '@/components'
 // import { ProtectedRoute } from '@/AuthProvider'
 
 export const Route = createFileRoute('/')({
@@ -9,7 +9,9 @@ export const Route = createFileRoute('/')({
 function App() {
   return (
     // <ProtectedRoute>
-    <SidebarLayout>hi</SidebarLayout>
+    <SidebarLayout>
+      <AdminDashboard />
+    </SidebarLayout>
     // </ProtectedRoute>
   )
 }
