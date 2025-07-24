@@ -36,43 +36,49 @@ interface AddRoleDialogProps {
 // Available permission sections and their actions
 const PERMISSION_SECTIONS = [
   {
-    id: 'USER_MANAGEMENT',
-    label: 'User Management',
-    permissions: [
-      { id: 'user:read', label: 'Read' },
-      { id: 'user:create', label: 'Create' },
-      { id: 'user:update', label: 'Update' },
-      { id: 'user:delete', label: 'Delete' },
-    ],
-  },
-  {
     id: 'LETTER_MANAGEMENT',
     label: 'Letter Management',
     permissions: [
-      { id: 'letter:read', label: 'Read' },
-      { id: 'letter:create', label: 'Create' },
-      { id: 'letter:update', label: 'Update' },
-      { id: 'letter:delete', label: 'Delete' },
+      { id: 'letter:create', label: 'Create Letters' },
+      { id: 'letter:view', label: 'View Letters' },
+      { id: 'letter:edit', label: 'Edit Letters' },
+      { id: 'letter:delete', label: 'Delete Letters' },
+      { id: 'letter:assign', label: 'Assign Letters' },
+      { id: 'letter:accept', label: 'Accept Letters' },
+      { id: 'letter:return', label: 'Return Letters' },
+      { id: 'letter:close', label: 'Close Letters' },
     ],
   },
   {
-    id: 'CABINET_PAPER_MANAGEMENT',
-    label: 'Cabinet Paper Management',
+    id: 'USER_MANAGEMENT',
+    label: 'User Management',
     permissions: [
-      { id: 'cabinetPaper:read', label: 'Read' },
-      { id: 'cabinetPaper:create', label: 'Create' },
-      { id: 'cabinetPaper:update', label: 'Update' },
-      { id: 'cabinetPaper:delete', label: 'Delete' },
+      { id: 'user:create', label: 'Create Users' },
+      { id: 'user:view', label: 'View Users' },
+      { id: 'user:edit', label: 'Edit Users' },
+      { id: 'user:delete', label: 'Delete Users' },
+      { id: 'user:manage_roles', label: 'Manage User Roles' },
     ],
   },
   {
     id: 'DIVISION_MANAGEMENT',
     label: 'Division Management',
     permissions: [
-      { id: 'division:read', label: 'Read' },
-      { id: 'division:create', label: 'Create' },
-      { id: 'division:update', label: 'Update' },
-      { id: 'division:delete', label: 'Delete' },
+      { id: 'division:create', label: 'Create Divisions' },
+      { id: 'division:view', label: 'View Divisions' },
+      { id: 'division:edit', label: 'Edit Divisions' },
+      { id: 'division:delete', label: 'Delete Divisions' },
+      { id: 'division:manage_users', label: 'Manage Division Users' },
+    ],
+  },
+  {
+    id: 'REPORTS_AND_SYSTEM',
+    label: 'Reports & System',
+    permissions: [
+      { id: 'report:view', label: 'View Reports' },
+      { id: 'report:generate', label: 'Generate Reports' },
+      { id: 'system:admin', label: 'System Administration' },
+      { id: 'settings:manage', label: 'Manage Settings' },
     ],
   },
 ] as const
