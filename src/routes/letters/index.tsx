@@ -404,7 +404,6 @@ function LettersPage() {
                 index={index}
                 getPriorityColor={getPriorityColor}
                 getStatusColor={getStatusColor}
-                formatDate={formatDate}
                 formatTimeAgo={formatTimeAgo}
                 onCardClick={(id) => navigate({ to: `/letters/${id}` })}
               />

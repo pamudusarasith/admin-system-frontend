@@ -26,6 +26,8 @@ import {
   Settings as SettingsIcon,
 } from '@mui/icons-material'
 import { useTheme as useThemeContext } from '../theme'
+import { useAuth } from '@/AuthProvider'
+import { useNavigate } from '@tanstack/react-router'
 
 interface NavbarProps {
   onMenuClick: () => void
@@ -33,6 +35,8 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
   const theme = useMuiTheme()
+  const auth = useAuth()
+  const navigate = useNavigate()
   const { mode, toggleTheme } = useThemeContext()
 
   const [profileMenuAnchor, setProfileMenuAnchor] =
@@ -59,8 +63,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
   }
 
   const handleLogout = () => {
+    auth.logout()
     // Implement logout logic here
     handleProfileMenuClose()
+    navigate({ to: '/login', replace: true })
   }
 
   return (

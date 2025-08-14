@@ -29,6 +29,12 @@ interface LetterSender {
   address: string
 }
 
+interface LetterReceiver {
+  name: string
+  designation?: string
+  division_name?: string
+}
+
 interface LetterAssignee {
   name: string
   role: string
@@ -52,6 +58,7 @@ interface LetterDivision {
 
 interface LetterDetailsGridProps {
   sender: LetterSender
+  receiver: LetterReceiver
   assignedDivision?: LetterDivision
   currentAssignee?: LetterAssignee
   modeOfArrival: string
@@ -62,6 +69,7 @@ interface LetterDetailsGridProps {
 
 export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
   sender,
+  receiver,
   assignedDivision,
   currentAssignee,
   modeOfArrival,
@@ -111,6 +119,38 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {sender.phone_number}
+              </Typography>
+            </Box>
+          </Box>
+        </Paper>
+
+        {/* Receiver Information */}
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+            Receiver Information
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar
+              sx={{
+                width: 56,
+                height: 56,
+                backgroundColor: theme.palette.secondary.main,
+              }}
+            >
+              {receiver.name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')}
+            </Avatar>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                {receiver.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {receiver.designation || 'No designation specified'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {receiver.division_name || 'No division specified'}
               </Typography>
             </Box>
           </Box>

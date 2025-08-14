@@ -62,7 +62,7 @@ interface QuickAction {
 
 export const AdminDashboard: React.FC = () => {
   const theme = useTheme()
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [refreshKey] = useState(0)
 
   // API Queries
   const { data: divisions = [], isLoading: divisionsLoading } = useQuery({

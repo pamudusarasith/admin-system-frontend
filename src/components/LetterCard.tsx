@@ -69,7 +69,6 @@ interface LetterCardProps {
   index: number
   getPriorityColor: (priority: string) => string
   getStatusColor: (status: string) => string
-  formatDate: (dateString: string) => string
   formatTimeAgo: (dateString: string) => string
   onCardClick: (id: number) => void
 }
@@ -79,7 +78,6 @@ export const LetterCard: React.FC<LetterCardProps> = ({
   index,
   getPriorityColor,
   getStatusColor,
-  formatDate,
   formatTimeAgo,
   onCardClick,
 }) => {
@@ -374,153 +372,60 @@ export const LetterCard: React.FC<LetterCardProps> = ({
               </Box>
             </Box>
 
-            {/* Assigned To Section */}
+            {/* To Section */}
             <Box>
               <Typography
                 variant="subtitle2"
                 sx={{ fontWeight: 'bold', mb: 1.5, color: 'secondary.main' }}
               >
-                👤 ASSIGNMENT STATUS
+                � TO
               </Typography>
-              {letter.assignedUser ? (
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                  <Avatar
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                <Avatar
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    backgroundColor: theme.palette.secondary.main,
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {letter.receiverDetails.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')}
+                </Avatar>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    variant="subtitle2"
                     sx={{
-                      width: 40,
-                      height: 40,
-                      backgroundColor: theme.palette.secondary.main,
-                      color: 'white',
-                      fontSize: '0.9rem',
                       fontWeight: 'bold',
+                      mb: 0.5,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {letter.assignedUser.fullName
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </Avatar>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        fontWeight: 'bold',
-                        mb: 0.5,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {letter.assignedUser.fullName}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        mb: 0.5,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {letter.assignedDivision?.name || 'Unknown Division'}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Status:{' '}
-                      {letter.isAcceptedByUser
-                        ? 'Accepted'
-                        : 'Pending Acceptance'}
-                    </Typography>
-                  </Box>
-                </Box>
-              ) : letter.assignedDivision ? (
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                  <Avatar
+                    {letter.receiverDetails.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
                     sx={{
-                      width: 40,
-                      height: 40,
-                      backgroundColor: theme.palette.primary.main,
-                      color: 'white',
-                      fontSize: '0.9rem',
-                      fontWeight: 'bold',
+                      mb: 0.5,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    <AssignmentIcon />
-                  </Avatar>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        fontWeight: 'bold',
-                        mb: 0.5,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {letter.assignedDivision.name}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        mb: 0.5,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      Division Assignment
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Mode: {letter.modeOfArrival.replace(/_/g, ' ')}
-                    </Typography>
-                  </Box>
+                    {letter.receiverDetails.designation || 'No designation provided'}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {letter.receiverDetails.divisionName || 'No division specified'}
+                  </Typography>
                 </Box>
-              ) : (
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                  <Avatar
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      backgroundColor: theme.palette.warning.main,
-                      color: 'white',
-                      fontSize: '0.9rem',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    <ScheduleIcon />
-                  </Avatar>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        fontWeight: 'bold',
-                        mb: 0.5,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      Pending Assignment
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        mb: 0.5,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      Awaiting Division Assignment
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Received: {formatDate(letter.receivedDate)}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
+              </Box>
             </Box>
           </Box>
 
