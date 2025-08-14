@@ -8,6 +8,11 @@ export const letterFormData = z.object({
     email: z.email().optional(),
     phone_number: z.string().optional(),
   }),
+  receiver_details: z.object({
+    name: z.string().min(1),
+    designation: z.string().optional(),
+    division_name: z.string().optional(),
+  }),
   sent_date: z.iso.date().optional(),
   received_date: z.iso.date(),
   mode_of_arrival: z.enum([

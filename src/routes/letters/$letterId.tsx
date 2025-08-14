@@ -65,6 +65,11 @@ interface Letter {
     phone_number: string
     address: string
   }
+  receiverDetails: {
+    name: string
+    designation?: string
+    division_name?: string
+  }
   receivingDate: string
   priority: 'NORMAL' | 'HIGH' | 'URGENT'
   status:
@@ -117,6 +122,11 @@ const mockLetter: Letter = {
     email: 'priyanka.w@ucolombo.lk',
     phone_number: '+94 11 250 3345',
     address: 'University of Colombo, Colombo 03',
+  },
+  receiverDetails: {
+    name: 'Hon. Minister of Education',
+    designation: 'Minister',
+    division_name: 'Ministry of Education',
   },
   receivingDate: '2024-01-15T09:30:00Z',
   priority: 'HIGH',
@@ -334,6 +344,7 @@ function LetterThreadView() {
 
         <LetterDetailsGrid
           sender={letter.senderDetails}
+          receiver={letter.receiverDetails}
           assignedDivision={letter.assignedDivision}
           currentAssignee={letter.currentAssignee}
           modeOfArrival={letter.modeOfArrival}

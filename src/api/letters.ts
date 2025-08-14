@@ -10,6 +10,11 @@ export interface LetterResponse {
     email: string | null
     phoneNumber: string | null
   }
+  receiverDetails: {
+    name: string
+    designation: string | null
+    divisionName: string | null
+  }
   sentDate: string | null
   receivedDate: string
   modeOfArrival:
@@ -46,7 +51,7 @@ export interface LetterResponse {
     division: string
     isActive: boolean
   } | null
-  isAcceptedByUser: boolean
+  isAcceptedByUser: boolean | null
   noOfAttachments: number
 }
 

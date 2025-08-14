@@ -70,6 +70,11 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
         phone_number: '',
         address: '',
       },
+      receiver_details: {
+        name: '',
+        designation: '',
+        division_name: '',
+      },
       priority: 'NORMAL',
       mode_of_arrival: 'REGISTERED_POST',
       received_date: new Date().toISOString().split('T')[0],
@@ -354,6 +359,80 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                         />
                       )}
                     </form.Field>
+                  </Stack>
+                </Box>
+
+                {/* Receiver Details Section */}
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+                    Receiver Details
+                  </Typography>
+                  <Stack spacing={2}>
+                    <form.Field
+                      name="receiver_details.name"
+                      validators={{
+                        onChange: ({ value }) =>
+                          !value.trim() ? 'Receiver name is required' : undefined,
+                      }}
+                    >
+                      {(field) => (
+                        <TextField
+                          fullWidth
+                          label="Receiver Name"
+                          variant="outlined"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          error={!field.state.meta.isValid}
+                          helperText={field.state.meta.errors.join(', ')}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                            },
+                          }}
+                        />
+                      )}
+                    </form.Field>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                      <form.Field name="receiver_details.designation">
+                        {(field) => (
+                          <TextField
+                            fullWidth
+                            label="Designation"
+                            variant="outlined"
+                            value={field.state.value || ''}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            error={!field.state.meta.isValid}
+                            helperText={field.state.meta.errors.join(', ')}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                              },
+                            }}
+                          />
+                        )}
+                      </form.Field>
+                      <form.Field name="receiver_details.division_name">
+                        {(field) => (
+                          <TextField
+                            fullWidth
+                            label="Division Name"
+                            variant="outlined"
+                            value={field.state.value || ''}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            error={!field.state.meta.isValid}
+                            helperText={field.state.meta.errors.join(', ')}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                              },
+                            }}
+                          />
+                        )}
+                      </form.Field>
+                    </Stack>
                   </Stack>
                 </Box>
 
