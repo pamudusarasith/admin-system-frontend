@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { AddButton, SearchBar } from '@/components'
 
-export const Route = createFileRoute('/user-roles')({
+export const Route = createFileRoute('/_authenticated/user-roles')({
   component: RouteComponent,
 })
 

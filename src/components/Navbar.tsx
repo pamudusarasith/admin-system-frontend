@@ -25,9 +25,9 @@ import {
   Search as SearchIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material'
-import { useTheme as useThemeContext } from '../theme'
-import { useAuth } from '@/AuthProvider'
 import { useNavigate } from '@tanstack/react-router'
+import { useTheme as useThemeContext } from '../theme'
+import { useAuth } from '@/auth'
 
 interface NavbarProps {
   onMenuClick: () => void
@@ -66,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     auth.logout()
     // Implement logout logic here
     handleProfileMenuClose()
-    navigate({ to: '/login', replace: true })
+    navigate({ to: '/login', search: { redirect: '/' } })
   }
 
   return (

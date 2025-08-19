@@ -46,7 +46,7 @@ import type { User } from '@/api/users'
 import { AddButton, CreateUser, SidebarLayout } from '@/components'
 import { getUsers } from '@/api/users'
 
-export const Route = createFileRoute('/users/')({
+export const Route = createFileRoute('/_authenticated/users/')({
   component: RouteComponent,
 })
 

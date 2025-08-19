@@ -43,7 +43,7 @@ import {
 // We fetch user roles from backend using the getRoles function imported from '@/api'.
 // This is called inside the loadRoles function, which is triggered in a useEffect when the component mounts.
 
-export const Route = createFileRoute('/roles')({
+export const Route = createFileRoute('/_authenticated/roles')({
   component: RolesPage,
 })
 

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import {
   Alert,
@@ -22,10 +22,18 @@ import {
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { AnimatedIcon } from '@/components'
-import { login } from '@/api'
-import { useAuth } from '@/AuthProvider'
+import { useAuth } from '@/auth'
 
 export const Route = createFileRoute('/login')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: (search.redirect as string) || '/',
+  }),
+  beforeLoad: ({ context, search }) => {
+    // Redirect if already authenticated
+    if (context.auth.isAuthenticated) {
+      throw redirect({ to: search.redirect })
+    }
+  },
   component: LoginPage,
 })
 
@@ -37,23 +45,28 @@ interface LoginForm {
 function LoginPage() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { login: authLogin, error: authError, clearError } = useAuth()
+  const {
+    login: authLogin,
+    error,
+    clearError,
+    isLoading: authLoading,
+  } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const search = Route.useSearch()
 
   const loginMutation = useMutation({
-    mutationFn: ({ username, password }: LoginForm) =>
-      login(username, password),
-    onSuccess: (data) => {
-      // Clear any previous auth errors
+    mutationFn: async ({ username, password }: LoginForm) => {
+      // Clear any previous errors
       clearError()
-      // Use the auth context login method
-      const success = authLogin(data.access_token)
-      if (success) {
-        navigate({ to: '/' })
-      }
+
+      // Use the auth context login method which handles API call internally
+      await authLogin(username, password)
+
+      // Navigate after successful login
+      navigate({ to: search.redirect, replace: true })
     },
-    onError: () => {
-      // Error is handled by the auth context
+    onError: (loginError) => {
+      console.error('Login failed:', loginError)
     },
   })
 
@@ -214,7 +227,7 @@ function LoginPage() {
             </Box>
 
             {/* Error Alert */}
-            {(loginMutation.isError || authError) && (
+            {(error || loginMutation.isError) && (
               <Alert
                 severity="error"
                 sx={{
@@ -222,10 +235,10 @@ function LoginPage() {
                   borderRadius: 2,
                 }}
               >
-                {authError || 
-                 (loginMutation.error instanceof Error
-                   ? loginMutation.error.message
-                   : 'Login failed. Please check your credentials.')}
+                {error ||
+                  (loginMutation.error instanceof Error
+                    ? loginMutation.error.message
+                    : 'Login failed. Please check your credentials.')}
               </Alert>
             )}
 
@@ -256,7 +269,7 @@ function LoginPage() {
                       onChange={(e) => field.handleChange(e.target.value)}
                       error={!!field.state.meta.errors.length}
                       helperText={field.state.meta.errors[0]}
-                      disabled={loginMutation.isPending}
+                      disabled={loginMutation.isPending || authLoading}
                       InputLabelProps={{
                         sx: {
                           fontSize: '1.1rem',
@@ -300,6 +313,7 @@ function LoginPage() {
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       error={!!field.state.meta.errors.length}
+                      disabled={loginMutation.isPending || authLoading}
                       InputLabelProps={{
                         sx: {
                           fontSize: '1.1rem',
@@ -318,7 +332,9 @@ function LoginPage() {
                               <IconButton
                                 onClick={handleTogglePasswordVisibility}
                                 edge="end"
-                                disabled={loginMutation.isPending}
+                                disabled={
+                                  loginMutation.isPending || authLoading
+                                }
                               >
                                 {showPassword ? (
                                   <VisibilityOff />
@@ -377,7 +393,7 @@ function LoginPage() {
                   variant="contained"
                   size="large"
                   fullWidth
-                  disabled={loginMutation.isPending}
+                  disabled={loginMutation.isPending || authLoading}
                   sx={{
                     py: 1.5,
                     borderRadius: 2,
@@ -398,7 +414,9 @@ function LoginPage() {
                     transition: 'all 0.3s ease',
                   }}
                 >
-                  {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+                  {loginMutation.isPending || authLoading
+                    ? 'Signing In...'
+                    : 'Sign In'}
                 </Button>
               </Stack>
             </Box>

@@ -25,7 +25,7 @@ import {
 } from '@mui/icons-material'
 
 import { SidebarLayout, EditProfileForm } from '@/components'
-export const Route = createFileRoute('/profile')({
+export const Route = createFileRoute('/_authenticated/profile')({
   component: ProfilePage,
 })
 

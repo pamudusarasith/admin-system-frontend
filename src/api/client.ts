@@ -9,6 +9,8 @@ export const client = axios.create({
   },
 })
 
+client.defaults.withCredentials = true
+
 client.interceptors.request.use(
   (config) => {
     const access_token = localStorage.getItem('access_token')

@@ -23,7 +23,7 @@ import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { AddCabinetPaperDialog, SearchBar, SidebarLayout } from '@/components'
 
-export const Route = createFileRoute('/papers')({
+export const Route = createFileRoute('/_authenticated/papers')({
   component: cabinetPaperPage,
 })
 
