@@ -10,7 +10,7 @@ import {
   SidebarLayout,
 } from '@/components'
 
-export const Route = createFileRoute('/letters/$letterId')({
+export const Route = createFileRoute('/_authenticated/letters/$letterId')({
   component: LetterThreadView,
 })
 

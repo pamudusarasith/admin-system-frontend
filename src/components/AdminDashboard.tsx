@@ -1,32 +1,32 @@
 import React, { useState } from 'react'
 import {
+  Avatar,
   Box,
   Card,
   CardContent,
-  Container,
-  Typography,
-  useTheme,
-  Avatar,
   Chip,
-  LinearProgress,
+  Container,
+  Divider,
   IconButton,
+  LinearProgress,
   Paper,
   Stack,
-  Divider,
+  Typography,
+  useTheme,
 } from '@mui/material'
 import {
-  People as PeopleIcon,
-  Business as BusinessIcon,
+  ArrowDownward as ArrowDownwardIcon,
+  ArrowUpward as ArrowUpwardIcon,
   Assignment as AssignmentIcon,
-  Email as EmailIcon,
-  Security as SecurityIcon,
+  Business as BusinessIcon,
   CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
+  Email as EmailIcon,
   Error as ErrorIcon,
   Info as InfoIcon,
-  ArrowUpward as ArrowUpwardIcon,
-  ArrowDownward as ArrowDownwardIcon,
   MoreVert as MoreVertIcon,
+  People as PeopleIcon,
+  Security as SecurityIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
 import { getDivisions } from '@/api/divisions'
@@ -78,10 +78,10 @@ export const AdminDashboard: React.FC = () => {
   })
 
   // Mock data for dashboard stats
-  const dashboardStats: DashboardStats[] = [
+  const dashboardStats: Array<DashboardStats> = [
     {
       title: 'Total Users',
-      value: users?.length || 0,
+      value: users.length || 0,
       change: 12,
       changeType: 'increase',
       icon: <PeopleIcon />,
@@ -89,7 +89,7 @@ export const AdminDashboard: React.FC = () => {
     },
     {
       title: 'Active Divisions',
-      value: divisions?.length || 0,
+      value: divisions.length || 0,
       change: 3,
       changeType: 'increase',
       icon: <BusinessIcon />,
@@ -114,7 +114,7 @@ export const AdminDashboard: React.FC = () => {
   ]
 
   // Mock system activities
-  const systemActivities: SystemActivity[] = [
+  const systemActivities: Array<SystemActivity> = [
     {
       id: '1',
       type: 'user',
@@ -160,7 +160,7 @@ export const AdminDashboard: React.FC = () => {
     },
   ]
 
-  const quickActions: QuickAction[] = [
+  const quickActions: Array<QuickAction> = [
     {
       id: '1',
       title: 'Add New User',

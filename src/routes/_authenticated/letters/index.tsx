@@ -35,7 +35,7 @@ import {
 } from '@/components'
 import { getLetters } from '@/api/letters'
 
-export const Route = createFileRoute('/letters/')({
+export const Route = createFileRoute('/_authenticated/letters/')({
   component: LettersPage,
   validateSearch: (search: Record<string, unknown>) => {
     return {
@@ -342,7 +342,7 @@ function LettersPage() {
         <Stack spacing={3} sx={{ mb: 3 }}>
           {isLoading ? (
             // Loading skeletons
-            Array.from({ length: 3 }).map((_, index) => (
+            (Array.from({ length: 3 }).map((_, index) => (
               <Card key={index} sx={{ borderRadius: 3 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box
@@ -365,7 +365,7 @@ function LettersPage() {
                   </Box>
                 </CardContent>
               </Card>
-            ))
+            )))
           ) : letters.length === 0 ? (
             <Fade in timeout={800}>
               <Paper
@@ -467,7 +467,6 @@ function LettersPage() {
           </Fade>
         )}
       </Container>
-
       {/* Add Letter Dialog */}
       <AddLetterDialog
         open={isAddLetterDialogOpen}

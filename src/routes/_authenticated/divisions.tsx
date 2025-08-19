@@ -41,7 +41,7 @@ import {
   type UpdateDivisionRequest,
 } from '@/api'
 
-export const Route = createFileRoute('/divisions')({
+export const Route = createFileRoute('/_authenticated/divisions')({
   component: DivisionPage,
 })
 

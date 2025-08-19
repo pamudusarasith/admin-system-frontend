@@ -1,17 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { SidebarLayout, AdminDashboard } from '@/components'
-// import { ProtectedRoute } from '@/AuthProvider'
 
-export const Route = createFileRoute('/')({
-  component: App,
+export const Route = createFileRoute('/_authenticated/')({
+  component: Dashboard,
 })
 
-function App() {
+function Dashboard() {
   return (
-    // <ProtectedRoute>
     <SidebarLayout>
       <AdminDashboard />
     </SidebarLayout>
-    // </ProtectedRoute>
   )
 }
