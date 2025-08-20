@@ -62,11 +62,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     setNotificationsMenuAnchor(null)
   }
 
-  const handleLogout = () => {
-    auth.logout()
-    // Implement logout logic here
-    handleProfileMenuClose()
-    navigate({ to: '/login', search: { redirect: '/' } })
+  const handleLogout = async () => {
+    try {
+      await auth.logout()
+    } catch (error) {
+      console.error('Logout failed:', error)
+    } finally {
+      // Navigate to login regardless of logout success/failure
+      handleProfileMenuClose()
+      navigate({ to: '/login', search: { redirect: '/' } })
+    }
   }
 
   return (

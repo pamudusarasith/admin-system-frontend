@@ -1,12 +1,10 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { jwtDecode } from 'jwt-decode'
-import { login as apiLogin } from '@/api'
+import {
+  login as apiLogin,
+  logout as apiLogout,
+  refreshToken as apiRefreshToken,
+} from '@/api'
 
 interface User {
   id: number
@@ -24,8 +22,8 @@ export interface AuthState {
   hasAuthority: (authority: string) => boolean
   hasAnyAuthority: (authorities: Array<string>) => boolean
   login: (username: string, password: string) => Promise<void>
-  loginWithToken: (access_token: string) => boolean
-  logout: () => void
+  refresh: () => Promise<boolean>
+  logout: () => Promise<void>
   clearError: () => void
 }
 
@@ -42,239 +40,195 @@ const AuthContext = createContext<AuthState | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Check if token is expired
-  const isTokenExpired = useCallback((token: string): boolean => {
+  const parseTokenFromStorage = (): User | null => {
+    const token = localStorage.getItem('access_token')
+    if (!token) return null
+
     try {
       const decoded = jwtDecode<TokenPayload>(token)
       const currentTime = Date.now() / 1000
-      return decoded.exp < currentTime
-    } catch {
-      return true
-    }
-  }, [])
 
-  // Validate and parse token
-  const parseToken = useCallback(
-    (token: string): User | null => {
-      try {
-        if (isTokenExpired(token)) {
-          return null
-        }
-
-        const decoded = jwtDecode<TokenPayload>(token)
-
-        // Extract authorities from token
-        let authorities: Array<string> = []
-
-        // Parse scope field which contains space-separated authorities
-        if (decoded.scope) {
-          const scopeItems = decoded.scope.split(' ')
-
-          // In your JWT, everything in scope appears to be authorities
-          // You can categorize them or use them all as authorities
-          authorities = scopeItems
-
-          // If you want to extract roles from scope (e.g., items that start with 'role:')
-          // roles = scopeItems.filter(s => s.startsWith('role:')).map(s => s.replace('role:', ''))
-        }
-
-        return {
-          id: decoded.user_id,
-          username: decoded.sub,
-          full_name: decoded.full_name,
-          authorities,
-          exp: decoded.exp,
-        }
-      } catch (tokenError) {
-        console.error('Invalid token:', tokenError)
+      // Check if token is expired
+      if (decoded.exp < currentTime) {
+        localStorage.removeItem('access_token')
         return null
       }
-    },
-    [isTokenExpired],
-  )
 
-  // Login with token
-  const loginWithToken = useCallback(
-    (token: string): boolean => {
-      const userData = parseToken(token)
-      if (userData) {
-        localStorage.setItem('access_token', token)
-        setUser(userData)
-        setIsAuthenticated(true)
-        setError(null)
-        return true
-      } else {
-        setError('Invalid or expired token')
-        return false
+      // Parse authorities from scope
+      const authorities = decoded.scope ? decoded.scope.split(' ') : []
+
+      return {
+        id: decoded.user_id,
+        username: decoded.sub,
+        full_name: decoded.full_name,
+        authorities,
+        exp: decoded.exp,
       }
-    },
-    [parseToken],
-  )
+    } catch {
+      localStorage.removeItem('access_token')
+      return null
+    }
+  }
 
-  // Login with username and password
-  const login = useCallback(
-    async (username: string, password: string): Promise<void> => {
-      setError(null)
-      setIsLoading(true)
+  // Update auth state from localStorage
+  const updateAuthState = () => {
+    const userData = parseTokenFromStorage()
 
-      try {
-        // Use the existing API login function
-        const data = await apiLogin(username, password)
-        const { access_token } = data
+    if (userData) {
+      setUser(userData)
+      setError(null) // Clear errors on successful auth
+    } else {
+      setUser(null)
+    }
+  }
 
-        if (loginWithToken(access_token)) {
-          // Success handled by loginWithToken
-        } else {
-          throw new Error('Invalid token received')
-        }
-      } catch (loginError) {
-        const errorMessage =
-          loginError instanceof Error
-            ? loginError.message
-            : 'Authentication failed'
-        setError(errorMessage)
-        throw new Error(errorMessage)
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [loginWithToken],
-  )
+  const login = async (username: string, password: string): Promise<void> => {
+    setError(null)
+    setIsLoading(true)
+
+    try {
+      const { access_token } = await apiLogin(username, password)
+      localStorage.setItem('access_token', access_token)
+      updateAuthState()
+      setIsLoading(false)
+    } catch (loginError) {
+      const errorMessage =
+        loginError instanceof Error
+          ? loginError.message
+          : 'Authentication failed'
+      setError(errorMessage)
+      setIsLoading(false)
+      throw new Error(errorMessage)
+    }
+  }
 
   // Check if user has specific authority
-  const hasAuthority = useCallback(
-    (authority: string): boolean => {
-      return user?.authorities.includes(authority) ?? false
-    },
-    [user],
-  )
+  const hasAuthority = (authority: string): boolean => {
+    return user?.authorities.includes(authority) ?? false
+  }
 
   // Check if user has any of the specified authorities
-  const hasAnyAuthority = useCallback(
-    (authorities: Array<string>): boolean => {
-      return authorities.some((authority) =>
-        user?.authorities.includes(authority),
-      )
-    },
-    [user],
-  )
+  const hasAnyAuthority = (authorities: Array<string>): boolean => {
+    return authorities.some((authority) =>
+      user?.authorities.includes(authority),
+    )
+  }
 
-  // Logout user
-  const logout = useCallback(() => {
-    localStorage.removeItem('access_token')
-    setIsAuthenticated(false)
-    setUser(null)
-    setError(null)
-  }, [])
+  // Simplified logout
+  const logout = async () => {
+    try {
+      await apiLogout()
+    } catch (logoutError) {
+      console.error('Logout API call failed:', logoutError)
+      // Don't rethrow - we want to clear local auth even if API fails
+    } finally {
+      // Always clear local auth state
+      localStorage.removeItem('access_token')
+      updateAuthState()
+    }
+  }
+
+  const refresh = async (): Promise<boolean> => {
+    try {
+      const { access_token } = await apiRefreshToken()
+      localStorage.setItem('access_token', access_token)
+      updateAuthState()
+      return true
+    } catch (refreshError) {
+      console.error('Token refresh failed:', refreshError)
+      localStorage.removeItem('access_token')
+      updateAuthState()
+      return false
+    }
+  }
 
   // Clear error state
-  const clearError = useCallback(() => {
+  const clearError = () => {
     setError(null)
-  }, [])
+  }
 
-  // Initialize auth state on mount
+  // Initialize auth and setup storage listeners
   useEffect(() => {
     const initializeAuth = () => {
-      setIsLoading(true)
-      const token = localStorage.getItem('access_token')
+      const userData = parseTokenFromStorage()
 
-      if (token && !isTokenExpired(token)) {
-        const userData = parseToken(token)
-        if (userData) {
-          setUser(userData)
-          setIsAuthenticated(true)
-        } else {
-          localStorage.removeItem('access_token')
-        }
-      } else if (token) {
-        localStorage.removeItem('access_token')
+      // Update all states in one batch
+      if (userData) {
+        setUser(userData)
+        setError(null)
+      } else {
+        setUser(null)
       }
-
+      // Always set loading to false after checking auth
       setIsLoading(false)
     }
 
     initializeAuth()
-  }, [isTokenExpired, parseToken])
+
+    // Listen for storage changes from other tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'access_token') {
+        const userData = parseTokenFromStorage()
+        setUser(userData)
+        if (userData) {
+          setError(null)
+        }
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, []) // Remove dependency on updateAuthState
 
   // Auto-refresh token before expiration
   useEffect(() => {
-    if (!isAuthenticated || !user?.exp) return
+    // Don't set up refresh if we're still loading or don't have a user
+    if (isLoading || !user?.exp) {
+      return
+    }
 
     const tokenExp = user.exp * 1000 // Convert to milliseconds
     const currentTime = Date.now()
     const timeUntilExpiry = tokenExp - currentTime
-    const refreshTime = Math.max(timeUntilExpiry - 5 * 60 * 1000, 60 * 1000) // Refresh 5 minutes before expiry, minimum 1 minute
 
-    if (refreshTime > 0) {
+    // Refresh 5 minutes before expiry, but ensure at least 1 minute minimum
+    const refreshTime = Math.max(timeUntilExpiry - 5 * 60 * 1000, 60 * 1000)
+
+    if (refreshTime > 0 && timeUntilExpiry > 60 * 1000) {
       const timer = setTimeout(() => {
-        // In a real app, you would call a refresh endpoint here
-        // For now, we'll just logout when token expires
-        logout()
+        refresh().catch((refreshError) => {
+          console.error('Auto-refresh failed:', refreshError)
+          // Don't logout automatically on refresh failure
+          // Let the axios interceptor handle 401s
+        })
       }, refreshTime)
 
       return () => clearTimeout(timer)
-    } else {
-      // Token is about to expire or has expired
-      logout()
+    } else if (timeUntilExpiry <= 60 * 1000) {
+      // Token expires within 1 minute, try immediate refresh
+      refresh().catch((refreshError) => {
+        console.error('Immediate refresh failed:', refreshError)
+      })
     }
-  }, [isAuthenticated, user?.exp, logout])
+  }, [user?.exp, isLoading])
 
-  // Show loading state while checking auth
-  if (isLoading) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-          flexDirection: 'column',
-          gap: '16px',
-        }}
-      >
-        <div
-          style={{
-            width: '40px',
-            height: '40px',
-            border: '4px solid #f3f3f3',
-            borderTop: '4px solid #1976d2',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-        <span>Loading...</span>
-      </div>
-    )
+  const value: AuthState = {
+    isAuthenticated: user !== null,
+    user,
+    isLoading,
+    error,
+    hasAuthority,
+    hasAnyAuthority,
+    login,
+    refresh,
+    logout,
+    clearError,
   }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        user,
-        isLoading,
-        error,
-        hasAuthority,
-        hasAnyAuthority,
-        login,
-        loginWithToken,
-        logout,
-        clearError,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

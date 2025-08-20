@@ -29,3 +29,40 @@ export async function login(
     throw error
   }
 }
+
+export async function refreshToken(): Promise<{ access_token: string }> {
+  try {
+    const csrf = await getCsrf()
+    const response = await client.post(
+      `/refresh-token`,
+      {},
+      {
+        params: {
+          [csrf.parameterName]: csrf.token,
+        },
+      },
+    )
+    return response.data
+  } catch (error) {
+    console.error('Token refresh failed:', error)
+    throw error
+  }
+}
+
+export async function logout(): Promise<void> {
+  try {
+    const csrf = await getCsrf()
+    await client.post(
+      `/logout`,
+      {},
+      {
+        params: {
+          [csrf.parameterName]: csrf.token,
+        },
+      },
+    )
+  } catch (error) {
+    console.error('Logout failed:', error)
+    throw error
+  }
+}
