@@ -13,12 +13,6 @@ export const Route = createFileRoute('/_authenticated')({
       })
     }
   },
-  loader: ({ location }) => {
-    // If user is accessing the authenticated root, redirect to dashboard
-    if (location.pathname === '/') {
-      throw redirect({ to: '/', replace: true })
-    }
-  },
   component: AuthenticatedLayout,
 })
 

@@ -12,6 +12,7 @@ import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 import { AuthProvider, useAuth } from './auth.tsx'
+import { AuthLoadingSpinner } from '@/components'
 
 // Create a new router instance
 export const router = createRouter({
@@ -31,6 +32,11 @@ declare module '@tanstack/react-router' {
 
 function InnerApp() {
   const auth = useAuth()
+  // Show loading state if auth is still loading
+  if (auth.isLoading) {
+    return <AuthLoadingSpinner />
+  }
+
   return <RouterProvider router={router} context={{ auth }} />
 }
 
