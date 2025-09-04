@@ -108,3 +108,13 @@ client.interceptors.response.use(
     return Promise.reject(error)
   },
 )
+
+export const unauthenticatedClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+})
+
+unauthenticatedClient.defaults.withCredentials = true

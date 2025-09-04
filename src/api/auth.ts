@@ -1,10 +1,10 @@
-import { client } from './client'
+import { client, unauthenticatedClient } from './client'
 
 export async function getCsrf(): Promise<{
   token: string
   parameterName: string
 }> {
-  const response = await client.get('/csrf-token')
+  const response = await unauthenticatedClient.get('/csrf-token')
   return response.data
 }
 
@@ -14,7 +14,7 @@ export async function login(
 ): Promise<{ access_token: string }> {
   try {
     const csrf = await getCsrf()
-    const response = await client.post(
+    const response = await unauthenticatedClient.post(
       `/login`,
       { username, password },
       {
@@ -33,7 +33,7 @@ export async function login(
 export async function refreshToken(): Promise<{ access_token: string }> {
   try {
     const csrf = await getCsrf()
-    const response = await client.post(
+    const response = await unauthenticatedClient.post(
       `/refresh-token`,
       {},
       {
