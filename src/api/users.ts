@@ -27,3 +27,14 @@ export const createUser = async (data: CreateUserPayload) => {
   const res = await client.post('/users', data)
   return res.data
 }
+
+export async function getUserProfile(): Promise<User> {
+  try {
+    const response = await client.get('/profile')
+    return response.data
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error)
+    throw error
+  }
+}
+

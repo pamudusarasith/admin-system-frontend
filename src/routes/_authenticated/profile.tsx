@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
 import {
   Avatar,
   Box,
@@ -10,35 +9,95 @@ import {
   TextField,
   Typography,
   useTheme,
+  CircularProgress,
+  Alert,
 } from '@mui/material'
+import { useQuery } from '@tanstack/react-query'
 
 import { SidebarLayout } from '@/components'
 import { Edit } from '@mui/icons-material'
+import { getUserProfile, type User } from '@/api/users'
 
 export const Route = createFileRoute('/_authenticated/profile')({
   component: ProfilePage,
 })
 
-interface UserProfile {
-  fullName: string
-  email: string
-  phoneNumber: string
-  role: string
-  division: string
-}
-
-// Sample user data matching the design exactly
-const sampleUser: UserProfile = {
-  fullName: 'Jaydon Frankie',
-  email: 'demo@minimals.cc',
-  phoneNumber: '(416) 555-0198',
-  role: 'Administrator',
-  division: 'Finance',
-}
-
 function ProfilePage() {
   const theme = useTheme()
-  const [user, setUser] = useState<UserProfile>(sampleUser)
+
+  // TanStack Query for fetching user profile
+  const {
+    data: user,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ['userProfile'],
+    queryFn: getUserProfile,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2, // Retry failed requests 2 times
+  })
+
+  // Show loading state
+  if (loading) {
+    return (
+      <SidebarLayout>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: '60vh',
+            }}
+          >
+            <CircularProgress size={48} />
+          </Box>
+        </Container>
+      </SidebarLayout>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <SidebarLayout>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" color="error" gutterBottom>
+              Unable to load user profile
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Please make sure you're connected to the internet and try again.
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 3, display: 'block' }}>
+              Error: {error instanceof Error ? error.message : 'An error occurred'}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => window.location.reload()}
+              sx={{ mr: 2 }}
+            >
+              Refresh Page
+            </Button>
+          </Box>
+        </Container>
+      </SidebarLayout>
+    )
+  }
+
+  // Show fallback if no user data
+  if (!user) {
+    return (
+      <SidebarLayout>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            No user profile data available. Please refresh the page or contact support.
+          </Alert>
+        </Container>
+      </SidebarLayout>
+    )
+  }
 
   return (
     <SidebarLayout>
@@ -163,7 +222,7 @@ function ProfilePage() {
                     <TextField
                       fullWidth
                       label="Name"
-                      value={user.fullName}
+                      value={user.fullName || ''}
                       variant="outlined"
                       sx={{
                         '& .MuiOutlinedInput-root': {
@@ -175,7 +234,7 @@ function ProfilePage() {
                     <TextField
                       fullWidth
                       label="Email address"
-                      value={user.email}
+                      value={user.email || ''}
                       variant="outlined"
                       sx={{
                         '& .MuiOutlinedInput-root': {
@@ -199,7 +258,7 @@ function ProfilePage() {
                       <TextField
                         fullWidth
                         label="Phone number"
-                        value={user.phoneNumber}
+                        value={user.phoneNumber || ''}
                         variant="outlined"
                         sx={{
                           '& .MuiOutlinedInput-root': {
@@ -213,7 +272,7 @@ function ProfilePage() {
                     <TextField
                       fullWidth
                       label="Status"
-                      value="Active"
+                      value={user.isActive ? "Active" : "Inactive"}
                       variant="outlined"
                       sx={{
                         '& .MuiOutlinedInput-root': {
