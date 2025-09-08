@@ -16,9 +16,11 @@ export interface UpdateDivisionRequest {
   description?: string
 }
 
-export async function getDivisions(): Promise<Division[]> {
+export async function getDivisions(search?: string): Promise<Division[]> {
   try {
-    const response = await client.get('/divisions')
+    const response = await client.get('/divisions', {
+      params: search ? { search } : {},
+    })
     return response.data
   } catch (error) {
     console.error('Failed to fetch divisions:', error)
