@@ -63,7 +63,7 @@ function DivisionPage() {
   )
   const queryClient = useQueryClient()
 
-  // React Query to fetch divisions
+  // React Query to fetch divisions with search
   const {
     data: divisions = [],
     isLoading,
@@ -71,8 +71,8 @@ function DivisionPage() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['divisions'],
-    queryFn: getDivisions,
+    queryKey: ['divisions', searchTerm],
+    queryFn: () => getDivisions(searchTerm),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   })
@@ -118,12 +118,8 @@ function DivisionPage() {
     },
   })
 
-  // Filter divisions based on search term
-  const filteredDivisions = divisions.filter(
-    (division: Division) =>
-      division.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      division.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  // No need to filter client-side, use server response directly
+  const filteredDivisions = divisions
 
   const handleRefresh = () => {
     refetch()
