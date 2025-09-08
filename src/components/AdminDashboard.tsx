@@ -30,6 +30,8 @@ import {
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
 import { getDivisions } from '@/api/divisions'
+import type { Division } from '@/api/divisions'
+import DivisionWorkloadCard from './DivisionWorkloadCard'
 import { getUsers } from '@/api/users'
 
 interface DashboardStats {
@@ -65,9 +67,11 @@ export const AdminDashboard: React.FC = () => {
   const [refreshKey] = useState(0)
 
   // API Queries
-  const { data: divisions = [], isLoading: divisionsLoading } = useQuery({
+  const { data: divisions = [], isLoading: divisionsLoading } = useQuery<
+    Division[]
+  >({
     queryKey: ['divisions', refreshKey],
-    queryFn: getDivisions,
+    queryFn: () => getDivisions(),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -350,6 +354,38 @@ export const AdminDashboard: React.FC = () => {
             </CardContent>
           </Card>
         ))}
+      </Box>
+
+      {/* Division Workload Section */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+          Division Workload
+        </Typography>
+        {divisionsLoading ? (
+          <LinearProgress />
+        ) : divisions.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            No divisions found.
+          </Typography>
+        ) : (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gap: 2,
+            }}
+          >
+            {divisions.map((division: any) => (
+              <DivisionWorkloadCard
+                key={division.id}
+                divisionName={division.name}
+                totalTasks={10} // mock data
+                completedTasks={Math.floor(Math.random() * 10)} // mock data
+                pendingTasks={10 - Math.floor(Math.random() * 10)} // mock data
+              />
+            ))}
+          </Box>
+        )}
       </Box>
 
       <Box
