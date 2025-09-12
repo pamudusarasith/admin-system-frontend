@@ -199,7 +199,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {letter.noOfAttachments! > 0 && (
+            {(letter.noOfAttachments ?? 0) > 0 && (
               <Tooltip title="Has attachments">
                 <Chip
                   icon={<AttachFileIcon sx={{ fontSize: 12 }} />}

@@ -52,7 +52,7 @@ function LetterThreadView() {
   }
 
   const statusColorCache: Record<string, string> = {
-    NEW: theme.palette.grey[500],
+    NEW: theme.palette.primary.light,
     ASSIGNED_TO_DIVISION: theme.palette.primary.main,
     PENDING_ACCEPTANCE: theme.palette.info.main,
     ASSIGNED_TO_OFFICER: theme.palette.secondary.main,
@@ -121,7 +121,6 @@ function LetterThreadView() {
 
         <LetterTimeline
           events={letter.events ?? []}
-          formatTimestamp={formatTimestamp}
           getStatusColor={getStatusColor}
         />
 

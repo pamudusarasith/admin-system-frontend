@@ -436,7 +436,7 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
             Attachments ({attachments.length})
           </Typography>
           <Stack spacing={1}>
-            {attachments.map((attachment: any) => (
+            {attachments.map((attachment: Attachment) => (
               <Box
                 key={attachment.id}
                 sx={{
@@ -454,17 +454,15 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
                     transform: 'translateY(-2px)',
                   },
                 }}
-                onClick={() => console.log('Download:', attachment.name)}
+                onClick={() => console.log('Download:', attachment.fileName)}
               >
                 <AttachIcon color="primary" fontSize="small" />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
-                    {attachment.fileName || attachment.name}
+                    {attachment.fileName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" noWrap>
-                    {(attachment.size || '').toString()}{' '}
-                    {attachment.size ? '•' : ''}{' '}
-                    {attachment.fileType || attachment.type || ''}
+                    {attachment.fileType || 'Unknown type'}
                   </Typography>
                 </Box>
                 <IconButton size="small" sx={{ ml: 0.5 }}>

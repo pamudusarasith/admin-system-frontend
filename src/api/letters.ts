@@ -30,11 +30,7 @@ export interface ChangeStatusEventDetails {
 
 export interface LetterEvent {
   id: string
-  user: {
-    fullName: string
-    role: string
-    division: string
-  }
+  user: User
   eventType:
     | 'ADD_NOTE'
     | 'ADD_ATTACHMENT'
