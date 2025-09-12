@@ -12,7 +12,7 @@ export const createUserSchema = z.object({
 export type CreateUserPayload = z.infer<typeof createUserSchema>
 
 export const updateUserProfileSchema = z.object({
-  fullName: z.string().min(1, 'Full name is required'),
+  fullName: z.string().trim().min(1, 'Full name is required'),
   email: z.email('Invalid email format'),
   phoneNumber: z
     .string()
