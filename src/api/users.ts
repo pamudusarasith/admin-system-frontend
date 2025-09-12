@@ -5,12 +5,12 @@ import type { CreateUserPayload } from '@/schemas/users'
 export interface User {
   id: number
   username: string
-  email: string | null
-  fullName: string | null
-  phoneNumber: string | null
+  email?: string
+  fullName?: string
+  phoneNumber?: string
   role: string
   division: string
-  isActive: boolean | null
+  isActive?: boolean
 }
 
 export async function getUsers(): Promise<Array<User>> {
