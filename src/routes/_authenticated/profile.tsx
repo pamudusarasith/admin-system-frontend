@@ -1,10 +1,10 @@
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   Avatar,
   Box,
   Button,
   Container,
-  IconButton,
   Paper,
   TextField,
   Typography,
@@ -12,11 +12,13 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { SidebarLayout } from '@/components'
+import { SidebarLayout, EditProfileForm } from '@/components'
+
 import { Edit } from '@mui/icons-material'
-import { getUserProfile, type User } from '@/api/users'
+import { getUserProfile, updateProfile, type User } from '@/api/users'
+import type { UpdateUserProfilePayload } from '@/schemas/users'
 
 export const Route = createFileRoute('/_authenticated/profile')({
   component: ProfilePage,
@@ -24,6 +26,8 @@ export const Route = createFileRoute('/_authenticated/profile')({
 
 function ProfilePage() {
   const theme = useTheme()
+  const [editFormOpen, setEditFormOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   // TanStack Query for fetching user profile
   const {
@@ -36,6 +40,18 @@ function ProfilePage() {
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 2, // Retry failed requests 2 times
+  })
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: UpdateUserProfilePayload) => updateProfile(data),
+    onSuccess: () => {
+      // Invalidate and refetch user profile data
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+      setEditFormOpen(false)
+    },
+    onError: (error) => {
+      console.error('Failed to update user profile:', error)
+    },
   })
 
   // Show loading state
@@ -70,8 +86,13 @@ function ProfilePage() {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Please make sure you're connected to the internet and try again.
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 3, display: 'block' }}>
-              Error: {error instanceof Error ? error.message : 'An error occurred'}
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mb: 3, display: 'block' }}
+            >
+              Error:{' '}
+              {error instanceof Error ? error.message : 'An error occurred'}
             </Typography>
             <Button
               variant="contained"
@@ -92,7 +113,8 @@ function ProfilePage() {
       <SidebarLayout>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Alert severity="error" sx={{ mb: 2 }}>
-            No user profile data available. Please refresh the page or contact support.
+            No user profile data available. Please refresh the page or contact
+            support.
           </Alert>
         </Container>
       </SidebarLayout>
@@ -195,6 +217,7 @@ function ProfilePage() {
                       mb: -12,
                     }}
                     startIcon={<Edit />}
+                    onClick={() => setEditFormOpen(true)}
                   >
                     Edit
                   </Button>
@@ -272,7 +295,7 @@ function ProfilePage() {
                     <TextField
                       fullWidth
                       label="Status"
-                      value={user.isActive ? "Active" : "Inactive"}
+                      value={user.isActive ? 'Active' : 'Inactive'}
                       variant="outlined"
                       sx={{
                         '& .MuiOutlinedInput-root': {
@@ -328,6 +351,24 @@ function ProfilePage() {
             </Box>
           </Box>
         </Paper>
+
+        {/* Edit Profile Form Dialog */}
+        <EditProfileForm
+          open={editFormOpen}
+          onClose={() => setEditFormOpen(false)}
+          initialData={{
+            fullName: user.fullName || '',
+            email: user.email || '',
+            phoneNumber: user.phoneNumber || '',
+          }}
+          onSubmit={(formData) => {
+            updateProfileMutation.mutate({
+              fullName: formData.fullName,
+              email: formData.email,
+              phoneNumber: formData.phoneNumber,
+            })
+          }}
+        />
       </Container>
     </SidebarLayout>
   )

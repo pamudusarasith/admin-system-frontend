@@ -1,474 +1,214 @@
+import React from 'react'
 import {
-  Box,
-  Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  Stack,
+  DialogContent,
+  DialogActions,
+  Card,
+  CardContent,
   TextField,
+  Button,
   Typography,
-  useTheme,
-  Avatar,
+  Stack,
   IconButton,
-  Divider,
-  InputAdornment,
-  alpha,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material'
-import {
-  Person as PersonIcon,
-  Save as SaveIcon,
-  Cancel as CancelIcon,
-  Edit as EditIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  Business as BusinessIcon,
-  LocationOn as LocationIcon,
-  Camera as CameraIcon,
-  Close as CloseIcon,
-} from '@mui/icons-material'
-
-interface UserProfile {
-  name: string
-  role: string
-  email: string
-  mobile: string
-  avatar: string
-  department: string
-  location: string
-  joinDate: string
-  status: 'Active' | 'Inactive'
-}
+import { Close as CloseIcon, Edit } from '@mui/icons-material'
+import { useForm } from '@tanstack/react-form'
+import { updateUserProfileSchema } from '@/schemas/users'
 
 interface EditProfileFormProps {
   open: boolean
-  editForm: UserProfile
   onClose: () => void
-  onSave: () => void
-  onCancel: () => void
-  onFormChange: (field: keyof UserProfile, value: string) => void
+  onSubmit?: (profileData: ProfileFormData) => void
+  initialData?: ProfileFormData
 }
 
-export function EditProfileForm({
-  open,
-  editForm,
-  onClose,
-  onSave,
-  onCancel,
-  onFormChange,
-}: EditProfileFormProps) {
-  const theme = useTheme()
+interface ProfileFormData {
+  fullName: string
+  email: string
+  phoneNumber: string
+}
 
-  // Generate initials for avatar placeholder
-//   const getInitials = (name: string) => {
-//     return name
-//       .split(' ')
-//       .map((word) => word.charAt(0))
-//       .join('')
-//       .toUpperCase()
-//       .slice(0, 2)
-//   }
+export const EditProfileForm: React.FC<EditProfileFormProps> = ({
+  open,
+  onClose,
+  onSubmit,
+  initialData,
+}) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
+  // Initialize TanStack form
+  const form = useForm({
+    defaultValues: {
+      fullName: initialData?.fullName ?? '',
+      email: initialData?.email ?? '',
+      phoneNumber: initialData?.phoneNumber ?? '',
+    },
+    validators: {
+      onChange: updateUserProfileSchema, // zod schema for live validation
+    },
+    onSubmit: async ({ value }) => {
+      onSubmit?.(value)
+    },
+  })
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
-      sx={{
-        '& .MuiDialog-paper': {
-          borderRadius: 4,
-          boxShadow: `0 20px 60px ${alpha(theme.palette.primary.main, 0.15)}`,
-          overflow: 'hidden',
+      fullScreen={isMobile}
+      PaperProps={{
+        sx: {
+          borderRadius: isMobile ? 0 : 3,
+          background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
         },
       }}
     >
-      {/* Header Section */}
-      <DialogTitle sx={{ p: 0, position: 'relative' }}>
-        {/* Background with gradient */}
-        <Box
-          sx={{
-            background: 'transparent',
-            px: 4,
-            py: 3,
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Background pattern removed for transparency */}
-
-          {/* Close button */}
-          <IconButton
-            onClick={onClose}
-            sx={{
-              position: 'absolute',
-              right: 12,
-              top: 12,
-              color: theme.palette.text.primary,
-              backgroundColor: 'rgba(255,255,255,0.6)',
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.8)',
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-
-          {/* Title content */}
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={2}
-            sx={{ position: 'relative' }}
-          >
-            <Box
-              sx={{
-                p: 1.5,
-                borderRadius: 2,
-                background: 'transparent',
-              }}
-            >
-              <EditIcon
-                sx={{ color: theme.palette.text.primary, fontSize: 28 }}
-              />
-            </Box>
-            <Box>
-              <Typography
-                variant="h4"
-                sx={{
-                  color: theme.palette.text.primary,
-                  fontWeight: 700,
-                  mb: 0.5,
-                }}
-              >
-                Edit Profile
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontSize: '0.9rem',
-                }}
-              >
-                Update your personal information and preferences
-              </Typography>
-            </Box>
-          </Stack>
-        </Box>
-      </DialogTitle>
-
-      {/* Content Section */}
-      <DialogContent sx={{ p: 0 }}>
-        {/* Profile Avatar Section */}
-        <Box sx={{ p: 4, pb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-            <Box sx={{ position: 'relative', mr: 3 }}>
-              <Avatar
-                src={editForm.avatar}
-                sx={{
-                  width: 100,
-                  height: 100,
-                  fontSize: '3rem',
-                  fontWeight: 600,
-                  bgcolor: theme.palette.secondary.main,
-                  border: `5px solid white`,
-                  boxShadow: `0 8px 32px rgba(0,0,0,0.3)`,
-                }}
-              >
-                <img
-                  src="https://randomuser.me/api/portraits/men/32.jpg"
-                  alt={editForm.name}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: '50%',
-                  }}
-                />
-              </Avatar>
-              <IconButton
-                sx={{
-                  position: 'absolute',
-                  bottom: -5,
-                  right: -5,
-                  bgcolor: theme.palette.primary.main,
-                  color: 'white',
-                  width: 28,
-                  height: 28,
-                  '&:hover': {
-                    bgcolor: theme.palette.primary.dark,
-                  },
-                }}
-                size="small"
-              >
-                <CameraIcon fontSize="small" />
-              </IconButton>
-            </Box>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-                {editForm.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {editForm.role}
-              </Typography>
-            </Box>
-          </Box>
-
-          <Divider sx={{ mb: 3 }} />
-
-          {/* Form Fields */}
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 600,
-              mb: 3,
-              color: theme.palette.text.primary,
-            }}
-          >
-            Personal Information
-          </Typography>
-
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-              gap: 3,
-            }}
-          >
-            <TextField
-              fullWidth
-              label="Full Name"
-              value={editForm.name}
-              onChange={(e) => onFormChange('name', e.target.value)}
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PersonIcon color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  backgroundColor: alpha(theme.palette.background.default, 0.5),
-                  '&:hover': {
-                    backgroundColor: alpha(
-                      theme.palette.background.default,
-                      0.8,
-                    ),
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'transparent',
-                  },
-                },
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Role"
-              value={editForm.role}
-              onChange={(e) => onFormChange('role', e.target.value)}
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <BusinessIcon color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  backgroundColor: alpha(theme.palette.background.default, 0.5),
-                  '&:hover': {
-                    backgroundColor: alpha(
-                      theme.palette.background.default,
-                      0.8,
-                    ),
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'transparent',
-                  },
-                },
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Email Address"
-              value={editForm.email}
-              onChange={(e) => onFormChange('email', e.target.value)}
-              variant="outlined"
-              type="email"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailIcon color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  backgroundColor: alpha(theme.palette.background.default, 0.5),
-                  '&:hover': {
-                    backgroundColor: alpha(
-                      theme.palette.background.default,
-                      0.8,
-                    ),
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'transparent',
-                  },
-                },
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Mobile Number"
-              value={editForm.mobile}
-              onChange={(e) => onFormChange('mobile', e.target.value)}
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneIcon color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  backgroundColor: alpha(theme.palette.background.default, 0.5),
-                  '&:hover': {
-                    backgroundColor: alpha(
-                      theme.palette.background.default,
-                      0.8,
-                    ),
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'transparent',
-                  },
-                },
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Department"
-              value={editForm.department}
-              onChange={(e) => onFormChange('department', e.target.value)}
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <BusinessIcon color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                gridColumn: { xs: '1', sm: '1 / -1' },
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  backgroundColor: alpha(theme.palette.background.default, 0.5),
-                  '&:hover': {
-                    backgroundColor: alpha(
-                      theme.palette.background.default,
-                      0.8,
-                    ),
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'transparent',
-                  },
-                },
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Location"
-              value={editForm.location}
-              onChange={(e) => onFormChange('location', e.target.value)}
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LocationIcon color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                gridColumn: { xs: '1', sm: '1 / -1' },
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                  backgroundColor: alpha(theme.palette.background.default, 0.5),
-                  '&:hover': {
-                    backgroundColor: alpha(
-                      theme.palette.background.default,
-                      0.8,
-                    ),
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'transparent',
-                  },
-                },
-              }}
-            />
-          </Box>
-        </Box>
-      </DialogContent>
-
-      {/* Actions Section */}
-      <DialogActions
+      <DialogTitle
         sx={{
-          p: 4,
-          pt: 2,
-          backgroundColor: alpha(theme.palette.background.default, 0.3),
-          borderTop: `1px solid ${theme.palette.divider}`,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          pb: 2,
+          borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Stack direction="row" spacing={2} sx={{ width: '100%' }}>
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: 700, color: theme.palette.text.primary }}
+        >
+          Edit Profile
+        </Typography>
+        <IconButton
+          onClick={onClose}
+          sx={{
+            color: theme.palette.text.secondary,
+            '&:hover': {
+              color: theme.palette.error.main,
+              backgroundColor: `${theme.palette.error.main}10`,
+            },
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault()
+          await form.handleSubmit()
+        }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <Card
+            elevation={0}
+            sx={{ borderRadius: 0, background: 'transparent' }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Stack spacing={3}>
+                {/* Full Name */}
+                <form.Field
+                  name="fullName"
+                  children={(field) => (
+                    <TextField
+                      fullWidth
+                      label="Full Name"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!field.state.meta.isValid}
+                      helperText={field.state.meta.errors
+                        ?.map((err: any) => err.message)
+                        .join(', ')}
+                    />
+                  )}
+                />
+
+                {/* Email */}
+                <form.Field
+                  name="email"
+                  children={(field) => (
+                    <TextField
+                      fullWidth
+                      label="Email"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!field.state.meta.isValid}
+                      helperText={field.state.meta.errors
+                        ?.map((err: any) => err.message)
+                        .join(', ')}
+                    />
+                  )}
+                />
+
+                {/* Phone Number */}
+                <form.Field
+                  name="phoneNumber"
+                  children={(field) => (
+                    <TextField
+                      fullWidth
+                      label="Phone Number"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      error={!field.state.meta.isValid}
+                      helperText={field.state.meta.errors
+                        ?.map((err: any) => err.message)
+                        .join(', ')}
+                    />
+                  )}
+                />
+              </Stack>
+            </CardContent>
+          </Card>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            p: 3,
+            borderTop: `1px solid ${theme.palette.divider}`,
+            justifyContent: 'space-between',
+          }}
+        >
           <Button
-            onClick={onCancel}
-            startIcon={<CancelIcon />}
+            onClick={onClose}
             variant="outlined"
-            sx={{
-              px: 4,
-              py: 1.5,
-              fontWeight: 600,
-              borderRadius: 3,
-              borderColor: theme.palette.divider,
-              color: theme.palette.text.secondary,
-              '&:hover': {
-                borderColor: theme.palette.error.main,
-                color: theme.palette.error.main,
-                backgroundColor: alpha(theme.palette.error.main, 0.04),
-              },
-            }}
+            sx={{ borderRadius: 2, fontWeight: 600, minWidth: 100 }}
           >
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            onClick={onSave}
-            startIcon={<SaveIcon />}
-            sx={{
-              px: 4,
-              py: 1.5,
-              fontWeight: 600,
-              borderRadius: 3,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-              boxShadow: `0 4px 15px ${alpha(theme.palette.primary.main, 0.3)}`,
-              '&:hover': {
-                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-                boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
-                transform: 'translateY(-1px)',
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Save Changes
-          </Button>
-        </Stack>
-      </DialogActions>
+
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit, isSubmitting]) => (
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={!canSubmit}
+                sx={{
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  minWidth: 120,
+                  boxShadow: theme.shadows[2],
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.shadows[4],
+                  },
+                }}
+              >
+                {isSubmitting ? 'Saving...' : 'Edit Profile'}
+              </Button>
+            )}
+          />
+        </DialogActions>
+      </form>
     </Dialog>
   )
 }
+export default EditProfileForm

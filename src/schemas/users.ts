@@ -10,3 +10,14 @@ export const createUserSchema = z.object({
 })
 
 export type CreateUserPayload = z.infer<typeof createUserSchema>
+
+export const updateUserProfileSchema = z.object({
+  fullName: z.string().trim().min(1, 'Full name is required'),
+  email: z.email('Invalid email format'),
+  phoneNumber: z
+    .string()
+    .length(10, 'Phone number must be exactly 10 digits')
+    .regex(/^\d{10}$/, 'Phone number must contain only digits'),
+})
+
+export type UpdateUserProfilePayload = z.infer<typeof updateUserProfileSchema>
