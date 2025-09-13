@@ -2,14 +2,15 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Container, useTheme } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import type { Letter } from '@/api'
 import { getLetterById } from '@/api'
 import {
+  ErrorMessage,
   LetterActionMenu,
   LetterDetailsGrid,
   LetterDialogs,
   LetterHeader,
   LetterTimeline,
+  LoadingSpinner,
   SidebarLayout,
 } from '@/components'
 
@@ -19,7 +20,6 @@ export const Route = createFileRoute('/_authenticated/letters/$letterId')({
 
 function LetterThreadView() {
   const theme = useTheme()
-  // const [letter] = useState<Letter>(mockLetter)
   const [replyDialogOpen, setReplyDialogOpen] = useState(false)
   const [forwardDialogOpen, setForwardDialogOpen] = useState(false)
   const [replyContent, setReplyContent] = useState('')
@@ -64,16 +64,6 @@ function LetterThreadView() {
   const getStatusColor = (status: string) =>
     statusColorCache[status] || theme.palette.grey[500]
 
-  const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
   const handleSendReply = () => {
     console.log('Send reply:', replyContent)
     setReplyDialogOpen(false)
@@ -86,14 +76,31 @@ function LetterThreadView() {
   }
 
   if (result.isLoading) {
-    return <div>Loading...</div>
+    return <LoadingSpinner />
   }
 
   if (result.isError) {
-    return <div>Error loading letter.</div>
+    if (result.error instanceof Error) {
+      return <ErrorMessage title="Error" message={result.error.message} />
+    }
+    return (
+      <ErrorMessage
+        title="Unexpected Error"
+        message="An unexpected error occurred."
+      />
+    )
   }
 
-  const letter = result.data as Letter
+  if (!result.data) {
+    return (
+      <ErrorMessage
+        title="Unexpected Error"
+        message="Error loading letter details."
+      />
+    )
+  }
+
+  const letter = result.data
 
   return (
     <SidebarLayout>

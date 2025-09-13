@@ -124,7 +124,6 @@ function EventMeta({ user, createdAt }: Readonly<EventMetaProps>) {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Avatar
-          src={(user as any).avatar}
           sx={{
             width: 32,
             height: 32,
