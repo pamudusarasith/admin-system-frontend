@@ -23,11 +23,11 @@ interface Letter {
   status:
     | 'NEW'
     | 'ASSIGNED_TO_DIVISION'
-    | 'ASSIGNED_TO_OFFICER'
     | 'PENDING_ACCEPTANCE'
-    | 'IN_PROGRESS'
-    | 'COMPLETED'
-    | 'RETURNED'
+    | 'ASSIGNED_TO_OFFICER'
+    | 'RETURNED_FROM_OFFICER'
+    | 'RETURNED_FROM_DIVISION'
+    | 'CLOSED'
 }
 
 interface LetterHeaderProps {
@@ -66,7 +66,16 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
       </Breadcrumbs>
 
       {/* Letter Title Section */}
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          mb: 3,
+          border: (t) => `1px solid ${t.palette.divider}`,
+          backgroundColor: (t) => t.palette.background.paper,
+          borderRadius: 3,
+        }}
+      >
         <Box
           sx={{
             display: 'flex',
@@ -77,8 +86,8 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
         >
           <Box sx={{ flex: 1, mr: 2 }}>
             <Typography
-              variant="h4"
-              sx={{ fontWeight: 'bold', mb: 1, lineHeight: 1.2 }}
+              variant="h5"
+              sx={{ fontWeight: 600, mb: 1, lineHeight: 1.25 }}
             >
               {letter.subject}
             </Typography>
@@ -98,21 +107,27 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
               }}
             >
               <Chip
-                label={letter.priority}
+                label={letter.priority.replace('_', ' ')}
                 size="small"
                 sx={{
-                  backgroundColor: getPriorityColor(letter.priority),
+                  px: 1,
+                  fontSize: 11,
+                  letterSpacing: 0.4,
+                  fontWeight: 600,
                   color: 'white',
-                  fontWeight: 'bold',
+                  backgroundColor: getPriorityColor(letter.priority),
                 }}
               />
               <Chip
-                label={letter.status}
+                label={letter.status.replaceAll('_', ' ')}
                 size="small"
                 sx={{
-                  backgroundColor: getStatusColor(letter.status),
+                  px: 1,
+                  fontSize: 11,
+                  letterSpacing: 0.4,
+                  fontWeight: 600,
                   color: 'white',
-                  fontWeight: 'bold',
+                  backgroundColor: getStatusColor(letter.status),
                 }}
               />
             </Box>
@@ -122,9 +137,10 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
             <Button
               variant="contained"
+              color="primary"
               startIcon={<ReplyIcon />}
               onClick={onReply}
-              size="large"
+              sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
             >
               Reply
             </Button>
@@ -132,17 +148,16 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
               variant="outlined"
               startIcon={<ForwardIcon />}
               onClick={onForward}
-              size="large"
+              sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
             >
               Forward
             </Button>
             <Button
               variant="outlined"
               onClick={onMenuClick}
-              size="large"
-              sx={{ minWidth: 'auto', px: 2 }}
+              sx={{ minWidth: 40, borderRadius: 2 }}
             >
-              <MoreVertIcon />
+              <MoreVertIcon fontSize="small" />
             </Button>
           </Box>
         </Box>

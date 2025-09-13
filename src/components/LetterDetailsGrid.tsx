@@ -2,6 +2,7 @@ import React from 'react'
 import {
   Avatar,
   Box,
+  Chip,
   IconButton,
   Paper,
   Stack,
@@ -9,73 +10,43 @@ import {
   useTheme,
 } from '@mui/material'
 import {
+  AccessTime as AccessTimeIcon,
   AttachFile as AttachIcon,
   Download as DownloadIcon,
+  Event as EventIcon,
+  MailOutline as MailIcon,
+  Outbox as SentIcon,
 } from '@mui/icons-material'
-
-interface LetterAttachment {
-  id: string
-  name: string
-  size: string
-  type: string
-  uploadedBy: string
-  uploadedAt: string
-}
-
-interface LetterSender {
-  name: string
-  email: string
-  phone_number: string
-  address: string
-}
-
-interface LetterReceiver {
-  name: string
-  designation?: string
-  division_name?: string
-}
-
-interface LetterAssignee {
-  name: string
-  role: string
-  division: string
-  assignedDate?: string
-  assignedBy?: {
-    name: string
-    role: string
-  }
-}
-
-interface LetterDivision {
-  id: string
-  name: string
-  assignedDate: string
-  assignedBy: {
-    name: string
-    role: string
-  }
-}
+import type {
+  Attachment,
+  Division,
+  ReceiverDetails,
+  SenderDetails,
+  User,
+} from '@/api'
 
 interface LetterDetailsGridProps {
-  sender: LetterSender
-  receiver: LetterReceiver
-  assignedDivision?: LetterDivision
-  currentAssignee?: LetterAssignee
+  sender: SenderDetails
+  receiver: ReceiverDetails
+  assignedDivision?: Division
+  assignedUser?: User
   modeOfArrival: string
+  sentDate?: string
   receivedDate: string
-  originalAttachments: Array<LetterAttachment>
-  formatTimestamp: (timestamp: string) => string
+  attachments: Array<Attachment>
+  content?: string
 }
 
 export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
   sender,
   receiver,
   assignedDivision,
-  currentAssignee,
+  assignedUser,
   modeOfArrival,
+  sentDate,
   receivedDate,
-  originalAttachments,
-  formatTimestamp,
+  attachments,
+  content,
 }) => {
   const theme = useTheme()
 
@@ -88,241 +59,420 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
         mb: 3,
       }}
     >
-      {/* Left Column - Sender & Assignment */}
-      <Box>
-        <Paper sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Sender Information
+      {content && (
+        <Paper
+          sx={{
+            p: 2.5,
+            border: (t) => `1px solid ${t.palette.divider}`,
+            borderRadius: 3,
+            gridColumn: '1 / -1',
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{ fontWeight: 600, mb: 1.5, opacity: 0.75, letterSpacing: 0.5 }}
+          >
+            Content
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar
-              sx={{
-                width: 56,
-                height: 56,
-                backgroundColor: theme.palette.primary.main,
-              }}
-            >
-              {sender.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </Avatar>
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {sender.name}
-              </Typography>
+          <Typography
+            variant="body2"
+            sx={{ lineHeight: 1.6, whiteSpace: 'pre-line' }}
+            color="text.primary"
+          >
+            {content}
+          </Typography>
+        </Paper>
+      )}
+
+      {/* Sender Card */}
+      <Paper
+        sx={{
+          p: 2.5,
+          border: (t) => `1px solid ${t.palette.divider}`,
+          borderRadius: 3,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 600, mb: 2, opacity: 0.75, letterSpacing: 0.5 }}
+        >
+          Sender
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar
+            sx={{
+              width: 56,
+              height: 56,
+              backgroundColor: theme.palette.primary.main,
+            }}
+          >
+            {sender.name
+              .split(' ')
+              .map((n) => n[0])
+              .join('')}
+          </Avatar>
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              {sender.name}
+            </Typography>
+            {sender.address && (
               <Typography variant="body2" color="text.secondary">
                 {sender.address}
               </Typography>
+            )}
+            {sender.email && (
               <Typography variant="body2" color="text.secondary">
                 {sender.email}
               </Typography>
+            )}
+            {sender.phoneNumber && (
               <Typography variant="body2" color="text.secondary">
-                {sender.phone_number}
+                {sender.phoneNumber}
               </Typography>
-            </Box>
+            )}
           </Box>
-        </Paper>
+        </Box>
+      </Paper>
 
-        {/* Receiver Information */}
-        <Paper sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Receiver Information
-          </Typography>
+      {/* Receiver Card */}
+      <Paper
+        sx={{
+          p: 2.5,
+          border: (t) => `1px solid ${t.palette.divider}`,
+          borderRadius: 3,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 600, mb: 2, opacity: 0.75, letterSpacing: 0.5 }}
+        >
+          Receiver
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar
+            sx={{
+              width: 56,
+              height: 56,
+              backgroundColor: theme.palette.secondary.main,
+            }}
+          >
+            {receiver.name
+              .split(' ')
+              .map((n) => n[0])
+              .join('')}
+          </Avatar>
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              {receiver.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {receiver.designation || 'No designation specified'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {receiver.divisionName || 'No division specified'}
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* Assigned Division Card */}
+      <Paper
+        sx={{
+          p: 2.5,
+          border: (t) => `1px solid ${t.palette.divider}`,
+          borderRadius: 3,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 600, mb: 2, opacity: 0.75, letterSpacing: 0.5 }}
+        >
+          Assigned Division
+        </Typography>
+        {assignedDivision ? (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
               sx={{
-                width: 56,
-                height: 56,
-                backgroundColor: theme.palette.secondary.main,
+                width: 48,
+                height: 48,
+                backgroundColor: theme.palette.info.main,
               }}
             >
-              {receiver.name
+              {assignedDivision.name
                 .split(' ')
                 .map((n) => n[0])
                 .join('')}
             </Avatar>
             <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {receiver.name}
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                {assignedDivision.name}
+              </Typography>
+              {assignedDivision.description && (
+                <Typography variant="body2" color="text.secondary" noWrap>
+                  {assignedDivision.description}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            Not assigned to a division.
+          </Typography>
+        )}
+      </Paper>
+
+      {/* Assignee Card */}
+      <Paper
+        sx={{
+          p: 2.5,
+          border: (t) => `1px solid ${t.palette.divider}`,
+          borderRadius: 3,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 600, mb: 2, opacity: 0.75, letterSpacing: 0.5 }}
+        >
+          Assigned User
+        </Typography>
+        {assignedUser ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar
+              sx={{
+                width: 48,
+                height: 48,
+                backgroundColor: theme.palette.secondary.main,
+              }}
+            >
+              {assignedUser.fullName
+                ?.split(' ')
+                .map((n) => n[0])
+                .join('')}
+            </Avatar>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                {assignedUser.fullName}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {receiver.designation || 'No designation specified'}
+                {assignedUser.role}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {receiver.division_name || 'No division specified'}
+                {assignedUser.division}
               </Typography>
             </Box>
           </Box>
-        </Paper>
-
-        {/* Division Assignment */}
-        {assignedDivision && (
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              Assigned Division
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar
-                sx={{
-                  width: 48,
-                  height: 48,
-                  backgroundColor: theme.palette.info.main,
-                }}
-              >
-                {assignedDivision.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')}
-              </Avatar>
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                  {assignedDivision.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Assigned by: {assignedDivision.assignedBy.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {formatTimestamp(assignedDivision.assignedDate)}
-                </Typography>
-              </Box>
-            </Box>
-          </Paper>
-        )}
-
-        {/* Person Assignment */}
-        {currentAssignee && (
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              Assigned Person
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar
-                sx={{
-                  width: 48,
-                  height: 48,
-                  backgroundColor: theme.palette.secondary.main,
-                }}
-              >
-                {currentAssignee.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')}
-              </Avatar>
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                  {currentAssignee.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {currentAssignee.role}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {currentAssignee.division}
-                </Typography>
-                {currentAssignee.assignedBy && (
-                  <Typography variant="body2" color="text.secondary">
-                    Assigned by: {currentAssignee.assignedBy.name}
-                  </Typography>
-                )}
-                {currentAssignee.assignedDate && (
-                  <Typography variant="body2" color="text.secondary">
-                    {formatTimestamp(currentAssignee.assignedDate)}
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-          </Paper>
-        )}
-      </Box>
-
-      {/* Right Column - Details & Attachments */}
-      <Box>
-        <Paper sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Letter Details
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            Not assigned to a user.
           </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                Mode of Arrival
-              </Typography>
-              <Typography variant="body1">
-                {modeOfArrival.replace(/_/g, ' ')}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                Received Date
-              </Typography>
-              <Typography variant="body1">
-                {formatTimestamp(receivedDate)}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                Days Open
-              </Typography>
-              <Typography
-                variant="body1"
-                color={
-                  new Date().getTime() - new Date(receivedDate).getTime() >
-                  7 * 24 * 60 * 60 * 1000
-                    ? 'error.main'
-                    : 'text.primary'
-                }
-              >
-                {Math.floor(
-                  (new Date().getTime() - new Date(receivedDate).getTime()) /
-                    (1000 * 60 * 60 * 24),
-                )}{' '}
-                days
-              </Typography>
-            </Box>
-          </Stack>
-        </Paper>
+        )}
+      </Paper>
 
-        {/* Attachments */}
-        {originalAttachments.length > 0 && (
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-              Attachments ({originalAttachments.length})
-            </Typography>
-            <Stack spacing={1}>
-              {originalAttachments.map((attachment) => (
+      <Paper
+        sx={{
+          p: 2.5,
+          border: (t) => `1px solid ${t.palette.divider}`,
+          borderRadius: 3,
+          position: 'relative',
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 600, mb: 1.5, opacity: 0.8, letterSpacing: 0.5 }}
+        >
+          Details
+        </Typography>
+        {(() => {
+          const days = Math.floor(
+            (new Date().getTime() - new Date(receivedDate).getTime()) /
+              (1000 * 60 * 60 * 24),
+          )
+          const urgent = days > 7
+          const formatDate = (d: string) =>
+            new Date(d).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })
+          return (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                gap: 2,
+              }}
+            >
+              {/* Days Open */}
+              <Box sx={{ display: 'flex', gap: 1.25 }}>
                 <Box
-                  key={attachment.id}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    p: 2,
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: 1,
-                    cursor: 'pointer',
-                    '&:hover': {
-                      backgroundColor: theme.palette.grey[50],
-                    },
+                    mt: 0.25,
+                    color: urgent ? 'error.main' : 'warning.main',
                   }}
-                  onClick={() => console.log('Download:', attachment.name)}
                 >
-                  <AttachIcon color="primary" />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                      {attachment.name}
+                  <AccessTimeIcon fontSize="small" />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ textTransform: 'uppercase', letterSpacing: 0.6 }}
+                  >
+                    Days Open
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      lineHeight: 1.1,
+                      mt: 0.4,
+                      color: urgent ? 'error.main' : 'text.primary',
+                    }}
+                  >
+                    {days}
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      sx={{ ml: 0.5, fontWeight: 400, color: 'text.secondary' }}
+                    >
+                      day{days !== 1 ? 's' : ''}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {attachment.size} • {attachment.type}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Received Date */}
+              <Box sx={{ display: 'flex', gap: 1.25 }}>
+                <Box sx={{ mt: 0.25, color: 'success.main' }}>
+                  <EventIcon fontSize="small" />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ textTransform: 'uppercase', letterSpacing: 0.6 }}
+                  >
+                    Received
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.6 }}>
+                    {formatDate(receivedDate)}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Mode of Arrival */}
+              <Box sx={{ display: 'flex', gap: 1.25 }}>
+                <Box sx={{ mt: 0.25, color: 'primary.main' }}>
+                  <MailIcon fontSize="small" />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.6,
+                      display: 'block',
+                    }}
+                  >
+                    Mode
+                  </Typography>
+                  <Chip
+                    size="small"
+                    label={modeOfArrival.replace(/_/g, ' ')}
+                    sx={{
+                      mt: 0.8,
+                      fontWeight: 500,
+                      borderRadius: 1,
+                      px: 0.75,
+                      display: 'inline-flex',
+                    }}
+                    variant="outlined"
+                    color="primary"
+                  />
+                </Box>
+              </Box>
+
+              {/* Sent Date (optional) */}
+              {sentDate && (
+                <Box sx={{ display: 'flex', gap: 1.25 }}>
+                  <Box sx={{ mt: 0.25, color: 'text.secondary' }}>
+                    <SentIcon fontSize="small" />
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ textTransform: 'uppercase', letterSpacing: 0.6 }}
+                    >
+                      Sent
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 500, mt: 0.6 }}
+                    >
+                      {formatDate(sentDate)}
                     </Typography>
                   </Box>
-                  <IconButton size="small">
-                    <DownloadIcon />
-                  </IconButton>
                 </Box>
-              ))}
-            </Stack>
-          </Paper>
-        )}
-      </Box>
+              )}
+            </Box>
+          )
+        })()}
+      </Paper>
+
+      {attachments.length > 0 && (
+        <Paper
+          sx={{
+            p: 2.5,
+            border: (t) => `1px solid ${t.palette.divider}`,
+            borderRadius: 3,
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{ fontWeight: 600, mb: 1.5, opacity: 0.75, letterSpacing: 0.5 }}
+          >
+            Attachments ({attachments.length})
+          </Typography>
+          <Stack spacing={1}>
+            {attachments.map((attachment: Attachment) => (
+              <Box
+                key={attachment.id}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  p: 1.25,
+                  borderRadius: 2,
+                  backgroundColor: (t) => t.palette.background.paper,
+                  border: (t) => `1px solid ${t.palette.divider}`,
+                  transition: 'background-color .2s, transform .15s',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: (t) => t.palette.action.hover,
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+                onClick={() => console.log('Download:', attachment.fileName)}
+              >
+                <AttachIcon color="primary" fontSize="small" />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
+                    {attachment.fileName}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {attachment.fileType || 'Unknown type'}
+                  </Typography>
+                </Box>
+                <IconButton size="small" sx={{ ml: 0.5 }}>
+                  <DownloadIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ))}
+          </Stack>
+        </Paper>
+      )}
     </Box>
   )
 }

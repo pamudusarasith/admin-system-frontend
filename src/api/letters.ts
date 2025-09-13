@@ -1,21 +1,54 @@
 import { client } from './client'
 import type { LetterFormData } from '@/schemas/letter'
+import type { Division } from './divisions'
+import type { User } from './users'
 
-export interface LetterResponse {
+export interface SenderDetails {
+  name: string
+  address?: string
+  email?: string
+  phoneNumber?: string
+}
+
+export interface ReceiverDetails {
+  name: string
+  designation?: string
+  divisionName?: string
+}
+
+export interface Attachment {
+  id: string
+  fileName: string
+  fileType: string
+  url: string
+  createdAt: string
+}
+
+export interface ChangeStatusEventDetails {
+  newStatus: string
+}
+
+export interface LetterEvent {
+  id: string
+  user: User
+  eventType:
+    | 'ADD_NOTE'
+    | 'ADD_ATTACHMENT'
+    | 'REMOVE_ATTACHMENT'
+    | 'REPLY'
+    | 'CHANGE_STATUS'
+    | 'CHANGE_PRIORITY'
+    | 'UPDATE_DETAILS'
+  eventDetails?: ChangeStatusEventDetails | Record<string, any>
+  createdAt: string
+}
+
+export interface Letter {
   id: number
   reference: string
-  senderDetails: {
-    name: string
-    address: string | null
-    email: string | null
-    phoneNumber: string | null
-  }
-  receiverDetails: {
-    name: string
-    designation: string | null
-    divisionName: string | null
-  }
-  sentDate: string | null
+  senderDetails: SenderDetails
+  receiverDetails: ReceiverDetails
+  sentDate?: string
   receivedDate: string
   modeOfArrival:
     | 'REGISTERED_POST'
@@ -26,7 +59,7 @@ export interface LetterResponse {
     | 'FAX'
     | 'OTHER'
   subject: string
-  content: string | null
+  content?: string
   priority: 'NORMAL' | 'HIGH' | 'URGENT'
   status:
     | 'NEW'
@@ -36,27 +69,18 @@ export interface LetterResponse {
     | 'RETURNED_FROM_OFFICER'
     | 'RETURNED_FROM_DIVISION'
     | 'CLOSED'
-  assignedDivision: {
-    id: number
-    name: string
-    description: string
-  } | null
-  assignedUser: {
-    id: number
-    username: string
-    email: string | null
-    fullName: string
-    phoneNumber: string | null
-    role: string
-    division: string
-    isActive: boolean
-  } | null
-  isAcceptedByUser: boolean | null
-  noOfAttachments: number
+  assignedDivision?: Division
+  assignedUser?: User
+  isAcceptedByUser?: boolean
+  noOfAttachments?: number
+  attachments?: Array<Attachment>
+  events?: Array<LetterEvent>
+  createdAt: string
+  updatedAt: string
 }
 
 export interface LettersApiResponse {
-  data: Array<LetterResponse>
+  data: Array<Letter>
   pagination: {
     page: number
     itemsPerPage: number
@@ -72,7 +96,9 @@ export interface GetLettersParams {
   search?: string
 }
 
-export async function getLetters(params: GetLettersParams = {}): Promise<LettersApiResponse> {
+export async function getLetters(
+  params: GetLettersParams = {},
+): Promise<LettersApiResponse> {
   try {
     const { page = 0, itemsPerPage = 10, ...otherParams } = params
     const response = await client.get('/letters', {
@@ -108,6 +134,16 @@ export async function createLetter(letterData: LetterFormData): Promise<any> {
     return response.data
   } catch (error) {
     console.error('Failed to create letter:', error)
+    throw error
+  }
+}
+
+export async function getLetterById(letterId: number): Promise<Letter> {
+  try {
+    const response = await client.get(`/letters/${letterId}`)
+    return response.data
+  } catch (error) {
+    console.error(`Failed to fetch letter with ID ${letterId}:`, error)
     throw error
   }
 }

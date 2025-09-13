@@ -3,12 +3,12 @@ import { client } from './client'
 export interface Division {
   id: string
   name: string
-  description: string
+  description?: string
 }
 
 export interface CreateDivisionRequest {
   name: string
-  description: string
+  description?: string
 }
 
 export interface UpdateDivisionRequest {
@@ -16,7 +16,7 @@ export interface UpdateDivisionRequest {
   description?: string
 }
 
-export async function getDivisions(search?: string): Promise<Division[]> {
+export async function getDivisions(search?: string): Promise<Array<Division>> {
   try {
     const response = await client.get('/divisions', {
       params: search ? { search } : {},

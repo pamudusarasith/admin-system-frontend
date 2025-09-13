@@ -25,47 +25,10 @@ import {
   Schedule as ScheduleIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material'
-import type { LetterResponse } from '@/api/letters'
-
-// interface LetterSummary {
-//   id: number
-//   reference: string
-//   senderDetails: {
-//     name: string
-//     email: string | null
-//     address: string | null
-//     phone_number: string | null
-//   }
-//   sentDate: string | null
-//   receivedDate: string
-//   modeOfArrival:
-//     | 'REGISTERED_POST'
-//     | 'UNREGISTERED_POST'
-//     | 'EMAIL'
-//     | 'WHATSAPP'
-//     | 'HAND_DELIVERED'
-//     | 'FAX'
-//     | 'OTHER'
-//   subject: string
-//   content: string | null
-//   priority: 'NORMAL' | 'HIGH' | 'URGENT'
-//   status:
-//     | 'NEW'
-//     | 'ASSIGNED_TO_DIVISION'
-//     | 'PENDING_ACCEPTANCE'
-//     | 'ASSIGNED_TO_OFFICER'
-//     | 'RETURNED_FROM_OFFICER'
-//     | 'RETURNED_FROM_DIVISION'
-//     | 'CLOSED'
-//   assignedDivision: string | null
-//   assignedUser: string | null
-//   isAcceptedByUser: boolean
-//   daysOpen?: number
-//   hasAttachments?: boolean
-// }
+import type { Letter } from '@/api/letters'
 
 interface LetterCardProps {
-  letter: LetterResponse
+  letter: Letter
   index: number
   getPriorityColor: (priority: string) => string
   getStatusColor: (status: string) => string
@@ -236,7 +199,7 @@ export const LetterCard: React.FC<LetterCardProps> = ({
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {letter.noOfAttachments > 0 && (
+            {(letter.noOfAttachments ?? 0) > 0 && (
               <Tooltip title="Has attachments">
                 <Chip
                   icon={<AttachFileIcon sx={{ fontSize: 12 }} />}
@@ -419,10 +382,12 @@ export const LetterCard: React.FC<LetterCardProps> = ({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {letter.receiverDetails.designation || 'No designation provided'}
+                    {letter.receiverDetails.designation ||
+                      'No designation provided'}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {letter.receiverDetails.divisionName || 'No division specified'}
+                    {letter.receiverDetails.divisionName ||
+                      'No division specified'}
                   </Typography>
                 </Box>
               </Box>

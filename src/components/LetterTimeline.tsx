@@ -1,348 +1,232 @@
-import React from 'react'
+import { Avatar, Box, Chip, Paper, Typography } from '@mui/material'
 import {
-  Avatar,
-  Box,
-  Chip,
-  IconButton,
-  Paper,
-  Stack,
-  Typography,
-  useTheme,
-} from '@mui/material'
-import {
-  AttachFile as AttachIcon,
-  Business as BusinessIcon,
-  Download as DownloadIcon,
-  Forward as ForwardIcon,
-  PersonAdd as PersonAddIcon,
-  Reply as ReplyIcon,
-  Visibility as VisibilityIcon,
-} from '@mui/icons-material'
-
-interface LetterAttachment {
-  id: string
-  name: string
-  size: string
-  type: string
-  uploadedBy: string
-  uploadedAt: string
-}
-
-interface LetterAction {
-  id: string
-  type:
-    | 'received'
-    | 'assigned_to_division'
-    | 'assigned_to_person'
-    | 'forwarded'
-    | 'replied'
-    | 'returned'
-    | 'status_change'
-  description: string
-  performedBy: {
-    name: string
-    role: string
-    division: string
-    avatar?: string
-  }
-  timestamp: string
-  content?: string
-  attachments?: Array<LetterAttachment>
-  fromDivision?: string
-  toDivision?: string
-  assignedTo?: {
-    type: 'division' | 'person'
-    name: string
-    id?: string
-  }
-  statusFrom?: string
-  statusTo?: string
-  priority?: 'Normal' | 'Urgent' | 'High'
-}
+  Timeline,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineItem,
+  TimelineSeparator,
+} from '@mui/lab'
+import type { ChangeStatusEventDetails, LetterEvent, User } from '@/api'
 
 interface LetterTimelineProps {
-  actions: Array<LetterAction>
-  formatTimestamp: (timestamp: string) => string
+  events: Array<LetterEvent>
   getStatusColor: (status: string) => string
 }
 
-export const LetterTimeline: React.FC<LetterTimelineProps> = ({
-  actions,
-  formatTimestamp,
+export function LetterTimeline({
+  events,
   getStatusColor,
-}) => {
-  const theme = useTheme()
+}: Readonly<LetterTimelineProps>) {
+  return (
+    <Paper
+      sx={{
+        p: 2.5,
+        border: (t) => `1px solid ${t.palette.divider}`,
+        borderRadius: 3,
+      }}
+    >
+      <Typography
+        variant="subtitle2"
+        sx={{
+          fontWeight: 600,
+          mb: 2,
+          opacity: 0.75,
+          letterSpacing: 0.5,
+        }}
+      >
+        Timeline
+      </Typography>
+      <Timeline
+        sx={{
+          '& .MuiTimelineItem-root:before': {
+            flex: 0,
+            padding: 0,
+          },
+        }}
+      >
+        {events.map((event) => {
+          let element = null
+          switch (event.eventType) {
+            case 'ADD_NOTE':
+            case 'ADD_ATTACHMENT':
+            case 'REMOVE_ATTACHMENT':
+            case 'REPLY':
+              break
+            case 'CHANGE_STATUS':
+              element = (
+                <ChangeStatusEvent
+                  details={event.eventDetails as ChangeStatusEventDetails}
+                  getStatusColor={getStatusColor}
+                />
+              )
+              break
+            case 'CHANGE_PRIORITY':
+            case 'UPDATE_DETAILS':
+            default:
+              break
+          }
 
-  const getActionIcon = (type: string) => {
-    switch (type) {
-      case 'assigned_to_division':
-        return <BusinessIcon />
-      case 'assigned_to_person':
-        return <PersonAddIcon />
-      case 'forwarded':
-        return <ForwardIcon />
-      case 'replied':
-        return <ReplyIcon />
-      default:
-        return <VisibilityIcon />
-    }
+          return (
+            <TimelineItem key={event.id}>
+              <TimelineSeparator>
+                <TimelineDot
+                  sx={{
+                    bgcolor: 'primary.main',
+                    width: 8,
+                    height: 8,
+                  }}
+                />
+                <TimelineConnector />
+              </TimelineSeparator>
+              <TimelineContent sx={{ pb: 2 }}>
+                <EventMeta user={event.user} createdAt={event.createdAt} />
+                {element}
+              </TimelineContent>
+            </TimelineItem>
+          )
+        })}
+      </Timeline>
+    </Paper>
+  )
+}
+
+interface EventMetaProps {
+  user: User
+  createdAt: string
+}
+
+function EventMeta({ user, createdAt }: Readonly<EventMetaProps>) {
+  const initials = user.fullName
+    ? user.fullName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+    : ''
+
+  const formatted = new Date(createdAt).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        mb: 1,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Avatar
+          sx={{
+            width: 32,
+            height: 32,
+            fontSize: 13,
+          }}
+        >
+          {initials}
+        </Avatar>
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+              mb: 0.25,
+            }}
+          >
+            {user.fullName}
+          </Typography>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontSize: 11,
+            }}
+          >
+            {user.role} • {user.division}
+          </Typography>
+        </Box>
+      </Box>
+      <Typography
+        variant="caption"
+        color="text.primary"
+        sx={{
+          fontSize: 12,
+          fontWeight: 500,
+          whiteSpace: 'nowrap',
+          ml: 2,
+          backgroundColor: (t) => t.palette.action.selected,
+          px: 1,
+          py: 0.5,
+          borderRadius: 1,
+        }}
+      >
+        {formatted}
+      </Typography>
+    </Box>
+  )
+}
+
+interface ChangeStatusEventProps {
+  details: ChangeStatusEventDetails
+  getStatusColor: (status: string) => string
+}
+
+function ChangeStatusEvent({
+  details,
+  getStatusColor,
+}: Readonly<ChangeStatusEventProps>) {
+  if (details.newStatus === 'NEW') {
+    return (
+      <Box
+        sx={{
+          mt: 0.5,
+          border: (t) => `1px solid ${t.palette.divider}`,
+          p: 1,
+          borderRadius: 1,
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{
+            my: 1,
+            fontWeight: 500,
+          }}
+        >
+          Letter registered in the system
+        </Typography>
+      </Box>
+    )
   }
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
-        Activity Timeline
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        mt: 0.5,
+      }}
+    >
+      <Typography variant="body2" color="text.secondary">
+        Status changed to
       </Typography>
-
-      <Box sx={{ position: 'relative' }}>
-        {/* Timeline line */}
-        <Box
-          sx={{
-            position: 'absolute',
-            left: 28,
-            top: 0,
-            bottom: 0,
-            width: 2,
-            backgroundColor: theme.palette.divider,
-          }}
-        />
-
-        <Stack spacing={0}>
-          {actions.map((action, index) => (
-            <Box
-              key={action.id}
-              sx={{
-                position: 'relative',
-                pb: index < actions.length - 1 ? 4 : 0,
-              }}
-            >
-              {/* Timeline dot */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  left: 20,
-                  top: 8,
-                  width: 16,
-                  height: 16,
-                  borderRadius: '50%',
-                  backgroundColor: theme.palette.primary.main,
-                  border: `3px solid ${theme.palette.background.paper}`,
-                  zIndex: 1,
-                }}
-              />
-
-              {/* Action content */}
-              <Box sx={{ ml: 8, pl: 3 }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    mb: 1,
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar
-                      src={action.performedBy.avatar}
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        backgroundColor: theme.palette.secondary.main,
-                      }}
-                    >
-                      {action.performedBy.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </Avatar>
-                    <Box>
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ fontWeight: 'bold' }}
-                      >
-                        {action.performedBy.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {action.performedBy.role} •{' '}
-                        {action.performedBy.division}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="caption" color="text.secondary">
-                      {formatTimestamp(action.timestamp)}
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        justifyContent: 'flex-end',
-                      }}
-                    >
-                      {getActionIcon(action.type)}
-                      <Typography variant="caption" color="text.secondary">
-                        {action.type.replaceAll('_', ' ').toUpperCase()}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-
-                <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                  {action.description}
-                </Typography>
-
-                {action.content && (
-                  <Paper
-                    variant="outlined"
-                    sx={{
-                      p: 2,
-                      backgroundColor: theme.palette.background.paper,
-                      mb: 2,
-                      border: `1px solid ${theme.palette.divider}`,
-                    }}
-                  >
-                    <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                      {action.content}
-                    </Typography>
-                  </Paper>
-                )}
-
-                {action.assignedTo && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      gap: 1,
-                      mb: 2,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Chip
-                      label="Assigned to"
-                      size="small"
-                      variant="outlined"
-                      sx={{ color: theme.palette.text.secondary }}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      →
-                    </Typography>
-                    <Chip
-                      label={action.assignedTo.name}
-                      size="small"
-                      color={
-                        action.assignedTo.type === 'division'
-                          ? 'info'
-                          : 'secondary'
-                      }
-                      sx={{ fontWeight: 'bold' }}
-                    />
-                  </Box>
-                )}
-
-                {action.fromDivision && action.toDivision && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      gap: 1,
-                      mb: 2,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Chip
-                      label={action.fromDivision}
-                      size="small"
-                      variant="outlined"
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      →
-                    </Typography>
-                    <Chip
-                      label={action.toDivision}
-                      size="small"
-                      color="primary"
-                    />
-                  </Box>
-                )}
-
-                {action.statusFrom && action.statusTo && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      gap: 1,
-                      mb: 2,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Chip
-                      label={action.statusFrom}
-                      size="small"
-                      sx={{
-                        backgroundColor: theme.palette.grey[300],
-                        color: theme.palette.grey[700],
-                      }}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      →
-                    </Typography>
-                    <Chip
-                      label={action.statusTo}
-                      size="small"
-                      sx={{
-                        backgroundColor: getStatusColor(action.statusTo),
-                        color: 'white',
-                      }}
-                    />
-                  </Box>
-                )}
-
-                {action.attachments && action.attachments.length > 0 && (
-                  <Box sx={{ mt: 2 }}>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ mb: 1, display: 'block' }}
-                    >
-                      {action.attachments.length} attachment
-                      {action.attachments.length > 1 ? 's' : ''}:
-                    </Typography>
-                    <Stack spacing={1}>
-                      {action.attachments.map((attachment) => (
-                        <Box
-                          key={attachment.id}
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            p: 1,
-                            backgroundColor: theme.palette.background.paper,
-                            border: `1px solid ${theme.palette.divider}`,
-                            borderRadius: 1,
-                            cursor: 'pointer',
-                            '&:hover': {
-                              backgroundColor: `${theme.palette.background.default}a0`,
-                            },
-                          }}
-                          onClick={() =>
-                            console.log('Download:', attachment.name)
-                          }
-                        >
-                          <AttachIcon fontSize="small" color="primary" />
-                          <Typography variant="caption" sx={{ flex: 1 }}>
-                            {attachment.name} ({attachment.size})
-                          </Typography>
-                          <IconButton size="small">
-                            <DownloadIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
-                      ))}
-                    </Stack>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          ))}
-        </Stack>
-      </Box>
-    </Paper>
+      <Chip
+        label={details.newStatus.replaceAll('_', ' ')}
+        size="small"
+        sx={{
+          backgroundColor: getStatusColor(details.newStatus),
+          color: 'white',
+          fontWeight: 500,
+          fontSize: 11,
+        }}
+      />
+    </Box>
   )
 }
