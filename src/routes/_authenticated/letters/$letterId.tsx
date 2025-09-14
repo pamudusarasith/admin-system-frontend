@@ -91,7 +91,7 @@ function LetterThreadView() {
     )
   }
 
-  if (!result.data) {
+  if (!result.data?.data) {
     return (
       <ErrorMessage
         title="Unexpected Error"
@@ -100,7 +100,7 @@ function LetterThreadView() {
     )
   }
 
-  const letter = result.data
+  const letter = result.data.data
 
   return (
     <SidebarLayout>

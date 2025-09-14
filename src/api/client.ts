@@ -1,6 +1,24 @@
 import axios from 'axios'
 import { router } from '@/main.tsx'
 
+export interface ErrorInfo {
+  message: string
+  field?: string
+}
+
+export interface Pagination {
+  page: number
+  size: number
+  totalPages: number
+}
+
+export interface ApiResponse<T> {
+  message?: string
+  data?: T
+  pagination?: Pagination
+  errors?: Array<ErrorInfo>
+}
+
 export const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {

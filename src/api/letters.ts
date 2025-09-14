@@ -1,4 +1,5 @@
 import { client } from './client'
+import type { ApiResponse } from './client'
 import type { LetterFormData } from '@/schemas/letter'
 import type { Division } from './divisions'
 import type { User } from './users'
@@ -90,7 +91,7 @@ export interface LettersApiResponse {
 
 export interface GetLettersParams {
   page?: number
-  itemsPerPage?: number
+  size?: number
   status?: string
   priority?: string
   search?: string
@@ -98,13 +99,13 @@ export interface GetLettersParams {
 
 export async function getLetters(
   params: GetLettersParams = {},
-): Promise<LettersApiResponse> {
+): Promise<ApiResponse<Array<Letter>>> {
   try {
-    const { page = 0, itemsPerPage = 10, ...otherParams } = params
+    const { page = 0, size = 10, ...otherParams } = params
     const response = await client.get('/letters', {
       params: {
         page,
-        itemsPerPage,
+        size,
         ...otherParams,
       },
     })
@@ -115,7 +116,9 @@ export async function getLetters(
   }
 }
 
-export async function createLetter(letterData: LetterFormData): Promise<any> {
+export async function createLetter(
+  letterData: LetterFormData,
+): Promise<ApiResponse<any>> {
   try {
     const { attachments, ...details } = letterData
     const formData = new FormData()
@@ -138,7 +141,9 @@ export async function createLetter(letterData: LetterFormData): Promise<any> {
   }
 }
 
-export async function getLetterById(letterId: number): Promise<Letter> {
+export async function getLetterById(
+  letterId: number,
+): Promise<ApiResponse<Letter>> {
   try {
     const response = await client.get(`/letters/${letterId}`)
     return response.data
