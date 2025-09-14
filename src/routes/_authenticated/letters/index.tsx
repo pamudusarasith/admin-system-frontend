@@ -20,11 +20,7 @@ import {
   Clear as ClearIcon,
   Inbox as InboxIcon,
 } from '@mui/icons-material'
-import {
-  keepPreviousData,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import type { GetLettersParams } from '@/api/letters'
 import {
   AddLetterDialog,
@@ -50,7 +46,6 @@ export const Route = createFileRoute('/_authenticated/letters/')({
 function LettersPage() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const searchParams = Route.useSearch()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -60,7 +55,7 @@ function LettersPage() {
     searchParams.priority || 'All',
   )
   const [page, setPage] = useState(searchParams.page || 1)
-  const [itemsPerPage] = useState(10)
+  const [size] = useState(10)
   const [isAddLetterDialogOpen, setIsAddLetterDialogOpen] = useState(false)
 
   // TanStack Query for fetching letters
@@ -73,7 +68,7 @@ function LettersPage() {
       'letters',
       {
         page: page - 1, // API uses 0-based pagination
-        itemsPerPage,
+        size,
         ...(statusFilter !== 'All' && { status: statusFilter }),
         ...(priorityFilter !== 'All' && { priority: priorityFilter }),
         ...(searchTerm && { search: searchTerm }),
@@ -165,18 +160,6 @@ function LettersPage() {
     })
   }
 
-  const handleAddLetterSubmit = async (letterData: any) => {
-    try {
-      console.log('New letter data:', letterData)
-      // The mutation will be handled by the AddLetterDialog component
-      // After successful creation, invalidate the letters query
-      await queryClient.invalidateQueries({ queryKey: ['letters'] })
-      setIsAddLetterDialogOpen(false)
-    } catch (error) {
-      console.error('Failed to create letter:', error)
-    }
-  }
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'HIGH':
@@ -256,10 +239,8 @@ function LettersPage() {
   const totalPages = pagination?.totalPages || 1
   const currentPage = page
   // Calculate total count estimate based on current page and items per page
-  const totalCount = pagination
-    ? pagination.totalPages * pagination.itemsPerPage
-    : 0
-  const rowsPerPage = itemsPerPage
+  const totalCount = pagination ? pagination.totalPages * pagination.size : 0
+  const rowsPerPage = size
 
   return (
     <SidebarLayout>
@@ -342,7 +323,7 @@ function LettersPage() {
         <Stack spacing={3} sx={{ mb: 3 }}>
           {isLoading ? (
             // Loading skeletons
-            (Array.from({ length: 3 }).map((_, index) => (
+            Array.from({ length: 3 }).map((_, index) => (
               <Card key={index} sx={{ borderRadius: 3 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box
@@ -365,7 +346,7 @@ function LettersPage() {
                   </Box>
                 </CardContent>
               </Card>
-            )))
+            ))
           ) : letters.length === 0 ? (
             <Fade in timeout={800}>
               <Paper
@@ -471,7 +452,6 @@ function LettersPage() {
       <AddLetterDialog
         open={isAddLetterDialogOpen}
         onClose={() => setIsAddLetterDialogOpen(false)}
-        onSubmit={handleAddLetterSubmit}
       />
     </SidebarLayout>
   )

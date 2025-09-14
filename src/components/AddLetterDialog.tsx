@@ -34,13 +34,11 @@ import type { LetterFormData } from '../schemas/letter'
 interface AddLetterDialogProps {
   open: boolean
   onClose: () => void
-  onSubmit?: (letterData: LetterFormData) => void
 }
 
 export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
   open,
   onClose,
-  onSubmit,
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -49,10 +47,9 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
   // TanStack Query mutation for creating a letter
   const createLetterMutation = useMutation({
     mutationFn: createLetter,
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Invalidate and refetch letters query
       queryClient.invalidateQueries({ queryKey: ['letters'] })
-      onSubmit?.(data)
       handleClose()
     },
     onError: (error) => {
@@ -211,7 +208,9 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                   name="reference"
                   validators={{
                     onChange: ({ value }) =>
-                      !value.trim() ? 'Reference number is required' : undefined,
+                      !value.trim()
+                        ? 'Reference number is required'
+                        : undefined,
                   }}
                 >
                   {(field) => (
@@ -268,7 +267,10 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
 
                 {/* Sender Details Section */}
                 <Box>
-                  <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ mb: 2, color: 'primary.main' }}
+                  >
                     Sender Details
                   </Typography>
                   <Stack spacing={2}>
@@ -364,7 +366,10 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
 
                 {/* Receiver Details Section */}
                 <Box>
-                  <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ mb: 2, color: 'primary.main' }}
+                  >
                     Receiver Details
                   </Typography>
                   <Stack spacing={2}>
@@ -372,7 +377,9 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                       name="receiver_details.name"
                       validators={{
                         onChange: ({ value }) =>
-                          !value.trim() ? 'Receiver name is required' : undefined,
+                          !value.trim()
+                            ? 'Receiver name is required'
+                            : undefined,
                       }}
                     >
                       {(field) => (
@@ -440,7 +447,9 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                   <form.Field name="priority">
                     {(field) => (
-                      <FormControl sx={{ minWidth: { xs: '100%', sm: '200px' } }}>
+                      <FormControl
+                        sx={{ minWidth: { xs: '100%', sm: '200px' } }}
+                      >
                         <InputLabel>Priority</InputLabel>
                         <Select
                           value={field.state.value}
@@ -456,7 +465,10 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                           }}
                         >
                           {priorities.map((priority) => (
-                            <MenuItem key={priority.value} value={priority.value}>
+                            <MenuItem
+                              key={priority.value}
+                              value={priority.value}
+                            >
                               <Box
                                 sx={{
                                   display: 'flex',
@@ -483,7 +495,9 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
 
                   <form.Field name="mode_of_arrival">
                     {(field) => (
-                      <FormControl sx={{ minWidth: { xs: '100%', sm: '200px' } }}>
+                      <FormControl
+                        sx={{ minWidth: { xs: '100%', sm: '200px' } }}
+                      >
                         <InputLabel>Mode of Arrival</InputLabel>
                         <Select
                           value={field.state.value}
