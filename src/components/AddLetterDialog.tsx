@@ -28,8 +28,11 @@ import {
 } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createLetter } from '../api/letters'
-import type { LetterFormData } from '../schemas/letter'
+import type { AxiosError } from 'axios'
+import type { LetterFormData } from '@/schemas/letter'
+import type { ApiResponse } from '@/api'
+import { createLetter } from '@/api'
+import { useSnackbar } from '@/components'
 
 interface AddLetterDialogProps {
   open: boolean
@@ -43,16 +46,27 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const queryClient = useQueryClient()
+  const { showSnackbar } = useSnackbar()
 
   // TanStack Query mutation for creating a letter
   const createLetterMutation = useMutation({
     mutationFn: createLetter,
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidate and refetch letters query
       queryClient.invalidateQueries({ queryKey: ['letters'] })
       handleClose()
+      if (data.message?.trim())
+        showSnackbar({ message: data.message, severity: 'success' })
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiResponse<unknown>>) => {
+      const message =
+        error.response?.data.message?.trim() ||
+        'An unexpected error occurred. Please try again.'
+      showSnackbar({
+        message,
+        severity: 'error',
+      })
+
       console.error('Failed to create letter:', error)
     },
   })
@@ -147,10 +161,12 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
       maxWidth="md"
       fullWidth
       fullScreen={isMobile}
-      PaperProps={{
-        sx: {
-          borderRadius: isMobile ? 0 : 3,
-          background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: isMobile ? 0 : 3,
+            background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+          },
         },
       }}
     >
@@ -542,8 +558,10 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                         onBlur={field.handleBlur}
                         error={!field.state.meta.isValid}
                         helperText={field.state.meta.errors.join(', ')}
-                        InputLabelProps={{
-                          shrink: true,
+                        slotProps={{
+                          inputLabel: {
+                            shrink: true,
+                          },
                         }}
                         sx={{
                           '& .MuiOutlinedInput-root': {
@@ -566,8 +584,10 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                         onBlur={field.handleBlur}
                         error={!field.state.meta.isValid}
                         helperText={field.state.meta.errors.join(', ')}
-                        InputLabelProps={{
-                          shrink: true,
+                        slotProps={{
+                          inputLabel: {
+                            shrink: true,
+                          },
                         }}
                         sx={{
                           '& .MuiOutlinedInput-root': {

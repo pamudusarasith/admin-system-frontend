@@ -12,7 +12,7 @@ import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 import { AuthProvider, useAuth } from './auth.tsx'
-import { AuthLoadingSpinner } from '@/components'
+import { AuthLoadingSpinner, SnackbarProvider } from '@/components'
 
 // Create a new router instance
 export const router = createRouter({
@@ -43,7 +43,9 @@ function InnerApp() {
 function App() {
   return (
     <AuthProvider>
-      <InnerApp />
+      <SnackbarProvider>
+        <InnerApp />
+      </SnackbarProvider>
     </AuthProvider>
   )
 }
