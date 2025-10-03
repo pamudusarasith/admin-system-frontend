@@ -7,32 +7,22 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material'
-import {
-  AttachFile as AttachIcon,
-  Forward as ForwardIcon,
-  Send as SendIcon,
-} from '@mui/icons-material'
+import { AttachFile as AttachIcon, Send as SendIcon } from '@mui/icons-material'
 
 interface LetterDialogsProps {
   replyDialogOpen: boolean
-  forwardDialogOpen: boolean
   replyContent: string
   onReplyDialogClose: () => void
-  onForwardDialogClose: () => void
   onReplyContentChange: (content: string) => void
   onSendReply: () => void
-  onForwardLetter: () => void
 }
 
 export const LetterDialogs: React.FC<LetterDialogsProps> = ({
   replyDialogOpen,
-  forwardDialogOpen,
   replyContent,
   onReplyDialogClose,
-  onForwardDialogClose,
   onReplyContentChange,
   onSendReply,
-  onForwardLetter,
 }) => {
   return (
     <>
@@ -70,40 +60,6 @@ export const LetterDialogs: React.FC<LetterDialogsProps> = ({
             onClick={onSendReply}
           >
             Send Reply
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Forward Dialog */}
-      <Dialog
-        open={forwardDialogOpen}
-        onClose={onForwardDialogClose}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Forward Letter</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="To Division/Officer"
-            sx={{ mb: 2, mt: 1 }}
-            placeholder="Select division or officer"
-          />
-          <TextField
-            multiline
-            rows={4}
-            fullWidth
-            placeholder="Add forwarding note (optional)..."
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onForwardDialogClose}>Cancel</Button>
-          <Button
-            variant="contained"
-            startIcon={<ForwardIcon />}
-            onClick={onForwardLetter}
-          >
-            Forward
           </Button>
         </DialogActions>
       </Dialog>

@@ -20,9 +20,8 @@ import {
   VisibilityOff,
 } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
 import { AnimatedIcon } from '@/components'
-import { useAuth } from '@/auth'
+import { useAuth } from '@/core/auth'
 
 export const Route = createFileRoute('/login')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -37,46 +36,24 @@ export const Route = createFileRoute('/login')({
   component: LoginPage,
 })
 
-interface LoginForm {
-  username: string
-  password: string
-}
-
 function LoginPage() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const {
-    login: authLogin,
-    error,
-    clearError,
-    isLoading: authLoading,
-  } = useAuth()
+  const { login, error, clearError, isLoading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const search = Route.useSearch()
-
-  const loginMutation = useMutation({
-    mutationFn: async ({ username, password }: LoginForm) => {
-      // Clear any previous errors
-      clearError()
-
-      // Use the auth context login method which handles API call internally
-      await authLogin(username, password)
-
-      // Navigate after successful login
-      navigate({ to: search.redirect, replace: true })
-    },
-    onError: (loginError) => {
-      console.error('Login failed:', loginError)
-    },
-  })
 
   const form = useForm({
     defaultValues: {
       username: '',
       password: '',
     },
-    onSubmit: async ({ value }) => {
-      await loginMutation.mutateAsync(value)
+    onSubmit: async ({ value: { username, password } }) => {
+      clearError()
+      const isLoggedIn = await login(username, password)
+      if (isLoggedIn) {
+        navigate({ to: search.redirect, replace: true })
+      }
     },
   })
 
@@ -227,7 +204,7 @@ function LoginPage() {
             </Box>
 
             {/* Error Alert */}
-            {(error || loginMutation.isError) && (
+            {error && (
               <Alert
                 severity="error"
                 sx={{
@@ -235,10 +212,7 @@ function LoginPage() {
                   borderRadius: 2,
                 }}
               >
-                {error ||
-                  (loginMutation.error instanceof Error
-                    ? loginMutation.error.message
-                    : 'Login failed. Please check your credentials.')}
+                {error || 'Login failed. Please check your credentials.'}
               </Alert>
             )}
 
@@ -269,14 +243,14 @@ function LoginPage() {
                       onChange={(e) => field.handleChange(e.target.value)}
                       error={!!field.state.meta.errors.length}
                       helperText={field.state.meta.errors[0]}
-                      disabled={loginMutation.isPending || authLoading}
-                      InputLabelProps={{
-                        sx: {
-                          fontSize: '1.1rem',
-                          fontWeight: 500,
-                        },
-                      }}
+                      disabled={isLoading}
                       slotProps={{
+                        inputLabel: {
+                          sx: {
+                            fontSize: '1.1rem',
+                            fontWeight: 500,
+                          },
+                        },
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
@@ -313,14 +287,14 @@ function LoginPage() {
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       error={!!field.state.meta.errors.length}
-                      disabled={loginMutation.isPending || authLoading}
-                      InputLabelProps={{
-                        sx: {
-                          fontSize: '1.1rem',
-                          fontWeight: 500,
-                        },
-                      }}
+                      disabled={isLoading}
                       slotProps={{
+                        inputLabel: {
+                          sx: {
+                            fontSize: '1.1rem',
+                            fontWeight: 500,
+                          },
+                        },
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
@@ -332,9 +306,7 @@ function LoginPage() {
                               <IconButton
                                 onClick={handleTogglePasswordVisibility}
                                 edge="end"
-                                disabled={
-                                  loginMutation.isPending || authLoading
-                                }
+                                disabled={isLoading}
                               >
                                 {showPassword ? (
                                   <VisibilityOff />
@@ -393,7 +365,7 @@ function LoginPage() {
                   variant="contained"
                   size="large"
                   fullWidth
-                  disabled={loginMutation.isPending || authLoading}
+                  disabled={isLoading}
                   sx={{
                     py: 1.5,
                     borderRadius: 2,
@@ -414,9 +386,7 @@ function LoginPage() {
                     transition: 'all 0.3s ease',
                   }}
                 >
-                  {loginMutation.isPending || authLoading
-                    ? 'Signing In...'
-                    : 'Sign In'}
+                  {isLoading ? 'Signing In...' : 'Sign In'}
                 </Button>
               </Stack>
             </Box>

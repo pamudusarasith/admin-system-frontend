@@ -21,7 +21,6 @@ export const Route = createFileRoute('/_authenticated/letters/$letterId')({
 function LetterThreadView() {
   const theme = useTheme()
   const [replyDialogOpen, setReplyDialogOpen] = useState(false)
-  const [forwardDialogOpen, setForwardDialogOpen] = useState(false)
   const [replyContent, setReplyContent] = useState('')
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
@@ -70,11 +69,6 @@ function LetterThreadView() {
     setReplyContent('')
   }
 
-  const handleForwardLetter = () => {
-    console.log('Forward letter')
-    setForwardDialogOpen(false)
-  }
-
   if (result.isLoading) {
     return <LoadingSpinner />
   }
@@ -108,7 +102,6 @@ function LetterThreadView() {
         <LetterHeader
           letter={letter}
           onReply={() => setReplyDialogOpen(true)}
-          onForward={() => setForwardDialogOpen(true)}
           onMenuClick={handleMenuClick}
           getPriorityColor={getPriorityColor}
           getStatusColor={getStatusColor}
@@ -135,17 +128,15 @@ function LetterThreadView() {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
+          letter={letter}
         />
 
         <LetterDialogs
           replyDialogOpen={replyDialogOpen}
-          forwardDialogOpen={forwardDialogOpen}
           replyContent={replyContent}
           onReplyDialogClose={() => setReplyDialogOpen(false)}
-          onForwardDialogClose={() => setForwardDialogOpen(false)}
           onReplyContentChange={setReplyContent}
           onSendReply={handleSendReply}
-          onForwardLetter={handleForwardLetter}
         />
       </Container>
     </SidebarLayout>

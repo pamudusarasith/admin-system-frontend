@@ -10,30 +10,15 @@ import {
 } from '@mui/material'
 import {
   ArrowBack as ArrowBackIcon,
-  Forward as ForwardIcon,
   MoreVert as MoreVertIcon,
   Reply as ReplyIcon,
 } from '@mui/icons-material'
-
-interface Letter {
-  id: number
-  reference: string
-  subject: string
-  priority: 'NORMAL' | 'HIGH' | 'URGENT'
-  status:
-    | 'NEW'
-    | 'ASSIGNED_TO_DIVISION'
-    | 'PENDING_ACCEPTANCE'
-    | 'ASSIGNED_TO_OFFICER'
-    | 'RETURNED_FROM_OFFICER'
-    | 'RETURNED_FROM_DIVISION'
-    | 'CLOSED'
-}
+import type { Letter } from '@/api'
+import { useAuth } from '@/core/auth'
 
 interface LetterHeaderProps {
   letter: Letter
   onReply: () => void
-  onForward: () => void
   onMenuClick: (event: React.MouseEvent<HTMLElement>) => void
   getPriorityColor: (priority: string) => string
   getStatusColor: (status: string) => string
@@ -42,11 +27,14 @@ interface LetterHeaderProps {
 export const LetterHeader: React.FC<LetterHeaderProps> = ({
   letter,
   onReply,
-  onForward,
   onMenuClick,
   getPriorityColor,
   getStatusColor,
 }) => {
+  const { user } = useAuth()
+
+  const canReply = user?.id && user.id === letter.assignedUser?.id
+
   return (
     <Box sx={{ mb: 4 }}>
       <Button
@@ -135,23 +123,17 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
 
           {/* Primary Actions */}
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<ReplyIcon />}
-              onClick={onReply}
-              sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-            >
-              Reply
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<ForwardIcon />}
-              onClick={onForward}
-              sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-            >
-              Forward
-            </Button>
+            {canReply && (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<ReplyIcon />}
+                onClick={onReply}
+                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+              >
+                Add Reply
+              </Button>
+            )}
             <Button
               variant="outlined"
               onClick={onMenuClick}
