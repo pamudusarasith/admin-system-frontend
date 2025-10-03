@@ -9,7 +9,8 @@ import {
 interface User {
   id: number
   username: string
-  full_name: string
+  fullName: string
+  divisionId: number
   authorities: Array<string>
   exp?: number // Token expiration time
 }
@@ -21,7 +22,7 @@ export interface AuthState {
   error: string | null
   hasAuthority: (authority: string) => boolean
   hasAnyAuthority: (authorities: Array<string>) => boolean
-  login: (username: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<boolean>
   refresh: () => Promise<boolean>
   logout: () => Promise<void>
   clearError: () => void
@@ -29,16 +30,21 @@ export interface AuthState {
 
 interface TokenPayload {
   sub: string
-  full_name: string
-  exp: number
-  user_id: number
-  iat: number
   scope: string
+  fullName: string
+  divisionId: number
+  exp: number
+  iat: number
+  userId: number
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+interface AuthProviderProps {
+  readonly children: React.ReactNode
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -61,9 +67,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const authorities = decoded.scope ? decoded.scope.split(' ') : []
 
       return {
-        id: decoded.user_id,
+        id: decoded.userId,
         username: decoded.sub,
-        full_name: decoded.full_name,
+        fullName: decoded.fullName,
+        divisionId: decoded.divisionId,
         authorities,
         exp: decoded.exp,
       }
@@ -85,23 +92,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (username: string, password: string): Promise<void> => {
+  const login = async (
+    username: string,
+    password: string,
+  ): Promise<boolean> => {
     setError(null)
-    setIsLoading(true)
 
     try {
       const { access_token } = await apiLogin(username, password)
       localStorage.setItem('access_token', access_token)
       updateAuthState()
-      setIsLoading(false)
-    } catch (loginError) {
-      const errorMessage =
-        loginError instanceof Error
-          ? loginError.message
-          : 'Authentication failed'
+      return true
+    } catch (loginError: any) {
+      const errorMessage = loginError.response?.data?.message || 'Login failed'
       setError(errorMessage)
-      setIsLoading(false)
-      throw new Error(errorMessage)
+      return false
     }
   }
 
@@ -152,7 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize auth and setup storage listeners
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       const userData = parseTokenFromStorage()
 
       // Update all states in one batch
@@ -161,6 +166,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setError(null)
       } else {
         setUser(null)
+        // Attempt to refresh token if none found
+        await refresh()
       }
       // Always set loading to false after checking auth
       setIsLoading(false)
@@ -171,16 +178,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for storage changes from other tabs
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'access_token') {
-        const userData = parseTokenFromStorage()
-        setUser(userData)
-        if (userData) {
-          setError(null)
-        }
+        updateAuthState()
       }
     }
 
     window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
+    window.addEventListener('AccessTokenChange', updateAuthState)
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('AccessTokenChange', updateAuthState)
+    }
   }, []) // Remove dependency on updateAuthState
 
   // Auto-refresh token before expiration
@@ -194,39 +201,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const currentTime = Date.now()
     const timeUntilExpiry = tokenExp - currentTime
 
-    // Refresh 5 minutes before expiry, but ensure at least 1 minute minimum
-    const refreshTime = Math.max(timeUntilExpiry - 5 * 60 * 1000, 60 * 1000)
+    // Refresh 20 seconds before expiry
+    const refreshTime = Math.max(timeUntilExpiry - 20 * 1000, 1)
 
-    if (refreshTime > 0 && timeUntilExpiry > 60 * 1000) {
-      const timer = setTimeout(() => {
-        refresh().catch((refreshError) => {
-          console.error('Auto-refresh failed:', refreshError)
-          // Don't logout automatically on refresh failure
-          // Let the axios interceptor handle 401s
-        })
-      }, refreshTime)
+    const timer = setTimeout(() => {
+      refresh()
+    }, refreshTime)
 
-      return () => clearTimeout(timer)
-    } else if (timeUntilExpiry <= 60 * 1000) {
-      // Token expires within 1 minute, try immediate refresh
-      refresh().catch((refreshError) => {
-        console.error('Immediate refresh failed:', refreshError)
-      })
-    }
+    return () => clearTimeout(timer)
   }, [user?.exp, isLoading])
 
-  const value: AuthState = {
-    isAuthenticated: user !== null,
-    user,
-    isLoading,
-    error,
-    hasAuthority,
-    hasAnyAuthority,
-    login,
-    refresh,
-    logout,
-    clearError,
-  }
+  const value = React.useMemo<AuthState>(
+    () => ({
+      isAuthenticated: user !== null,
+      user,
+      isLoading,
+      error,
+      hasAuthority,
+      hasAnyAuthority,
+      login,
+      refresh,
+      logout,
+      clearError,
+    }),
+    [user, isLoading, error],
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

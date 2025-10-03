@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import type { AuthState } from '@/auth'
+import type { AuthState } from '@/core/auth'
 import { ThemeProvider } from '@/theme'
 
 interface RouterContext {

@@ -28,6 +28,8 @@ import {
   Settings as SettingsIcon,
 } from '@mui/icons-material'
 import { Link } from '@tanstack/react-router'
+import { useAuth } from '@/core/auth'
+import { Permission as P } from '@/core/permission'
 
 interface SidebarProps {
   open: boolean
@@ -38,6 +40,7 @@ interface MenuItem {
   id: string
   label: string
   icon: React.ReactNode
+  authorities?: Array<string>
   path?: {
     to: string
     search?: { [key: string]: string }
@@ -56,6 +59,12 @@ const menuItems: Array<MenuItem> = [
     id: 'letters',
     label: 'Letter Management',
     icon: <EmailIcon />,
+    authorities: [
+      P.letterAllRead,
+      P.letterUnassignedRead,
+      P.letterDivisionRead,
+      P.letterOwnRead,
+    ],
     children: [
       {
         id: 'all-letters',
@@ -67,18 +76,21 @@ const menuItems: Array<MenuItem> = [
         id: 'pending-division',
         label: 'Pending Division Assignment',
         icon: <ScheduleIcon />,
+        authorities: [P.letterAllRead, P.letterUnassignedRead],
         path: { to: '/letters', search: { status: 'NEW' } },
       },
       {
         id: 'pending-person',
         label: 'Assigned to Division',
         icon: <AssignmentIcon />,
+        authorities: [P.letterAllRead, P.letterDivisionRead],
         path: { to: '/letters', search: { status: 'ASSIGNED_TO_DIVISION' } },
       },
       {
         id: 'my-letters',
         label: 'My Assigned Letters',
         icon: <MarkEmailUnreadIcon />,
+        authorities: [P.letterAllRead, P.letterOwnRead],
         path: { to: '/letters', search: { status: 'ASSIGNED_TO_OFFICER' } },
       },
     ],
@@ -138,6 +150,7 @@ const menuItems: Array<MenuItem> = [
 
 export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
   const theme = useTheme()
+  const { hasAnyAuthority } = useAuth()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [expandedItems, setExpandedItems] = useState<Array<string>>([])
   const [selectedId, setSelectedId] = useState<string>('dashboard')
@@ -163,6 +176,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
   }
 
   const renderMenuItem = (item: MenuItem, depth = 0) => {
+    if (item.authorities && !hasAnyAuthority(item.authorities)) return null
+
     const hasChildren = item.children && item.children.length > 0
     const isExpanded = expandedItems.includes(item.id)
 

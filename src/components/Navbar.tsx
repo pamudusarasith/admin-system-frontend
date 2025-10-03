@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material'
 import { useNavigate } from '@tanstack/react-router'
 import { useTheme as useThemeContext } from '../theme'
-import { useAuth } from '@/auth'
+import { useAuth } from '@/core/auth'
 
 interface NavbarProps {
   onMenuClick: () => void

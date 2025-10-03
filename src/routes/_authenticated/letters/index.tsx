@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import {
   Box,
@@ -30,8 +30,22 @@ import {
   StatusCardsGrid,
 } from '@/components'
 import { getLetters } from '@/api/letters'
+import { useAuth } from '@/core/auth'
+import { Permission as P } from '@/core/permission'
 
 export const Route = createFileRoute('/_authenticated/letters/')({
+  beforeLoad: ({ context }) => {
+    if (
+      !context.auth.hasAnyAuthority([
+        P.letterAllRead,
+        P.letterUnassignedRead,
+        P.letterDivisionRead,
+        P.letterOwnRead,
+      ])
+    ) {
+      throw redirect({ to: '/403' })
+    }
+  },
   component: LettersPage,
   validateSearch: (search: Record<string, unknown>) => {
     return {
@@ -46,6 +60,8 @@ export const Route = createFileRoute('/_authenticated/letters/')({
 function LettersPage() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { hasAuthority } = useAuth()
+  const canCreate = hasAuthority(P.letterCreate)
   const searchParams = Route.useSearch()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -277,21 +293,23 @@ function LettersPage() {
                   Track and manage all incoming and outgoing correspondence
                 </Typography>
               </Box>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setIsAddLetterDialogOpen(true)}
-                sx={{
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  minWidth: { xs: '100%', sm: 'auto' },
-                  py: 1.5,
-                  px: 3,
-                }}
-              >
-                Add New Letter
-              </Button>
+              {canCreate && (
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setIsAddLetterDialogOpen(true)}
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    minWidth: { xs: '100%', sm: 'auto' },
+                    py: 1.5,
+                    px: 3,
+                  }}
+                >
+                  Add New Letter
+                </Button>
+              )}
             </Box>
 
             {/* Enhanced Status Overview Cards */}
@@ -321,75 +339,25 @@ function LettersPage() {
 
         {/* Enhanced Letters Cards */}
         <Stack spacing={3} sx={{ mb: 3 }}>
-          {isLoading ? (
-            // Loading skeletons
-            Array.from({ length: 3 }).map((_, index) => (
-              <Card key={index} sx={{ borderRadius: 3 }}>
-                <CardContent sx={{ p: 3 }}>
-                  <Box
-                    sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}
-                  >
-                    <Skeleton variant="circular" width={48} height={48} />
-                    <Box sx={{ flex: 1 }}>
-                      <Skeleton variant="text" width="60%" height={32} />
-                      <Skeleton variant="text" width="40%" height={24} />
-                      <Skeleton variant="text" width="80%" height={20} />
-                    </Box>
-                    <Box>
-                      <Skeleton
-                        variant="rectangular"
-                        width={80}
-                        height={24}
-                        sx={{ borderRadius: 1 }}
-                      />
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))
-          ) : letters.length === 0 ? (
-            <Fade in timeout={800}>
-              <Paper
-                sx={{
-                  p: 6,
-                  textAlign: 'center',
-                  borderRadius: 2,
-                  backgroundColor: theme.palette.grey[50],
-                }}
-              >
-                <InboxIcon
-                  sx={{ fontSize: 64, color: 'primary.light', mb: 2 }}
+          {(() => {
+            if (isLoading) {
+              return <LoadingSkeletons />
+            } else if (letters.length === 0) {
+              return <NoLettersCard handleClearFilters={handleClearFilters} />
+            } else {
+              return letters.map((letter, index) => (
+                <LetterCard
+                  key={letter.id}
+                  letter={letter}
+                  index={index}
+                  getPriorityColor={getPriorityColor}
+                  getStatusColor={getStatusColor}
+                  formatTimeAgo={formatTimeAgo}
+                  onCardClick={(id) => navigate({ to: `/letters/${id}` })}
                 />
-                <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
-                  No letters found
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  No letters match your current filter criteria. Try adjusting
-                  your search or filters.
-                </Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={<ClearIcon />}
-                  onClick={handleClearFilters}
-                  sx={{ mt: 2, borderRadius: 2 }}
-                >
-                  Clear All Filters
-                </Button>
-              </Paper>
-            </Fade>
-          ) : (
-            letters.map((letter, index) => (
-              <LetterCard
-                key={letter.id}
-                letter={letter}
-                index={index}
-                getPriorityColor={getPriorityColor}
-                getStatusColor={getStatusColor}
-                formatTimeAgo={formatTimeAgo}
-                onCardClick={(id) => navigate({ to: `/letters/${id}` })}
-              />
-            ))
-          )}
+              ))
+            }
+          })()}
 
           {/* Loading indicator for background fetching */}
           {isFetching && !isLoading && (
@@ -454,5 +422,68 @@ function LettersPage() {
         onClose={() => setIsAddLetterDialogOpen(false)}
       />
     </SidebarLayout>
+  )
+}
+
+function LoadingSkeletons() {
+  const skeletonKeys = ['skel-1', 'skel-2', 'skel-3']
+  return skeletonKeys.map((key) => (
+    <Card key={key} sx={{ borderRadius: 3 }}>
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+          <Skeleton variant="circular" width={48} height={48} />
+          <Box sx={{ flex: 1 }}>
+            <Skeleton variant="text" width="60%" height={32} />
+            <Skeleton variant="text" width="40%" height={24} />
+            <Skeleton variant="text" width="80%" height={20} />
+          </Box>
+          <Box>
+            <Skeleton
+              variant="rectangular"
+              width={80}
+              height={24}
+              sx={{ borderRadius: 1 }}
+            />
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
+  ))
+}
+
+interface NoLettersCardProps {
+  readonly handleClearFilters: () => void
+}
+
+function NoLettersCard({ handleClearFilters }: NoLettersCardProps) {
+  const theme = useTheme()
+  return (
+    <Fade in timeout={800}>
+      <Paper
+        sx={{
+          p: 6,
+          textAlign: 'center',
+          borderRadius: 2,
+          backgroundColor: theme.palette.grey[50],
+        }}
+      >
+        <InboxIcon sx={{ fontSize: 64, color: 'primary.light', mb: 2 }} />
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+          No letters found
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          No letters match your current filter criteria. Try adjusting your
+          search or filters.
+        </Typography>
+        <Button
+          variant="outlined"
+          startIcon={<ClearIcon />}
+          onClick={handleClearFilters}
+          sx={{ mt: 2, borderRadius: 2 }}
+        >
+          Clear All Filters
+        </Button>
+      </Paper>
+    </Fade>
   )
 }
