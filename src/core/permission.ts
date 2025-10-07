@@ -28,6 +28,12 @@ export enum Permission {
   letterDivisionUpdatePriority = 'letter:division:update:priority',
   letterOwnUpdatePriority = 'letter:own:update:priority',
 
+  // Add letter note
+  letterAllAddNote = 'letter:all:add:note',
+  letterUnassignedAddNote = 'letter:unassigned:add:note',
+  letterDivisionAddNote = 'letter:division:add:note',
+  letterOwnAddNote = 'letter:own:add:note',
+
   // Add letter attachments
   letterAllAddAttachments = 'letter:all:add:attachments',
   letterUnassignedAddAttachments = 'letter:unassigned:add:attachments',
