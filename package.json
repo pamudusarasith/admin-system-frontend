@@ -25,11 +25,13 @@
     "@tanstack/react-router": "^1.121.2",
     "@tanstack/react-router-devtools": "^1.121.2",
     "@tanstack/router-plugin": "^1.121.2",
+    "@types/react-dropzone": "^4.2.2",
     "axios": "^1.10.0",
     "axios-retry": "^4.5.0",
     "jwt-decode": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-dropzone": "^14.3.8",
     "zod": "^4.0.5"
   },
   "devDependencies": {

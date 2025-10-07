@@ -29,4 +29,5 @@ export { default as ViewRoleDetails } from './ViewRoleDetails'
 
 export { AdminDashboard } from './AdminDashboard'
 export { SnackbarProvider, useSnackbar } from './common/Snackbar'
+export { FileUploadField } from './common/FileUploadField'
 export { ErrorMessage } from './common/ErrorMessage'

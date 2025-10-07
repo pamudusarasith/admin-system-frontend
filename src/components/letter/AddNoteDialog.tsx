@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardContent,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -16,22 +15,16 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material'
-import {
-  AttachFile as AttachFileIcon,
-  Close as CloseIcon,
-  Delete as DeleteIcon,
-  NoteAdd as NoteAddIcon,
-  CloudUpload as UploadIcon,
-} from '@mui/icons-material'
+import { Close as CloseIcon, NoteAdd as NoteAddIcon } from '@mui/icons-material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
 import { getRouteApi } from '@tanstack/react-router'
-import { useSnackbar } from '../common/Snackbar'
 import type { AxiosError } from 'axios'
 import type { ApiResponse } from '@/api'
 import type { AddNoteFormData } from '@/schemas/letter'
+import { FileUploadField, useSnackbar } from '@/components'
 import { addNote } from '@/api'
-import { addNoteFormData } from '@/schemas/letter'
+import { addNoteSchema } from '@/schemas/letter'
 
 const Route = getRouteApi('/_authenticated/letters/$letterId')
 
@@ -81,21 +74,13 @@ export const AddNoteDialog: React.FC<AddNoteDialogProps> = ({
       addNoteMutation.mutate(value)
     },
     validators: {
-      onChange: addNoteFormData,
+      onChange: addNoteSchema,
     },
   })
 
   const handleClose = () => {
     form.reset()
     onClose()
-  }
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   return (
@@ -205,100 +190,20 @@ export const AddNoteDialog: React.FC<AddNoteDialogProps> = ({
                 {/* File Attachments */}
                 <form.Field name="attachments" mode="array">
                   {(field) => (
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          color: theme.palette.text.primary,
-                          mb: 2,
-                        }}
-                      >
-                        Attachments
-                      </Typography>
-
-                      <Button
-                        component="label"
-                        variant="outlined"
-                        startIcon={<UploadIcon />}
-                        sx={{
-                          borderRadius: 2,
-                          borderStyle: 'dashed',
-                          borderColor: theme.palette.primary.main,
-                          color: theme.palette.primary.main,
-                          padding: 2,
-                          '&:hover': {
-                            backgroundColor: `${theme.palette.primary.main}10`,
-                            borderColor: theme.palette.primary.dark,
-                          },
-                        }}
-                        fullWidth
-                      >
-                        <input
-                          type="file"
-                          hidden
-                          multiple
-                          accept=".png,.jpg,.jpeg,.pdf,.docx,.txt"
-                          onChange={(e) => {
-                            if (e.target.files) {
-                              Array.from(e.target.files).forEach((file) => {
-                                field.pushValue(file)
-                              })
-                            }
-                            // Call validate after a small delay
-                            setTimeout(() => field.validate('change'), 1000)
-                          }}
-                        />
-                        <Typography>
-                          Upload Files (PNG, JPEG, PDF, DOCX, TXT)
-                        </Typography>
-                      </Button>
-
-                      <Box sx={{ mt: 2 }}>
-                        <Stack spacing={1}>
-                          {field.state.value.map((file, i) => (
-                            <form.Field
-                              name={`attachments[${i}]`}
-                              key={`${file.name}-${i}`}
-                            >
-                              {(subField) => (
-                                <>
-                                  {!subField.state.meta.isValid && (
-                                    <Typography
-                                      color="error"
-                                      variant="body2"
-                                      sx={{ mt: 1 }}
-                                    >
-                                      {subField.state.meta.errors
-                                        .map((e) => e?.message)
-                                        .join(', ')}
-                                    </Typography>
-                                  )}
-                                  <Chip
-                                    icon={<AttachFileIcon />}
-                                    label={`${subField.state.value.name} (${formatFileSize(subField.state.value.size)})`}
-                                    onDelete={() => field.removeValue(i)}
-                                    deleteIcon={<DeleteIcon />}
-                                    variant="outlined"
-                                    sx={{
-                                      justifyContent: 'space-between',
-                                      '& .MuiChip-label': {
-                                        maxWidth: {
-                                          xs: '200px',
-                                          sm: '300px',
-                                        },
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                      },
-                                    }}
-                                  />
-                                </>
-                              )}
-                            </form.Field>
-                          ))}
-                        </Stack>
-                      </Box>
-                    </Box>
+                    <FileUploadField
+                      field={field}
+                      label="Attachments"
+                      accept={{
+                        'image/*': ['.png', '.jpg', '.jpeg'],
+                        'application/pdf': ['.pdf'],
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                          ['.docx'],
+                        'text/plain': ['.txt'],
+                      }}
+                      maxSize={10 * 1024 * 1024} // 10MB
+                      multiple={true}
+                      helperText="Drag & drop files here, or click to select (PNG, JPEG, PDF, DOCX, TXT)"
+                    />
                   )}
                 </form.Field>
               </Stack>
@@ -347,7 +252,9 @@ export const AddNoteDialog: React.FC<AddNoteDialogProps> = ({
                   },
                 }}
               >
-                {addNoteMutation.isPending || isSubmitting ? '...' : 'Add Note'}
+                {addNoteMutation.isPending || isSubmitting
+                  ? 'Adding Note...'
+                  : 'Add Note'}
               </Button>
             )}
           </form.Subscribe>

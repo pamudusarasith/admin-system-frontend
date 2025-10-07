@@ -1,6 +1,6 @@
 import * as z from 'zod'
 
-export const letterFormData = z.object({
+export const createLetterSchema = z.object({
   reference: z.string().min(1),
   sender_details: z.object({
     name: z.string().min(1),
@@ -30,7 +30,7 @@ export const letterFormData = z.object({
   attachments: z.array(z.file()).optional(),
 })
 
-export const addNoteFormData = z.object({
+export const addNoteSchema = z.object({
   content: z.string().trim().min(1, { error: 'Note content is required' }),
   attachments: z.array(
     z
@@ -49,5 +49,5 @@ export const addNoteFormData = z.object({
   ),
 })
 
-export type LetterFormData = z.infer<typeof letterFormData>
-export type AddNoteFormData = z.infer<typeof addNoteFormData>
+export type LetterFormData = z.infer<typeof createLetterSchema>
+export type AddNoteFormData = z.infer<typeof addNoteSchema>
