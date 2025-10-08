@@ -657,7 +657,9 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                         }}
                         fullWidth
                       >
-                        Upload Files (PNG, JPEG, PDF, DOCX)
+                        <Typography>
+                          Upload Files (PNG, JPEG, PDF, DOCX)
+                        </Typography>
                         <input
                           type="file"
                           hidden

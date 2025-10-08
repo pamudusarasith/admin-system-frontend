@@ -1,4 +1,12 @@
-import { Avatar, Box, Chip, Paper, Typography } from '@mui/material'
+import {
+  Avatar,
+  Box,
+  Chip,
+  Link,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material'
 import {
   Timeline,
   TimelineConnector,
@@ -7,7 +15,17 @@ import {
   TimelineItem,
   TimelineSeparator,
 } from '@mui/lab'
-import type { ChangeStatusEventDetails, LetterEvent, User } from '@/api'
+import {
+  AttachFile as AttachFileIcon,
+  NoteAlt as NoteAltIcon,
+} from '@mui/icons-material'
+import mime from 'mime'
+import type {
+  AddNoteEventDetails,
+  ChangeStatusEventDetails,
+  LetterEvent,
+  User,
+} from '@/api'
 
 interface LetterTimelineProps {
   events: Array<LetterEvent>
@@ -49,6 +67,12 @@ export function LetterTimeline({
           let element = null
           switch (event.eventType) {
             case 'ADD_NOTE':
+              element = (
+                <AddNoteEvent
+                  details={event.eventDetails as AddNoteEventDetails}
+                />
+              )
+              break
             case 'ADD_ATTACHMENT':
             case 'REMOVE_ATTACHMENT':
             case 'REPLY':
@@ -227,6 +251,123 @@ function ChangeStatusEvent({
           fontSize: 11,
         }}
       />
+    </Box>
+  )
+}
+
+interface AddNoteEventProps {
+  details: AddNoteEventDetails
+}
+
+function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
+  return (
+    <Box
+      sx={{
+        mt: 0.5,
+        border: (t) => `1px solid ${t.palette.divider}`,
+        borderRadius: 2,
+        overflow: 'hidden',
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          px: 2,
+          py: 1,
+          backgroundColor: (t) => t.palette.action.hover,
+        }}
+      >
+        <NoteAltIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
+            color: 'primary.main',
+          }}
+        >
+          Added a note
+        </Typography>
+      </Box>
+
+      {/* Content */}
+      <Box sx={{ px: 2, py: 1.5 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.primary',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            lineHeight: 1.6,
+          }}
+        >
+          {details.content}
+        </Typography>
+
+        {/* Attachments */}
+        {details.attachments && details.attachments.length > 0 && (
+          <Stack spacing={0.5} sx={{ mt: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                color: 'text.secondary',
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
+                fontSize: 10,
+              }}
+            >
+              Attachments ({details.attachments.length})
+            </Typography>
+            {details.attachments.map((attachment) => (
+              <Link
+                key={attachment.id}
+                href={attachment.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="hover"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  p: 1,
+                  borderRadius: 1,
+                  backgroundColor: (t) => t.palette.action.hover,
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    backgroundColor: (t) => t.palette.action.selected,
+                  },
+                }}
+              >
+                <AttachFileIcon
+                  sx={{ fontSize: 14, color: 'text.secondary' }}
+                />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.primary',
+                    fontWeight: 500,
+                  }}
+                >
+                  {attachment.fileName}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                    ml: 'auto',
+                  }}
+                >
+                  {mime.getExtension(attachment.fileType)?.toUpperCase() ||
+                    'FILE'}
+                </Typography>
+              </Link>
+            ))}
+          </Stack>
+        )}
+      </Box>
     </Box>
   )
 }

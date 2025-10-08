@@ -1,6 +1,6 @@
 import { client } from './client'
 import type { ApiResponse } from './client'
-import type { LetterFormData } from '@/schemas/letter'
+import type { AddNoteFormData, LetterFormData } from '@/schemas/letter'
 import type { Division } from './divisions'
 import type { User } from './users'
 
@@ -29,6 +29,11 @@ export interface ChangeStatusEventDetails {
   newStatus: string
 }
 
+export interface AddNoteEventDetails {
+  content: string
+  attachments?: Array<Attachment>
+}
+
 export interface LetterEvent {
   id: string
   user: User
@@ -40,7 +45,10 @@ export interface LetterEvent {
     | 'CHANGE_STATUS'
     | 'CHANGE_PRIORITY'
     | 'UPDATE_DETAILS'
-  eventDetails?: ChangeStatusEventDetails | Record<string, any>
+  eventDetails?:
+    | ChangeStatusEventDetails
+    | AddNoteEventDetails
+    | Record<string, any>
   createdAt: string
 }
 
@@ -149,6 +157,29 @@ export async function getLetterById(
     return response.data
   } catch (error) {
     console.error(`Failed to fetch letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
+
+export async function addNote(
+  letterId: number,
+  noteData: AddNoteFormData,
+): Promise<ApiResponse<any>> {
+  try {
+    const { content, attachments } = noteData
+    const formData = new FormData()
+    formData.append('content', content)
+    attachments?.forEach((file) => {
+      formData.append(`attachments`, file)
+    })
+    const response = await client.post(`/letters/${letterId}/notes`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  } catch (error) {
+    console.error(`Failed to add note to letter with ID ${letterId}:`, error)
     throw error
   }
 }

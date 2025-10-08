@@ -1,6 +1,6 @@
 import * as z from 'zod'
 
-export const letterFormData = z.object({
+export const createLetterSchema = z.object({
   reference: z.string().min(1),
   sender_details: z.object({
     name: z.string().min(1),
@@ -30,4 +30,24 @@ export const letterFormData = z.object({
   attachments: z.array(z.file()).optional(),
 })
 
-export type LetterFormData = z.infer<typeof letterFormData>
+export const addNoteSchema = z.object({
+  content: z.string().trim().min(1, { error: 'Note content is required' }),
+  attachments: z.array(
+    z
+      .file()
+      .max(10 * 1024 * 1024, { error: 'Each file must be less than 10MB' })
+      .mime(
+        [
+          'image/png',
+          'image/jpeg',
+          'application/pdf',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain',
+        ],
+        { error: 'Unsupported file type' },
+      ),
+  ),
+})
+
+export type LetterFormData = z.infer<typeof createLetterSchema>
+export type AddNoteFormData = z.infer<typeof addNoteSchema>

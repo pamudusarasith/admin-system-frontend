@@ -22,6 +22,7 @@ function LetterThreadView() {
   const theme = useTheme()
   const [replyDialogOpen, setReplyDialogOpen] = useState(false)
   const [replyContent, setReplyContent] = useState('')
+  const [addNoteDialogOpen, setAddNoteDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const { letterId } = Route.useParams()
@@ -129,6 +130,7 @@ function LetterThreadView() {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
           letter={letter}
+          onAddNote={() => setAddNoteDialogOpen(true)}
         />
 
         <LetterDialogs
@@ -137,6 +139,8 @@ function LetterThreadView() {
           onReplyDialogClose={() => setReplyDialogOpen(false)}
           onReplyContentChange={setReplyContent}
           onSendReply={handleSendReply}
+          addNoteDialogOpen={addNoteDialogOpen}
+          onAddNoteDialogClose={() => setAddNoteDialogOpen(false)}
         />
       </Container>
     </SidebarLayout>

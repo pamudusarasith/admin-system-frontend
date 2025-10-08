@@ -6,6 +6,7 @@ import {
   Check as CheckIcon,
   Edit as EditIcon,
   Flag as FlagIcon,
+  NoteAdd as NoteAddIcon,
   Print as PrintIcon,
 } from '@mui/icons-material'
 import type { Letter } from '@/api'
@@ -17,6 +18,7 @@ interface LetterActionMenuProps {
   open: boolean
   onClose: () => void
   letter: Letter
+  onAddNote?: () => void
 }
 
 export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
@@ -24,6 +26,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   open,
   onClose,
   letter,
+  onAddNote,
 }) => {
   const { hasAnyAuthority } = useAuth()
 
@@ -44,6 +47,12 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
     P.letterUnassignedUpdatePriority,
     P.letterDivisionUpdatePriority,
     P.letterOwnUpdatePriority,
+  ])
+  const canAddNote = hasAnyAuthority([
+    P.letterAllAddNote,
+    P.letterUnassignedAddNote,
+    P.letterDivisionAddNote,
+    P.letterOwnAddNote,
   ])
   const canAddAttachment = hasAnyAuthority([
     P.letterAllAddAttachments,
@@ -85,6 +94,19 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         </MenuItem>
       )}
       <Divider />
+      {canAddNote && (
+        <MenuItem 
+          onClick={() => {
+            if (onAddNote) {
+              onAddNote()
+            }
+            onClose()
+          }}
+        >
+          <NoteAddIcon sx={{ mr: 2 }} />
+          Add Note
+        </MenuItem>
+      )}
       {canAddAttachment && (
         <MenuItem onClick={onClose}>
           <AttachIcon sx={{ mr: 2 }} />
