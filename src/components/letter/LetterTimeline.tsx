@@ -19,6 +19,7 @@ import {
   AttachFile as AttachFileIcon,
   NoteAlt as NoteAltIcon,
 } from '@mui/icons-material'
+import mime from 'mime'
 import type {
   AddNoteEventDetails,
   ChangeStatusEventDetails,
@@ -340,7 +341,9 @@ function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
                   },
                 }}
               >
-                <AttachFileIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                <AttachFileIcon
+                  sx={{ fontSize: 14, color: 'text.secondary' }}
+                />
                 <Typography
                   variant="caption"
                   sx={{
@@ -357,7 +360,8 @@ function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
                     ml: 'auto',
                   }}
                 >
-                  {attachment.fileType.split('/')[1]?.toUpperCase() || 'FILE'}
+                  {mime.getExtension(attachment.fileType)?.toUpperCase() ||
+                    'FILE'}
                 </Typography>
               </Link>
             ))}
@@ -367,4 +371,3 @@ function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
     </Box>
   )
 }
-
