@@ -28,8 +28,7 @@ import {
   Settings as SettingsIcon,
 } from '@mui/icons-material'
 import { Link } from '@tanstack/react-router'
-import { useAuth } from '@/core/auth'
-import { Permission as P } from '@/core/permission'
+import { Permission as P, useAuth } from '@/core'
 
 interface SidebarProps {
   open: boolean

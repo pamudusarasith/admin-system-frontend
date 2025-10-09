@@ -1,12 +1,8 @@
 import {
-  AddButton,
-  SearchBar,
-  SidebarLayout,
-  AddDivisionDialog,
-  DeleteConfirmationBox,
-} from '@/components'
-import {
+  Alert,
   Box,
+  Button,
+  CircularProgress,
   Container,
   Divider,
   IconButton,
@@ -18,27 +14,30 @@ import {
   TableHead,
   TableRow,
   Typography,
-  CircularProgress,
-  Alert,
-  Button,
 } from '@mui/material'
 import {
-  Edit as EditIcon,
   Delete as DeleteIcon,
+  Edit as EditIcon,
   KeyboardArrowLeft as KeyboardArrowLeftIcon,
   KeyboardArrowRight as KeyboardArrowRightIcon,
 } from '@mui/icons-material'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { CreateDivisionRequest, UpdateDivisionRequest } from '@/api'
 import {
-  getDivisions,
+  AddButton,
+  AddDivisionDialog,
+  DeleteConfirmationBox,
+  SearchBar,
+  SidebarLayout,
+} from '@/components'
+import {
   createDivision,
-  updateDivision,
   deleteDivision,
-  type CreateDivisionRequest,
-  type UpdateDivisionRequest,
+  getDivisions,
+  updateDivision,
 } from '@/api'
 
 export const Route = createFileRoute('/_authenticated/divisions')({
@@ -85,8 +84,8 @@ function DivisionPage() {
       queryClient.invalidateQueries({ queryKey: ['divisions'] })
       setIsAddDialogOpen(false)
     },
-    onError: (error) => {
-      console.error('Failed to create division:', error)
+    onError: (e) => {
+      console.error('Failed to create division:', e)
     },
   })
 
@@ -101,8 +100,8 @@ function DivisionPage() {
       setIsEditMode(false)
       setEditingDivision(null)
     },
-    onError: (error) => {
-      console.error('Failed to update division:', error)
+    onError: (e) => {
+      console.error('Failed to update division:', e)
     },
   })
 
@@ -113,8 +112,8 @@ function DivisionPage() {
       // Invalidate and refetch divisions data
       queryClient.invalidateQueries({ queryKey: ['divisions'] })
     },
-    onError: (error) => {
-      console.error('Failed to delete division:', error)
+    onError: (e) => {
+      console.error('Failed to delete division:', e)
     },
   })
 
@@ -159,8 +158,8 @@ function DivisionPage() {
       await deleteDivisionMutation.mutateAsync(divisionToDelete.id)
       setDeleteDialogOpen(false)
       setDivisionToDelete(null)
-    } catch (error) {
-      console.error('Error deleting division:', error)
+    } catch (e) {
+      console.error('Error deleting division:', e)
       // Keep dialog open on error to show error message
     }
   }
@@ -193,8 +192,8 @@ function DivisionPage() {
         await createDivisionMutation.mutateAsync(createRequest)
       }
       // The onSuccess callback will handle closing the dialog and refetching data
-    } catch (error) {
-      console.error('Error saving division:', error)
+    } catch (e) {
+      console.error('Error saving division:', e)
       // The onError callback will handle error logging
     }
   }

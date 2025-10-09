@@ -29,10 +29,9 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
-import { getDivisions } from '@/api/divisions'
-import type { Division } from '@/api/divisions'
 import DivisionWorkloadCard from './DivisionWorkloadCard'
-import { getUsers } from '@/api/users'
+import type { Division } from '@/api'
+import { getDivisions, getUsers } from '@/api'
 
 interface DashboardStats {
   title: string
@@ -68,7 +67,7 @@ export const AdminDashboard: React.FC = () => {
 
   // API Queries
   const { data: divisions = [], isLoading: divisionsLoading } = useQuery<
-    Division[]
+    Array<Division>
   >({
     queryKey: ['divisions', refreshKey],
     queryFn: () => getDivisions(),

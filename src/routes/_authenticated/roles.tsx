@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { getRoles, deleteRole, type Role } from '@/api'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Avatar,
   Box,
@@ -10,6 +9,7 @@ import {
   CardActions,
   CardContent,
   Chip,
+  CircularProgress,
   Container,
   Divider,
   IconButton,
@@ -19,7 +19,6 @@ import {
   Stack,
   Typography,
   useTheme,
-  CircularProgress,
 } from '@mui/material'
 import {
   AdminPanelSettings as AdminIcon,
@@ -31,12 +30,14 @@ import {
   Person as PersonIcon,
   Support as SupportIcon,
 } from '@mui/icons-material'
+import type { Role } from '@/api'
+import { deleteRole, getRoles } from '@/api'
 import {
   AddButton,
-  SearchBar,
-  SidebarLayout,
   AddRoleDialog,
   DeleteConfirmationBox,
+  SearchBar,
+  SidebarLayout,
   ViewRoleDetails,
 } from '@/components'
 
@@ -76,7 +77,7 @@ function RolesPage() {
     queryFn: async () => {
       const rolesData = await getRoles()
       // Transform API roles to UserRole format with icons
-      const rolesWithIcons: UserRole[] = rolesData.map((role) => ({
+      const rolesWithIcons: Array<UserRole> = rolesData.map((role) => ({
         ...role,
         userCount: role.userCount || 0,
         icon: getIconForRole(role.name),
@@ -94,8 +95,8 @@ function RolesPage() {
       queryClient.invalidateQueries({ queryKey: ['roles'] })
       handleMenuClose()
     },
-    onError: (error) => {
-      console.error('Failed to delete role:', error)
+    onError: (e) => {
+      console.error('Failed to delete role:', e)
     },
   })
 
@@ -147,13 +148,13 @@ function RolesPage() {
 
   const handleConfirmDelete = async () => {
     if (!roleToDelete) return
-    
+
     try {
       await deleteRoleMutation.mutateAsync(roleToDelete.id)
       setDeleteDialogOpen(false)
       setRoleToDelete(null)
-    } catch (error) {
-      console.error('Failed to delete role:', error)
+    } catch (e) {
+      console.error('Failed to delete role:', e)
       // Keep dialog open on error so user can retry
     }
   }
@@ -199,20 +200,24 @@ function RolesPage() {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Please make sure the backend server is running and try again.
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 3, display: 'block' }}>
-              Error: {error instanceof Error ? error.message : 'An error occurred'}
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mb: 3, display: 'block' }}
+            >
+              Error:{' '}
+              {error instanceof Error ? error.message : 'An error occurred'}
             </Typography>
             <Button
               variant="contained"
-              onClick={() => queryClient.invalidateQueries({ queryKey: ['roles'] })}
+              onClick={() =>
+                queryClient.invalidateQueries({ queryKey: ['roles'] })
+              }
               sx={{ mr: 2 }}
             >
               Retry Connection
             </Button>
-            <Button
-              variant="outlined"
-              onClick={() => window.location.reload()}
-            >
+            <Button variant="outlined" onClick={() => window.location.reload()}>
               Refresh Page
             </Button>
           </Box>
@@ -378,8 +383,6 @@ function RolesPage() {
                   overflow: 'visible',
                 }}
               >
-                
-
                 <CardContent sx={{ p: 3, pb: 1 }}>
                   {/* Role Header */}
                   <Stack
@@ -408,7 +411,6 @@ function RolesPage() {
                       >
                         {role.name}
                       </Typography>
-                      
                     </Box>
                   </Stack>
 
@@ -479,9 +481,6 @@ function RolesPage() {
                       </Typography>
                     </Box>
                   </Box>
-
-                  
-                  
                 </CardContent>
 
                 <CardActions sx={{ px: 3, pb: 3, pt: 0 }}>

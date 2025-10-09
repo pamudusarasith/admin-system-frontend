@@ -21,7 +21,7 @@ import {
 } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
 import { AnimatedIcon } from '@/components'
-import { useAuth } from '@/core/auth'
+import { useAuth } from '@/core'
 
 export const Route = createFileRoute('/login')({
   validateSearch: (search: Record<string, unknown>) => ({

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SidebarLayout, AdminDashboard } from '@/components'
+import { AdminDashboard, SidebarLayout } from '@/components'
 
 export const Route = createFileRoute('/_authenticated/')({
   component: Dashboard,

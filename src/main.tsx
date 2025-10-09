@@ -11,7 +11,7 @@ import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
-import { AuthProvider, useAuth } from './core/auth.tsx'
+import { AuthProvider, useAuth } from '@/core'
 import { AuthLoadingSpinner, SnackbarProvider } from '@/components'
 
 // Create a new router instance

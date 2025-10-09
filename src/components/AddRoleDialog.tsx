@@ -1,29 +1,30 @@
 import React from 'react'
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Box,
+  Button,
   Card,
   CardContent,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Stack,
-  IconButton,
-  useTheme,
-  useMediaQuery,
-  FormControl,
-  FormGroup,
-  FormControlLabel,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
-import { roleFormDataSchema, type RoleFormData } from '@/schemas/role'
-import { createRole, updateRole } from '@/api'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
+import type { RoleFormData } from '@/schemas'
+import { roleFormDataSchema } from '@/schemas'
+import { createRole, updateRole } from '@/api'
 
 interface AddRoleDialogProps {
   open: boolean
@@ -121,7 +122,7 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
     validators: {
       onChange: roleFormDataSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       if (editMode && initialData) {
         // Assuming we have the role ID available somehow, you might need to pass it in initialData
         // For now, let's assume initialData has an id property
@@ -151,10 +152,12 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
       maxWidth="md"
       fullWidth
       fullScreen={isMobile}
-      PaperProps={{
-        sx: {
-          borderRadius: isMobile ? 0 : 3,
-          background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: isMobile ? 0 : 3,
+            background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+          },
         },
       }}
     >

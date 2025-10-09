@@ -39,12 +39,9 @@ export const LetterDialogs: React.FC<LetterDialogsProps> = ({
         onReplyContentChange={onReplyContentChange}
         onSendReply={onSendReply}
       />
-      
+
       {/* Add Note Dialog */}
-      <AddNoteDialog
-        open={addNoteDialogOpen}
-        onClose={onAddNoteDialogClose}
-      />
+      <AddNoteDialog open={addNoteDialogOpen} onClose={onAddNoteDialogClose} />
     </>
   )
 }

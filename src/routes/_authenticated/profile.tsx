@@ -1,24 +1,24 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
+  Alert,
   Avatar,
   Box,
   Button,
+  CircularProgress,
   Container,
   Paper,
   TextField,
   Typography,
   useTheme,
-  CircularProgress,
-  Alert,
 } from '@mui/material'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-
-import { SidebarLayout, EditProfileForm } from '@/components'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { Edit } from '@mui/icons-material'
-import { getUserProfile, updateProfile, type User } from '@/api/users'
-import type { UpdateUserProfilePayload } from '@/schemas/users'
+import type { UpdateUserProfilePayload } from '@/schemas'
+import { EditProfileForm, SidebarLayout } from '@/components'
+
+import { getUserProfile, updateProfile } from '@/api'
 
 export const Route = createFileRoute('/_authenticated/profile')({
   component: ProfilePage,
@@ -49,8 +49,8 @@ function ProfilePage() {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] })
       setEditFormOpen(false)
     },
-    onError: (error) => {
-      console.error('Failed to update user profile:', error)
+    onError: (e) => {
+      console.error('Failed to update user profile:', e)
     },
   })
 
@@ -140,7 +140,7 @@ function ProfilePage() {
                 gap: 4,
               }}
             >
-              {/*Left Panel */}
+              {/* Left Panel */}
               <Box
                 sx={{
                   display: 'flex',
@@ -191,7 +191,7 @@ function ProfilePage() {
                 </Box>
               </Box>
 
-              {/*Right panel */}
+              {/* Right panel */}
               <Box
                 sx={{
                   display: 'flex',

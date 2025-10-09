@@ -1,18 +1,18 @@
-import type { RoleFormData } from '@/schemas/role'
 import { client } from './client'
+import type { RoleFormData } from '@/schemas'
 
 // Types for Role API responses
 export interface Role {
   id: string
   name: string
   description: string
-  permissions: string[]
+  permissions: Array<string>
   userCount?: number
   createdDate: string
   isActive: boolean
 }
 
-export async function getRoles(): Promise<Role[]> {
+export async function getRoles(): Promise<Array<Role>> {
   try {
     const response = await client.get('/roles')
     return response.data

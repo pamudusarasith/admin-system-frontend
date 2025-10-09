@@ -16,14 +16,12 @@ import TextField from '@mui/material/TextField'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
-import type { CreateUserPayload } from '@/schemas/users'
-import { createUser } from '@/api/users'
-import { getRoles } from '@/api/roles'
-import { getDivisions } from '@/api/divisions'
-import { createUserSchema } from '@/schemas/users'
+import type { CreateUserPayload } from '@/schemas'
+import { createUser, getDivisions, getRoles } from '@/api'
+import { createUserSchema } from '@/schemas'
 
 interface CreateUserProps {
-  onClose?: () => void
+  readonly onClose?: () => void
 }
 
 export function CreateUser({ onClose }: CreateUserProps) {
@@ -178,7 +176,8 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       return undefined
                     },
                   }}
-                  children={(field) => (
+                >
+                  {(field) => (
                     <TextField
                       name={field.name}
                       value={field.state.value}
@@ -200,7 +199,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       }}
                     />
                   )}
-                />
+                </form.Field>
                 <form.Field
                   name="email"
                   validators={{
@@ -211,7 +210,8 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       return undefined
                     },
                   }}
-                  children={(field) => (
+                >
+                  {(field) => (
                     <TextField
                       name={field.name}
                       value={field.state.value}
@@ -234,7 +234,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       }}
                     />
                   )}
-                />
+                </form.Field>
               </Box>
             </Grid>
             <Grid size={6} color={theme.palette.text.primary}>
@@ -258,7 +258,8 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       return undefined
                     },
                   }}
-                  children={(field) => (
+                >
+                  {(field) => (
                     <FormControl
                       variant="outlined"
                       error={field.state.meta.errors.length > 0}
@@ -298,7 +299,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       )}
                     </FormControl>
                   )}
-                />
+                </form.Field>
                 <form.Field
                   name="roleId"
                   validators={{
@@ -307,7 +308,8 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       return undefined
                     },
                   }}
-                  children={(field) => (
+                >
+                  {(field) => (
                     <FormControl
                       variant="outlined"
                       error={field.state.meta.errors.length > 0}
@@ -347,7 +349,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       )}
                     </FormControl>
                   )}
-                />
+                </form.Field>
               </Box>
             </Grid>
           </Grid>
@@ -370,7 +372,8 @@ export function CreateUser({ onClose }: CreateUserProps) {
             </Button>
             <form.Subscribe
               selector={(state) => [state.canSubmit, state.isSubmitting]}
-              children={([canSubmit, isSubmitting]) => (
+            >
+              {([canSubmit, isSubmitting]) => (
                 <Button
                   type="submit"
                   variant="contained"
@@ -392,7 +395,7 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       : 'Create'}
                 </Button>
               )}
-            />
+            </form.Subscribe>
           </Box>
         </form>
       </Box>

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, IconButton, Tooltip, useTheme } from '@mui/material'
-import type { SxProps, Theme } from '@mui/material'
 import { Add as AddIcon } from '@mui/icons-material'
+import type { SxProps, Theme } from '@mui/material'
 
 interface AddButtonProps {
   /**

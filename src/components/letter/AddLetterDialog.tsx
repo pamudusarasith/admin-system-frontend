@@ -29,7 +29,7 @@ import {
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
-import type { LetterFormData } from '@/schemas/letter'
+import type { LetterFormData } from '@/schemas'
 import type { ApiResponse } from '@/api'
 import { createLetter } from '@/api'
 import { useSnackbar } from '@/components'

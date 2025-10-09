@@ -1,4 +1,4 @@
-import type { ThemeOptions } from '@mui/material/styles';
+import type { ThemeOptions } from '@mui/material/styles'
 
 export const typography: ThemeOptions['typography'] = {
   fontFamily: [
@@ -13,7 +13,6 @@ export const typography: ThemeOptions['typography'] = {
     '"Apple Color Emoji"',
     '"Segoe UI Emoji"',
     '"Segoe UI Symbol"',
-
   ].join(','),
   fontWeightLight: 300,
   fontWeightRegular: 400,
@@ -99,4 +98,4 @@ export const typography: ThemeOptions['typography'] = {
     letterSpacing: '0.08333em',
     textTransform: 'uppercase',
   },
-};
+}
