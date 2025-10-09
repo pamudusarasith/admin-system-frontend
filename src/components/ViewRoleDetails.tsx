@@ -1,34 +1,34 @@
 import React from 'react'
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Box,
-  Typography,
-  Button,
   Avatar,
-  Paper,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
-  useTheme,
+  Paper,
   Stack,
+  Typography,
+  useTheme,
 } from '@mui/material'
 import {
-  Close as CloseIcon,
   AdminPanelSettings as AdminIcon,
   Business as BusinessIcon,
-  Support as SupportIcon,
-  Person as PersonIcon,
-  People as PeopleIcon,
-  Security as SecurityIcon,
   CheckCircle as CheckIcon,
+  Close as CloseIcon,
+  People as PeopleIcon,
+  Person as PersonIcon,
+  Security as SecurityIcon,
+  Support as SupportIcon,
 } from '@mui/icons-material'
-import { type Role } from '@/api'
+import type { Role } from '@/api'
 
 interface ViewRoleDetailsProps {
   open: boolean
   onClose: () => void
-  role: Role & { userCount?: number; icon?: React.ReactNode } | null
+  role: (Role & { userCount?: number; icon?: React.ReactNode }) | null
 }
 
 const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
@@ -48,15 +48,15 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
     return <PersonIcon />
   }
 
-  const formatPermissions = (permissions: string[]) => {
-    const groupedPermissions: { [key: string]: string[] } = {}
-    
-    permissions.forEach(permission => {
+  const formatPermissions = (permissions: Array<string>) => {
+    const groupedPermissions: { [key: string]: Array<string> } = {}
+
+    permissions.forEach((permission) => {
       // Extract category from permission (e.g., "USER_CREATE" -> "User Management")
       const parts = permission.split('_')
       const category = parts[0]
       const action = parts.slice(1).join('_')
-      
+
       let categoryName = ''
       switch (category.toUpperCase()) {
         case 'USER':
@@ -72,16 +72,19 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
           categoryName = 'Division Management'
           break
         default:
-          categoryName = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase() 
+          categoryName =
+            category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()
       }
-      
+
       if (!groupedPermissions[categoryName]) {
         groupedPermissions[categoryName] = []
       }
-      
-      groupedPermissions[categoryName].push(action.toLowerCase().replace('_', ' '))
+
+      groupedPermissions[categoryName].push(
+        action.toLowerCase().replace('_', ' '),
+      )
     })
-    
+
     return groupedPermissions
   }
 
@@ -125,7 +128,7 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
           >
             <CloseIcon />
           </IconButton>
-          
+
           <Stack direction="row" spacing={3} alignItems="center">
             <Box
               sx={{
@@ -138,7 +141,7 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
                   background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
                   zIndex: -1,
                   opacity: 0.8,
-                }
+                },
               }}
             >
               <Avatar
@@ -227,7 +230,7 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
                     height: '3px',
                     background: theme.palette.primary.main,
                     borderRadius: '3px 3px 0 0',
-                  }
+                  },
                 }}
               >
                 <PeopleIcon
@@ -281,7 +284,7 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
                     height: '3px',
                     background: theme.palette.secondary.main,
                     borderRadius: '3px 3px 0 0',
-                  }
+                  },
                 }}
               >
                 <SecurityIcon
@@ -335,7 +338,7 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
                     height: '3px',
                     background: theme.palette.success.main,
                     borderRadius: '3px 3px 0 0',
-                  }
+                  },
                 }}
               >
                 <CheckIcon
@@ -386,39 +389,36 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
               <SecurityIcon color="primary" />
               Permissions & Access Control
             </Typography>
-            
+
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {Object.entries(groupedPermissions)
                 .sort(([a], [b]) => b.localeCompare(a)) // Sort categories in descending order
                 .map(([category]) => (
-                <Box key={category} sx={{ flex: 1 }}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: `1px solid ${theme.palette.divider}`,
-                      background: theme.palette.background.paper,
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
+                  <Box key={category} sx={{ flex: 1 }}>
+                    <Paper
+                      elevation={0}
                       sx={{
-                        fontWeight: 600,
-                        color: theme.palette.text.primary,
-                        mb: 1,
+                        p: 2,
+                        borderRadius: 2,
+                        border: `1px solid ${theme.palette.divider}`,
+                        background: theme.palette.background.paper,
                       }}
                     >
-                      {category}
-                    </Typography>
-                    
-                  </Paper>
-                </Box>
-              ))}
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 600,
+                          color: theme.palette.text.primary,
+                          mb: 1,
+                        }}
+                      >
+                        {category}
+                      </Typography>
+                    </Paper>
+                  </Box>
+                ))}
             </Box>
           </Box>
-
-        
         </Box>
       </DialogContent>
 
@@ -442,7 +442,6 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
         >
           Close
         </Button>
-        
       </DialogActions>
     </Dialog>
   )

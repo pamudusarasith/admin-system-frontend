@@ -208,7 +208,7 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
                 {assignedDivision.name}
               </Typography>
               {assignedDivision.description && (
-                <Typography variant="body2" color="text.secondary" noWrap>
+                <Typography variant="body2" color="text.secondary">
                   {assignedDivision.description}
                 </Typography>
               )}

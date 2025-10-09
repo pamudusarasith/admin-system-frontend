@@ -1,20 +1,20 @@
 import React from 'react'
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  Button,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
-  useTheme,
+  Typography,
   useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
   Close as CloseIcon,
-  Warning as WarningIcon,
   Delete as DeleteIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material'
 
 interface DeleteConfirmationBoxProps {

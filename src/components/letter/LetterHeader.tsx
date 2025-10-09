@@ -14,7 +14,7 @@ import {
   Reply as ReplyIcon,
 } from '@mui/icons-material'
 import type { Letter } from '@/api'
-import { useAuth } from '@/core/auth'
+import { useAuth } from '@/core'
 
 interface LetterHeaderProps {
   letter: Letter

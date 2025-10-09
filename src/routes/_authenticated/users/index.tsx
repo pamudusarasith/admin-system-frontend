@@ -42,9 +42,9 @@ import {
   MoreVert as MoreVertIcon,
   Search as SearchIcon,
 } from '@mui/icons-material'
-import type { User } from '@/api/users'
+import type { User } from '@/api'
 import { AddButton, CreateUser, SidebarLayout } from '@/components'
-import { getUsers } from '@/api/users'
+import { getUsers } from '@/api'
 
 export const Route = createFileRoute('/_authenticated/users/')({
   component: RouteComponent,

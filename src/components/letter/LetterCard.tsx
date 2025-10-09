@@ -25,7 +25,7 @@ import {
   Schedule as ScheduleIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material'
-import type { Letter } from '@/api/letters'
+import type { Letter } from '@/api'
 
 interface LetterCardProps {
   letter: Letter

@@ -26,8 +26,8 @@ import {
   Settings as SettingsIcon,
 } from '@mui/icons-material'
 import { useNavigate } from '@tanstack/react-router'
-import { useTheme as useThemeContext } from '../theme'
-import { useAuth } from '@/core/auth'
+import { useTheme as useThemeContext } from '@/theme'
+import { useAuth } from '@/core'
 
 interface NavbarProps {
   onMenuClick: () => void

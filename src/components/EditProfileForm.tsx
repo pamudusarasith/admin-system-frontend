@@ -1,22 +1,22 @@
 import React from 'react'
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Button,
   Card,
   CardContent,
-  TextField,
-  Button,
-  Typography,
-  Stack,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
-  useTheme,
+  Stack,
+  TextField,
+  Typography,
   useMediaQuery,
+  useTheme,
 } from '@mui/material'
-import { Close as CloseIcon, Edit } from '@mui/icons-material'
+import { Close as CloseIcon } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
-import { updateUserProfileSchema } from '@/schemas/users'
+import { updateUserProfileSchema } from '@/schemas'
 
 interface EditProfileFormProps {
   open: boolean
@@ -50,7 +50,7 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
     validators: {
       onChange: updateUserProfileSchema, // zod schema for live validation
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       onSubmit?.(value)
     },
   })
@@ -62,10 +62,12 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
       maxWidth="sm"
       fullWidth
       fullScreen={isMobile}
-      PaperProps={{
-        sx: {
-          borderRadius: isMobile ? 0 : 3,
-          background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: isMobile ? 0 : 3,
+            background: `linear-gradient(145deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+          },
         },
       }}
     >
@@ -112,9 +114,8 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
             <CardContent sx={{ p: 3 }}>
               <Stack spacing={3}>
                 {/* Full Name */}
-                <form.Field
-                  name="fullName"
-                  children={(field) => (
+                <form.Field name="fullName">
+                  {(field) => (
                     <TextField
                       fullWidth
                       label="Full Name"
@@ -123,16 +124,15 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
                       onBlur={field.handleBlur}
                       error={!field.state.meta.isValid}
                       helperText={field.state.meta.errors
-                        ?.map((err: any) => err.message)
+                        .map((err: any) => err.message)
                         .join(', ')}
                     />
                   )}
-                />
+                </form.Field>
 
                 {/* Email */}
-                <form.Field
-                  name="email"
-                  children={(field) => (
+                <form.Field name="email">
+                  {(field) => (
                     <TextField
                       fullWidth
                       label="Email"
@@ -141,16 +141,15 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
                       onBlur={field.handleBlur}
                       error={!field.state.meta.isValid}
                       helperText={field.state.meta.errors
-                        ?.map((err: any) => err.message)
+                        .map((err: any) => err.message)
                         .join(', ')}
                     />
                   )}
-                />
+                </form.Field>
 
                 {/* Phone Number */}
-                <form.Field
-                  name="phoneNumber"
-                  children={(field) => (
+                <form.Field name="phoneNumber">
+                  {(field) => (
                     <TextField
                       fullWidth
                       label="Phone Number"
@@ -159,11 +158,11 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
                       onBlur={field.handleBlur}
                       error={!field.state.meta.isValid}
                       helperText={field.state.meta.errors
-                        ?.map((err: any) => err.message)
+                        .map((err: any) => err.message)
                         .join(', ')}
                     />
                   )}
-                />
+                </form.Field>
               </Stack>
             </CardContent>
           </Card>
@@ -186,7 +185,8 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
 
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
-            children={([canSubmit, isSubmitting]) => (
+          >
+            {([canSubmit, isSubmitting]) => (
               <Button
                 type="submit"
                 variant="contained"
@@ -205,7 +205,7 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
                 {isSubmitting ? 'Saving...' : 'Edit Profile'}
               </Button>
             )}
-          />
+          </form.Subscribe>
         </DialogActions>
       </form>
     </Dialog>

@@ -10,8 +10,7 @@ import {
   Print as PrintIcon,
 } from '@mui/icons-material'
 import type { Letter } from '@/api'
-import { useAuth } from '@/core/auth'
-import { Permission as P } from '@/core/permission'
+import { Permission as P, useAuth } from '@/core'
 
 interface LetterActionMenuProps {
   anchorEl: HTMLElement | null
@@ -95,7 +94,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
       )}
       <Divider />
       {canAddNote && (
-        <MenuItem 
+        <MenuItem
           onClick={() => {
             if (onAddNote) {
               onAddNote()

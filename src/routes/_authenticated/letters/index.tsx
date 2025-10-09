@@ -21,7 +21,7 @@ import {
   Inbox as InboxIcon,
 } from '@mui/icons-material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import type { GetLettersParams } from '@/api/letters'
+import type { GetLettersParams } from '@/api'
 import {
   AddLetterDialog,
   Filters,
@@ -29,9 +29,8 @@ import {
   SidebarLayout,
   StatusCardsGrid,
 } from '@/components'
-import { getLetters } from '@/api/letters'
-import { useAuth } from '@/core/auth'
-import { Permission as P } from '@/core/permission'
+import { getLetters } from '@/api'
+import { Permission as P, useAuth } from '@/core'
 
 export const Route = createFileRoute('/_authenticated/letters/')({
   beforeLoad: ({ context }) => {

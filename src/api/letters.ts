@@ -1,8 +1,8 @@
 import { client } from './client'
 import type { ApiResponse } from './client'
-import type { AddNoteFormData, LetterFormData } from '@/schemas/letter'
 import type { Division } from './divisions'
 import type { User } from './users'
+import type { AddNoteFormData, LetterFormData } from '@/schemas'
 
 export interface SenderDetails {
   name: string
@@ -169,7 +169,7 @@ export async function addNote(
     const { content, attachments } = noteData
     const formData = new FormData()
     formData.append('content', content)
-    attachments?.forEach((file) => {
+    attachments.forEach((file) => {
       formData.append(`attachments`, file)
     })
     const response = await client.post(`/letters/${letterId}/notes`, formData, {

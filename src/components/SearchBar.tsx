@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import {
   Box,
-  TextField,
-  InputAdornment,
   IconButton,
+  InputAdornment,
+  TextField,
   useTheme,
 } from '@mui/material'
-import { Search as SearchIcon, Clear as ClearIcon } from '@mui/icons-material'
+import { Clear as ClearIcon, Search as SearchIcon } from '@mui/icons-material'
 
 interface SearchBarProps {
   placeholder?: string

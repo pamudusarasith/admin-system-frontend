@@ -32,15 +32,17 @@ export const createComponents = (theme: Theme): Components<Theme> => ({
     styleOverrides: {
       root: {
         borderRadius: 18,
-        boxShadow: theme.palette.mode === 'dark' 
-          ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
-          : '0 4px 20px rgba(0, 0, 0, 0.1)',
+        boxShadow:
+          theme.palette.mode === 'dark'
+            ? '0 4px 20px rgba(0, 0, 0, 0.3)'
+            : '0 4px 20px rgba(0, 0, 0, 0.1)',
         transition: 'all 0.3s ease-in-out',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: theme.palette.mode === 'dark' 
-            ? '0 8px 30px rgba(0, 0, 0, 0.4)' 
-            : '0 8px 30px rgba(0, 0, 0, 0.15)',
+          boxShadow:
+            theme.palette.mode === 'dark'
+              ? '0 8px 30px rgba(0, 0, 0, 0.4)'
+              : '0 8px 30px rgba(0, 0, 0, 0.15)',
         },
       },
     },
@@ -48,9 +50,10 @@ export const createComponents = (theme: Theme): Components<Theme> => ({
   MuiPaper: {
     styleOverrides: {
       elevation1: {
-        boxShadow: theme.palette.mode === 'dark' 
-          ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
-          : '0 2px 8px rgba(0, 0, 0, 0.1)',
+        boxShadow:
+          theme.palette.mode === 'dark'
+            ? '0 2px 8px rgba(0, 0, 0, 0.3)'
+            : '0 2px 8px rgba(0, 0, 0, 0.1)',
       },
     },
   },
@@ -160,9 +163,10 @@ export const createComponents = (theme: Theme): Components<Theme> => ({
         borderRadius: 12,
         marginTop: 4,
         minWidth: 180,
-        boxShadow: theme.palette.mode === 'dark' 
-          ? '0 8px 32px rgba(0, 0, 0, 0.4)' 
-          : '0 8px 32px rgba(0, 0, 0, 0.15)',
+        boxShadow:
+          theme.palette.mode === 'dark'
+            ? '0 8px 32px rgba(0, 0, 0, 0.4)'
+            : '0 8px 32px rgba(0, 0, 0, 0.15)',
       },
     },
   },

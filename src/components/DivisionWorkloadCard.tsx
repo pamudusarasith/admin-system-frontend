@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Paper, Typography, LinearProgress } from '@mui/material'
+import { Box, LinearProgress, Paper, Typography } from '@mui/material'
 // Removed Grid import
 
 interface DivisionWorkloadProps {
