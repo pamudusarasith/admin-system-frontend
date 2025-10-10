@@ -88,32 +88,21 @@ export interface Letter {
   updatedAt: string
 }
 
-export interface LettersApiResponse {
-  data: Array<Letter>
-  pagination: {
-    page: number
-    itemsPerPage: number
-    totalPages: number
-  }
-}
-
 export interface GetLettersParams {
   page?: number
-  size?: number
-  status?: string
-  priority?: string
-  search?: string
+  pageSize?: number
+  query?: string
 }
 
 export async function getLetters(
   params: GetLettersParams = {},
 ): Promise<ApiResponse<Array<Letter>>> {
   try {
-    const { page = 0, size = 10, ...otherParams } = params
+    const { page = 0, pageSize = 10, ...otherParams } = params
     const response = await client.get('/letters', {
       params: {
         page,
-        size,
+        pageSize,
         ...otherParams,
       },
     })
@@ -180,6 +169,24 @@ export async function addNote(
     return response.data
   } catch (error) {
     console.error(`Failed to add note to letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
+
+export async function assignDivision(
+  letterId: number,
+  divisionId: string,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.put(`/letters/${letterId}/division`, {
+      divisionId,
+    })
+    return response.data
+  } catch (error) {
+    console.error(
+      `Failed to assign division to letter with ID ${letterId}:`,
+      error,
+    )
     throw error
   }
 }

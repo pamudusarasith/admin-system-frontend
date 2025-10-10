@@ -49,5 +49,12 @@ export const addNoteSchema = z.object({
   ),
 })
 
+export const letterSearchParamsSchema = z.object({
+  page: z.number().min(1).optional().catch(undefined),
+  pageSize: z.number().min(1).max(100).optional().catch(undefined),
+  query: z.string().optional().catch(undefined),
+})
+
 export type LetterFormData = z.infer<typeof createLetterSchema>
 export type AddNoteFormData = z.infer<typeof addNoteSchema>
+export type LetterSearchParams = z.infer<typeof letterSearchParamsSchema>

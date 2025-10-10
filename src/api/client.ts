@@ -10,7 +10,7 @@ export interface ErrorInfo {
 
 export interface Pagination {
   page: number
-  size: number
+  pageSize: number
   totalPages: number
 }
 

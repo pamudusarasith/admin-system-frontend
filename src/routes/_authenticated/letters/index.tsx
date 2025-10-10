@@ -7,7 +7,6 @@ import {
   CardContent,
   Container,
   Fade,
-  Pagination,
   Paper,
   Skeleton,
   Stack,
@@ -26,11 +25,13 @@ import {
   AddLetterDialog,
   Filters,
   LetterCard,
+  PaginationControls,
   SidebarLayout,
   StatusCardsGrid,
 } from '@/components'
 import { getLetters } from '@/api'
 import { Permission as P, useAuth } from '@/core'
+import { letterSearchParamsSchema } from '@/schemas/letter'
 
 export const Route = createFileRoute('/_authenticated/letters/')({
   beforeLoad: ({ context }) => {
@@ -46,31 +47,22 @@ export const Route = createFileRoute('/_authenticated/letters/')({
     }
   },
   component: LettersPage,
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      status: (search.status as string) || 'All',
-      page: Number(search.page) || 1,
-      priority: (search.priority as string) || 'All',
-      search: (search.search as string) || '',
-    }
-  },
+  validateSearch: letterSearchParamsSchema,
 })
 
 function LettersPage() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { hasAuthority } = useAuth()
-  const canCreate = hasAuthority(P.letterCreate)
-  const searchParams = Route.useSearch()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
-  const [searchTerm, setSearchTerm] = useState(searchParams.search || '')
-  const [statusFilter, setStatusFilter] = useState(searchParams.status || 'All')
-  const [priorityFilter, setPriorityFilter] = useState(
-    searchParams.priority || 'All',
-  )
-  const [page, setPage] = useState(searchParams.page || 1)
-  const [size] = useState(10)
+  const { hasAuthority } = useAuth()
+  const canCreate = hasAuthority(P.letterCreate)
+
+  const searchParams = Route.useSearch()
+  const [page, setPage] = useState(searchParams.page)
+  const [pageSize, setPageSize] = useState(searchParams.pageSize)
+  const [query, setQuery] = useState(searchParams.query)
+
   const [isAddLetterDialogOpen, setIsAddLetterDialogOpen] = useState(false)
 
   // TanStack Query for fetching letters
@@ -82,11 +74,9 @@ function LettersPage() {
     queryKey: [
       'letters',
       {
-        page: page - 1, // API uses 0-based pagination
-        size,
-        ...(statusFilter !== 'All' && { status: statusFilter }),
-        ...(priorityFilter !== 'All' && { priority: priorityFilter }),
-        ...(searchTerm && { search: searchTerm }),
+        ...(page && { page: page - 1 }), // API uses 0-based pagination
+        ...(pageSize && { pageSize }),
+        ...(query && { query }),
       },
     ],
     queryFn: ({ queryKey }) => {
@@ -101,77 +91,50 @@ function LettersPage() {
   const letters = lettersResponse?.data || []
   const pagination = lettersResponse?.pagination
 
-  const handleStatusFilterChange = (newStatus: string) => {
-    setStatusFilter(newStatus)
-    setPage(1)
+  const handleSearchQueryChange = (newQuery: string) => {
+    setQuery(newQuery)
+    setPage(undefined)
     navigate({
       to: '/letters',
       search: {
-        status: newStatus,
-        page: 1,
-        priority: priorityFilter,
-        search: searchTerm,
+        page,
+        pageSize,
+        query: newQuery,
       },
     })
   }
 
-  const handlePriorityFilterChange = (newPriority: string) => {
-    setPriorityFilter(newPriority)
-    setPage(1)
+  const handlePageChange = (newPage?: number) => {
+    setPage(newPage)
     navigate({
       to: '/letters',
       search: {
-        status: statusFilter,
-        page: 1,
-        priority: newPriority,
-        search: searchTerm,
+        page: newPage,
+        pageSize,
+        query,
       },
     })
   }
 
-  const handleSearchChange = (newSearch: string) => {
-    setSearchTerm(newSearch)
-    setPage(1)
+  const handlePageSizeChange = (newPageSize?: number) => {
+    setPage(undefined)
+    setPageSize(newPageSize)
     navigate({
       to: '/letters',
       search: {
-        status: statusFilter,
-        page: 1,
-        priority: priorityFilter,
-        search: newSearch,
+        page,
+        pageSize: newPageSize,
+        query,
       },
     })
   }
 
   const handleClearFilters = () => {
-    setStatusFilter('All')
-    setPriorityFilter('All')
-    setSearchTerm('')
-    setPage(1)
+    setQuery(undefined)
+    setPage(undefined)
+    setPageSize(undefined)
     navigate({
       to: '/letters',
-      search: {
-        status: 'All',
-        page: 1,
-        priority: 'All',
-        search: '',
-      },
-    })
-  }
-
-  const handlePageChange = (
-    _event: React.ChangeEvent<unknown>,
-    newPage: number,
-  ) => {
-    setPage(newPage)
-    navigate({
-      to: '/letters',
-      search: {
-        status: statusFilter,
-        page: newPage,
-        priority: priorityFilter,
-        search: searchTerm,
-      },
     })
   }
 
@@ -251,12 +214,6 @@ function LettersPage() {
     CLOSED: letters.filter((l) => l.status === 'CLOSED').length,
   }
 
-  const totalPages = pagination?.totalPages || 1
-  const currentPage = page
-  // Calculate total count estimate based on current page and items per page
-  const totalCount = pagination ? pagination.totalPages * pagination.size : 0
-  const rowsPerPage = size
-
   return (
     <SidebarLayout>
       <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 } }}>
@@ -314,8 +271,8 @@ function LettersPage() {
             {/* Enhanced Status Overview Cards */}
             <StatusCardsGrid
               statusCounts={statusCounts}
-              statusFilter={statusFilter}
-              onStatusFilterChange={handleStatusFilterChange}
+              statusFilter={''}
+              onStatusFilterChange={() => {}}
               getStatusColor={getStatusColor}
             />
           </Box>
@@ -325,12 +282,12 @@ function LettersPage() {
         <Fade in timeout={1000}>
           <div>
             <Filters
-              searchTerm={searchTerm}
-              statusFilter={statusFilter}
-              priorityFilter={priorityFilter}
-              onSearchChange={handleSearchChange}
-              onStatusFilterChange={handleStatusFilterChange}
-              onPriorityFilterChange={handlePriorityFilterChange}
+              query={query}
+              statusFilter={''}
+              priorityFilter={''}
+              onSearchChange={handleSearchQueryChange}
+              onStatusFilterChange={() => {}}
+              onPriorityFilterChange={() => {}}
               onClearAllFilters={handleClearFilters}
             />
           </div>
@@ -368,48 +325,23 @@ function LettersPage() {
           )}
         </Stack>
 
-        {/* Enhanced Pagination */}
-        {!isLoading && letters.length > 0 && (
+        {/* Pagination */}
+        {!isLoading && letters.length > 0 && pagination && (
           <Fade in timeout={1200}>
             <Box
               sx={{
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 2,
                 mt: 4,
-                p: 3,
                 backgroundColor: theme.palette.background.paper,
                 borderRadius: 2,
                 border: `1px solid ${theme.palette.divider}`,
               }}
             >
-              <Typography variant="body2" color="text.secondary">
-                Showing {(currentPage - 1) * rowsPerPage + 1}-
-                {Math.min(currentPage * rowsPerPage, totalCount)} of{' '}
-                {totalCount} letters
-              </Typography>
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={handlePageChange}
-                color="primary"
-                size={isMobile ? 'medium' : 'large'}
-                showFirstButton
-                showLastButton
-                sx={{
-                  '& .MuiPaginationItem-root': {
-                    fontWeight: 500,
-                    '&.Mui-selected': {
-                      backgroundColor: theme.palette.primary.main,
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: theme.palette.primary.dark,
-                      },
-                    },
-                  },
-                }}
+              <PaginationControls
+                pagination={pagination}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                pageSizeOptions={[10, 25, 50, 100]}
+                showPageSize={true}
               />
             </Box>
           </Fade>

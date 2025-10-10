@@ -1,4 +1,5 @@
 import { client } from './client'
+import type { ApiResponse } from './client'
 
 export interface Division {
   id: string
@@ -16,10 +17,18 @@ export interface UpdateDivisionRequest {
   description?: string
 }
 
-export async function getDivisions(search?: string): Promise<Array<Division>> {
+interface GetDivisionsParams {
+  query?: string
+  page?: number
+  pageSize?: number
+}
+
+export async function getDivisions(
+  params?: GetDivisionsParams,
+): Promise<ApiResponse<Array<Division>>> {
   try {
     const response = await client.get('/divisions', {
-      params: search ? { search } : {},
+      params: params,
     })
     return response.data
   } catch (error) {
