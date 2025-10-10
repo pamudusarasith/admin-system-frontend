@@ -8,7 +8,6 @@ import {
   TextField,
 } from '@mui/material'
 import { AttachFile as AttachIcon, Send as SendIcon } from '@mui/icons-material'
-import { AddNoteDialog } from './AddNoteDialog'
 
 interface LetterDialogsProps {
   replyDialogOpen: boolean
@@ -16,8 +15,6 @@ interface LetterDialogsProps {
   onReplyDialogClose: () => void
   onReplyContentChange: (content: string) => void
   onSendReply: () => void
-  addNoteDialogOpen: boolean
-  onAddNoteDialogClose: () => void
 }
 
 export const LetterDialogs: React.FC<LetterDialogsProps> = ({
@@ -26,8 +23,6 @@ export const LetterDialogs: React.FC<LetterDialogsProps> = ({
   onReplyDialogClose,
   onReplyContentChange,
   onSendReply,
-  addNoteDialogOpen,
-  onAddNoteDialogClose,
 }) => {
   return (
     <>
@@ -39,9 +34,6 @@ export const LetterDialogs: React.FC<LetterDialogsProps> = ({
         onReplyContentChange={onReplyContentChange}
         onSendReply={onSendReply}
       />
-
-      {/* Add Note Dialog */}
-      <AddNoteDialog open={addNoteDialogOpen} onClose={onAddNoteDialogClose} />
     </>
   )
 }

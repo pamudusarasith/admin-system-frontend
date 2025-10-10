@@ -17,7 +17,8 @@ interface LetterActionMenuProps {
   open: boolean
   onClose: () => void
   letter: Letter
-  onAddNote?: () => void
+  onAddNote: () => void
+  onAssignDivision: () => void
 }
 
 export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
@@ -26,6 +27,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   onClose,
   letter,
   onAddNote,
+  onAssignDivision,
 }) => {
   const { hasAnyAuthority } = useAuth()
 
@@ -75,7 +77,12 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         </MenuItem>
       )}
       {canAssignDivision && (
-        <MenuItem onClick={onClose}>
+        <MenuItem
+          onClick={() => {
+            onAssignDivision()
+            onClose()
+          }}
+        >
           <AssignmentIndIcon sx={{ mr: 2 }} />
           Assign To Division
         </MenuItem>
@@ -96,9 +103,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
       {canAddNote && (
         <MenuItem
           onClick={() => {
-            if (onAddNote) {
-              onAddNote()
-            }
+            onAddNote()
             onClose()
           }}
         >

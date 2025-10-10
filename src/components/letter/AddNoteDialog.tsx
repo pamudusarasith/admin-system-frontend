@@ -18,7 +18,6 @@ import {
 import { Close as CloseIcon, NoteAdd as NoteAddIcon } from '@mui/icons-material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
-import { getRouteApi } from '@tanstack/react-router'
 import type { AxiosError } from 'axios'
 import type { ApiResponse } from '@/api'
 import type { AddNoteFormData } from '@/schemas'
@@ -26,18 +25,17 @@ import { FileUploadField, useSnackbar } from '@/components'
 import { addNote } from '@/api'
 import { addNoteSchema } from '@/schemas'
 
-const Route = getRouteApi('/_authenticated/letters/$letterId')
-
 interface AddNoteDialogProps {
+  letterId: number
   open: boolean
   onClose: () => void
 }
 
 export const AddNoteDialog: React.FC<AddNoteDialogProps> = ({
+  letterId,
   open,
   onClose,
 }) => {
-  const { letterId } = Route.useParams()
   const theme = useTheme()
   const queryClient = useQueryClient()
   const { showSnackbar } = useSnackbar()

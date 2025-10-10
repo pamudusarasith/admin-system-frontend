@@ -35,7 +35,13 @@ export type {
 } from './divisions'
 
 // Letter exports
-export { getLetters, createLetter, getLetterById, addNote } from './letters'
+export {
+  getLetters,
+  createLetter,
+  getLetterById,
+  addNote,
+  assignDivision,
+} from './letters'
 export type {
   SenderDetails,
   ReceiverDetails,
@@ -44,6 +50,5 @@ export type {
   AddNoteEventDetails,
   LetterEvent,
   Letter,
-  LettersApiResponse,
   GetLettersParams,
 } from './letters'

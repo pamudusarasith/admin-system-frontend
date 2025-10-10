@@ -22,7 +22,7 @@ import {
 } from '@mui/icons-material'
 
 interface FiltersProps {
-  searchTerm: string
+  query?: string
   statusFilter: string
   priorityFilter: string
   onSearchChange: (value: string) => void
@@ -32,7 +32,7 @@ interface FiltersProps {
 }
 
 export const Filters: React.FC<FiltersProps> = ({
-  searchTerm,
+  query,
   statusFilter,
   priorityFilter,
   onSearchChange,
@@ -44,7 +44,7 @@ export const Filters: React.FC<FiltersProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const hasActiveFilters =
-    statusFilter !== 'All' || priorityFilter !== 'All' || searchTerm
+    statusFilter !== 'All' || priorityFilter !== 'All' || query
 
   return (
     <Paper
@@ -67,7 +67,7 @@ export const Filters: React.FC<FiltersProps> = ({
       >
         <TextField
           placeholder="Search letters by subject, sender, or reference..."
-          value={searchTerm}
+          value={query}
           onChange={(e) => onSearchChange(e.target.value)}
           sx={{
             flex: 1,
@@ -81,29 +81,31 @@ export const Filters: React.FC<FiltersProps> = ({
               },
             },
           }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="primary" />
-              </InputAdornment>
-            ),
-            endAdornment: searchTerm && (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="clear search"
-                  onClick={() => onSearchChange('')}
-                  edge="end"
-                  size="small"
-                  sx={{
-                    '&:hover': {
-                      backgroundColor: theme.palette.action.hover,
-                    },
-                  }}
-                >
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+              endAdornment: query && (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="clear search"
+                    onClick={() => onSearchChange('')}
+                    edge="end"
+                    size="small"
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: theme.palette.action.hover,
+                      },
+                    }}
+                  >
+                    <ClearIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
           }}
         />
 
@@ -168,9 +170,9 @@ export const Filters: React.FC<FiltersProps> = ({
           >
             Active filters:
           </Typography>
-          {searchTerm && (
+          {query && (
             <Chip
-              label={`Search: ${searchTerm}`}
+              label={`Search: ${query}`}
               onDelete={() => onSearchChange('')}
               color="primary"
               variant="outlined"
