@@ -6,6 +6,7 @@ import {
   Paper,
   Stack,
   Typography,
+  useTheme,
 } from '@mui/material'
 import {
   Timeline,
@@ -16,13 +17,19 @@ import {
   TimelineSeparator,
 } from '@mui/lab'
 import {
+  Apartment as ApartmentIcon,
   AttachFile as AttachFileIcon,
+  FiberNew as FiberNewIcon,
   NoteAlt as NoteAltIcon,
 } from '@mui/icons-material'
 import mime from 'mime'
+import { alpha } from '@mui/material/styles'
+import type { Theme } from '@mui/material/styles'
+import type { ReactNode } from 'react'
 import type {
   AddNoteEventDetails,
   ChangeStatusEventDetails,
+  Division,
   LetterEvent,
   User,
 } from '@/api'
@@ -206,29 +213,54 @@ function ChangeStatusEvent({
   details,
   getStatusColor,
 }: Readonly<ChangeStatusEventProps>) {
-  if (details.newStatus === 'NEW') {
-    return (
-      <Box
-        sx={{
-          mt: 0.5,
-          border: (t) => `1px solid ${t.palette.divider}`,
-          p: 1,
-          borderRadius: 1,
-        }}
-      >
-        <Typography
-          variant="body2"
-          sx={{
-            my: 1,
-            fontWeight: 500,
-          }}
-        >
-          Letter registered in the system
-        </Typography>
-      </Box>
-    )
+  switch (details.newStatus) {
+    case 'NEW':
+      return <NewStatusEvent />
+    case 'ASSIGNED_TO_DIVISION':
+      return details.assignedDivision ? (
+        <AssignedDivisionStatusEvent division={details.assignedDivision} />
+      ) : null
+    default:
+      return (
+        <GenericStatusEvent
+          status={details.newStatus}
+          getStatusColor={getStatusColor}
+        />
+      )
   }
+}
 
+interface GenericStatusEventProps {
+  status: string
+  getStatusColor: (status: string) => string
+  message?: string
+}
+
+function GenericStatusEvent({
+  status,
+  getStatusColor,
+  message = 'Status changed to',
+}: Readonly<GenericStatusEventProps>) {
+  return (
+    <StatusMessageEvent
+      message={message}
+      status={status}
+      getStatusColor={getStatusColor}
+    />
+  )
+}
+
+interface StatusMessageEventProps {
+  message: string
+  status: string
+  getStatusColor: (status: string) => string
+}
+
+function StatusMessageEvent({
+  message,
+  status,
+  getStatusColor,
+}: Readonly<StatusMessageEventProps>) {
   return (
     <Box
       sx={{
@@ -239,13 +271,13 @@ function ChangeStatusEvent({
       }}
     >
       <Typography variant="body2" color="text.secondary">
-        Status changed to
+        {message}
       </Typography>
       <Chip
-        label={details.newStatus.replaceAll('_', ' ')}
+        label={formatStatus(status)}
         size="small"
         sx={{
-          backgroundColor: getStatusColor(details.newStatus),
+          backgroundColor: getStatusColor(status),
           color: 'white',
           fontWeight: 500,
           fontSize: 11,
@@ -255,21 +287,206 @@ function ChangeStatusEvent({
   )
 }
 
+function formatStatus(status: string) {
+  return status.replaceAll('_', ' ')
+}
+
+function NewStatusEvent() {
+  return (
+    <TimelineCard
+      icon={<FiberNewIcon sx={{ fontSize: 16, color: 'success.main' }} />}
+      title="Letter registered"
+      borderColor={(t) => `${t.palette.success.main}40`}
+      headerColor={(t) => t.palette.success.main}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          lineHeight: 1.6,
+          fontWeight: 500,
+        }}
+      >
+        Letter registered in the system
+      </Typography>
+    </TimelineCard>
+  )
+}
+
+interface AssignedDivisionStatusEventProps {
+  readonly division: Division
+}
+
+function AssignedDivisionStatusEvent({
+  division,
+}: AssignedDivisionStatusEventProps) {
+  const initials = division.name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+
+  return (
+    <TimelineCard
+      icon={<ApartmentIcon sx={{ fontSize: 16, color: 'primary.main' }} />}
+      title="Assigned to division"
+      borderColor={(t) => `${t.palette.primary.main}40`}
+      headerColor={(t) => t.palette.primary.main}
+    >
+      <Stack direction="row" spacing={1.5} alignItems="center">
+        <Avatar
+          sx={{
+            width: 40,
+            height: 40,
+            fontSize: 16,
+            fontWeight: 600,
+            backgroundColor: (t) => t.palette.primary.main,
+            color: 'white',
+          }}
+        >
+          {initials}
+        </Avatar>
+        <Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            {division.name}
+          </Typography>
+          {division.description && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {division.description}
+            </Typography>
+          )}
+        </Box>
+      </Stack>
+    </TimelineCard>
+  )
+}
+
 interface AddNoteEventProps {
   details: AddNoteEventDetails
 }
 
 function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
   return (
+    <TimelineCard
+      icon={<NoteAltIcon sx={{ fontSize: 16, color: 'primary.main' }} />}
+      title="Added a note"
+      borderColor={(t) => t.palette.divider}
+      headerColor={(t) => t.palette.primary.main}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.primary',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          lineHeight: 1.6,
+        }}
+      >
+        {details.content}
+      </Typography>
+
+      {details.attachments && details.attachments.length > 0 && (
+        <Stack spacing={0.5} sx={{ mt: 2 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 600,
+              color: 'text.secondary',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              fontSize: 10,
+            }}
+          >
+            Attachments ({details.attachments.length})
+          </Typography>
+          {details.attachments.map((attachment) => (
+            <Link
+              key={attachment.id}
+              href={attachment.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                p: 1,
+                borderRadius: 1,
+                backgroundColor: (t) => t.palette.action.hover,
+                transition: 'all 0.2s',
+                '&:hover': {
+                  backgroundColor: (t) => t.palette.action.selected,
+                },
+              }}
+            >
+              <AttachFileIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.primary',
+                  fontWeight: 500,
+                }}
+              >
+                {attachment.fileName}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                  ml: 'auto',
+                }}
+              >
+                {mime.getExtension(attachment.fileType)?.toUpperCase() ||
+                  'FILE'}
+              </Typography>
+            </Link>
+          ))}
+        </Stack>
+      )}
+    </TimelineCard>
+  )
+}
+
+type ThemeColor = string | ((theme: Theme) => string)
+
+interface TimelineCardProps {
+  icon: ReactNode
+  title: string
+  borderColor?: ThemeColor
+  headerColor?: ThemeColor
+  children: ReactNode
+}
+
+function resolveThemeColor(color: ThemeColor | undefined, theme: Theme) {
+  if (!color) {
+    return undefined
+  }
+
+  return typeof color === 'function' ? color(theme) : color
+}
+
+function TimelineCard({
+  icon,
+  title,
+  borderColor,
+  headerColor,
+  children,
+}: Readonly<TimelineCardProps>) {
+  const theme = useTheme()
+  const resolvedBorderColor =
+    resolveThemeColor(borderColor, theme) ?? theme.palette.divider
+  const resolvedHeaderColor =
+    resolveThemeColor(headerColor, theme) ?? theme.palette.text.primary
+  const headerBackground = alpha(resolvedHeaderColor, 0.08)
+
+  return (
     <Box
       sx={{
         mt: 0.5,
-        border: (t) => `1px solid ${t.palette.divider}`,
+        border: `1px solid ${resolvedBorderColor}`,
         borderRadius: 2,
         overflow: 'hidden',
       }}
     >
-      {/* Header */}
       <Box
         sx={{
           display: 'flex',
@@ -277,97 +494,21 @@ function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
           gap: 1,
           px: 2,
           py: 1,
-          backgroundColor: (t) => t.palette.action.hover,
+          backgroundColor: headerBackground,
         }}
       >
-        <NoteAltIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+        {icon}
         <Typography
           variant="body2"
           sx={{
             fontWeight: 600,
-            color: 'primary.main',
+            color: resolvedHeaderColor,
           }}
         >
-          Added a note
+          {title}
         </Typography>
       </Box>
-
-      {/* Content */}
-      <Box sx={{ px: 2, py: 1.5 }}>
-        <Typography
-          variant="body2"
-          sx={{
-            color: 'text.primary',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            lineHeight: 1.6,
-          }}
-        >
-          {details.content}
-        </Typography>
-
-        {/* Attachments */}
-        {details.attachments && details.attachments.length > 0 && (
-          <Stack spacing={0.5} sx={{ mt: 2 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 600,
-                color: 'text.secondary',
-                textTransform: 'uppercase',
-                letterSpacing: 0.5,
-                fontSize: 10,
-              }}
-            >
-              Attachments ({details.attachments.length})
-            </Typography>
-            {details.attachments.map((attachment) => (
-              <Link
-                key={attachment.id}
-                href={attachment.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  p: 1,
-                  borderRadius: 1,
-                  backgroundColor: (t) => t.palette.action.hover,
-                  transition: 'all 0.2s',
-                  '&:hover': {
-                    backgroundColor: (t) => t.palette.action.selected,
-                  },
-                }}
-              >
-                <AttachFileIcon
-                  sx={{ fontSize: 14, color: 'text.secondary' }}
-                />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.primary',
-                    fontWeight: 500,
-                  }}
-                >
-                  {attachment.fileName}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                    ml: 'auto',
-                  }}
-                >
-                  {mime.getExtension(attachment.fileType)?.toUpperCase() ||
-                    'FILE'}
-                </Typography>
-              </Link>
-            ))}
-          </Stack>
-        )}
-      </Box>
+      <Box sx={{ px: 2, py: 1.5 }}>{children}</Box>
     </Box>
   )
 }

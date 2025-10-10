@@ -4,6 +4,7 @@ import { Container, useTheme } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { getLetterById } from '@/api'
 import {
+  AddNoteDialog,
   AssignDivisionDialog,
   ErrorMessage,
   LetterActionMenu,
@@ -30,7 +31,7 @@ function LetterThreadView() {
 
   const { letterId } = Route.useParams()
   const result = useQuery({
-    queryKey: ['letter', letterId],
+    queryKey: ['letter', Number(letterId)],
     queryFn: () => getLetterById(Number(letterId)),
   })
 
@@ -143,8 +144,12 @@ function LetterThreadView() {
           onReplyDialogClose={() => setReplyDialogOpen(false)}
           onReplyContentChange={setReplyContent}
           onSendReply={handleSendReply}
-          addNoteDialogOpen={addNoteDialogOpen}
-          onAddNoteDialogClose={() => setAddNoteDialogOpen(false)}
+        />
+
+        <AddNoteDialog
+          letterId={Number(letterId)}
+          open={addNoteDialogOpen}
+          onClose={() => setAddNoteDialogOpen(false)}
         />
 
         <AssignDivisionDialog

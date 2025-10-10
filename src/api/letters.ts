@@ -27,6 +27,7 @@ export interface Attachment {
 
 export interface ChangeStatusEventDetails {
   newStatus: string
+  assignedDivision?: Division
 }
 
 export interface AddNoteEventDetails {
