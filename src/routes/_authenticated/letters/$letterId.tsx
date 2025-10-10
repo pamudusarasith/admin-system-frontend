@@ -4,6 +4,7 @@ import { Container, useTheme } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { getLetterById } from '@/api'
 import {
+  AssignDivisionDialog,
   ErrorMessage,
   LetterActionMenu,
   LetterDetailsGrid,
@@ -23,6 +24,8 @@ function LetterThreadView() {
   const [replyDialogOpen, setReplyDialogOpen] = useState(false)
   const [replyContent, setReplyContent] = useState('')
   const [addNoteDialogOpen, setAddNoteDialogOpen] = useState(false)
+  const [assignDivisionDialogOpen, setAssignDivisionDialogOpen] =
+    useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const { letterId } = Route.useParams()
@@ -131,6 +134,7 @@ function LetterThreadView() {
           onClose={handleMenuClose}
           letter={letter}
           onAddNote={() => setAddNoteDialogOpen(true)}
+          onAssignDivision={() => setAssignDivisionDialogOpen(true)}
         />
 
         <LetterDialogs
@@ -141,6 +145,12 @@ function LetterThreadView() {
           onSendReply={handleSendReply}
           addNoteDialogOpen={addNoteDialogOpen}
           onAddNoteDialogClose={() => setAddNoteDialogOpen(false)}
+        />
+
+        <AssignDivisionDialog
+          letterId={Number(letterId)}
+          open={assignDivisionDialogOpen}
+          onClose={() => setAssignDivisionDialogOpen(false)}
         />
       </Container>
     </SidebarLayout>
