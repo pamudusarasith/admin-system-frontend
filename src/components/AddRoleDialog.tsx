@@ -21,10 +21,11 @@ import {
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import type { RoleFormData } from '@/schemas'
 import { roleFormDataSchema } from '@/schemas'
 import { createRole, updateRole } from '@/api'
+import { getPermissions, type PermissionCategory } from '@/api/permissions'
 
 interface AddRoleDialogProps {
   open: boolean
@@ -33,56 +34,6 @@ interface AddRoleDialogProps {
   initialData?: { id: string } & RoleFormData
   onSuccess?: () => void
 }
-
-// Available permission sections and their actions
-const PERMISSION_SECTIONS = [
-  {
-    id: 'LETTER_MANAGEMENT',
-    label: 'Letter Management',
-    permissions: [
-      { id: 'letter:create', label: 'Create Letters' },
-      { id: 'letter:view', label: 'View Letters' },
-      { id: 'letter:edit', label: 'Edit Letters' },
-      { id: 'letter:delete', label: 'Delete Letters' },
-      { id: 'letter:assign', label: 'Assign Letters' },
-      { id: 'letter:accept', label: 'Accept Letters' },
-      { id: 'letter:return', label: 'Return Letters' },
-      { id: 'letter:close', label: 'Close Letters' },
-    ],
-  },
-  {
-    id: 'USER_MANAGEMENT',
-    label: 'User Management',
-    permissions: [
-      { id: 'user:create', label: 'Create Users' },
-      { id: 'user:view', label: 'View Users' },
-      { id: 'user:edit', label: 'Edit Users' },
-      { id: 'user:delete', label: 'Delete Users' },
-      { id: 'user:manage_roles', label: 'Manage User Roles' },
-    ],
-  },
-  {
-    id: 'DIVISION_MANAGEMENT',
-    label: 'Division Management',
-    permissions: [
-      { id: 'division:create', label: 'Create Divisions' },
-      { id: 'division:view', label: 'View Divisions' },
-      { id: 'division:edit', label: 'Edit Divisions' },
-      { id: 'division:delete', label: 'Delete Divisions' },
-      { id: 'division:manage_users', label: 'Manage Division Users' },
-    ],
-  },
-  {
-    id: 'REPORTS_AND_SYSTEM',
-    label: 'Reports & System',
-    permissions: [
-      { id: 'report:view', label: 'View Reports' },
-      { id: 'report:generate', label: 'Generate Reports' },
-      { id: 'system:admin', label: 'System Administration' },
-      { id: 'settings:manage', label: 'Manage Settings' },
-    ],
-  },
-] as const
 
 export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
   open,
@@ -93,6 +44,17 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
+  // Fetch permissions from backend
+  const {
+    data: permissionCategories = [],
+    isLoading: permissionsLoading,
+    error: permissionsError,
+  } = useQuery({
+    queryKey: ['permissions'],
+    queryFn: getPermissions,
+    staleTime: 5 * 60 * 1000,
+  })
 
   // Mutations for create and update
   const createRoleMutation = useMutation({
@@ -111,7 +73,7 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
       handleClose()
     },
   })
-  console.log('initialData', initialData)
+
   // Form setup with TanStack Form
   const form = useForm({
     defaultValues: {
@@ -312,112 +274,121 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
                         have
                       </Typography>
 
-                      <FormControl
-                        component="fieldset"
-                        variant="standard"
-                        error={!field.state.meta.isValid}
-                      >
-                        <FormGroup>
-                          <Stack spacing={3}>
-                            {PERMISSION_SECTIONS.map((section) => (
-                              <Box key={section.id}>
-                                <Typography
-                                  variant="subtitle1"
-                                  sx={{
-                                    fontWeight: 600,
-                                    color: theme.palette.text.primary,
-                                    mb: 1,
-                                  }}
-                                >
-                                  {section.label}
-                                </Typography>
-                                <Box
-                                  sx={{
-                                    display: 'grid',
-                                    gridTemplateColumns: {
-                                      xs: '1fr 1fr',
-                                      md: '1fr 1fr 1fr 1fr',
-                                    },
-                                    gap: 1,
-                                    p: 2,
-                                    borderRadius: 2,
-                                    border: `1px solid ${theme.palette.divider}`,
-                                    backgroundColor:
-                                      theme.palette.background.default,
-                                  }}
-                                >
-                                  {section.permissions.map((permission) => (
-                                    <FormControlLabel
-                                      key={permission.id}
-                                      control={
-                                        <Checkbox
-                                          checked={(() => {
-                                            console.log(
-                                              'pamudu',
-                                              field.state.value,
-                                            )
-                                            console.log('dinu', permission.id)
-                                            return field.state.value.includes(
-                                              permission.id,
-                                            )
-                                          })()}
-                                          onChange={(event) => {
-                                            const newPermissions = event.target
-                                              .checked
-                                              ? [
-                                                  ...field.state.value,
-                                                  permission.id,
-                                                ]
-                                              : field.state.value.filter(
-                                                  (id) => id !== permission.id,
-                                                )
-                                            field.handleChange(newPermissions)
-                                          }}
-                                          sx={{
-                                            '&.Mui-checked': {
-                                              color: theme.palette.primary.main,
-                                            },
-                                          }}
-                                        />
-                                      }
-                                      label={
-                                        <Typography
-                                          variant="body2"
-                                          sx={{
-                                            fontWeight: 500,
-                                            color: theme.palette.text.primary,
-                                          }}
-                                        >
-                                          {permission.label}
-                                        </Typography>
-                                      }
-                                      sx={{
-                                        alignItems: 'center',
-                                        m: 0,
-                                        '& .MuiFormControlLabel-label': {
-                                          ml: 1,
-                                        },
-                                      }}
-                                    />
+                      {permissionsLoading ? (
+                        <Typography variant="body2" color="text.secondary">
+                          Loading permissions...
+                        </Typography>
+                      ) : permissionsError ? (
+                        <Typography variant="body2" color="error">
+                          Failed to load permissions.
+                        </Typography>
+                      ) : (
+                        <FormControl
+                          component="fieldset"
+                          variant="standard"
+                          error={!field.state.meta.isValid}
+                        >
+                          <FormGroup>
+                            <Stack spacing={3}>
+                              {permissionCategories.map((category) => (
+                                <Box key={category.id} sx={{ mb: 2 }}>
+                                  <Typography
+                                    variant="subtitle1"
+                                    sx={{
+                                      fontWeight: 700,
+                                      color: theme.palette.text.primary,
+                                      mb: 1,
+                                    }}
+                                  >
+                                    {category.name}
+                                  </Typography>
+                                  {category.subCategories.map((sub) => (
+                                    <Box key={sub.id} sx={{ mb: 1, ml: 2 }}>
+                                      <Typography
+                                        variant="subtitle2"
+                                        sx={{
+                                          fontWeight: 600,
+                                          color: theme.palette.text.secondary,
+                                          mb: 1,
+                                        }}
+                                      >
+                                        {sub.name}
+                                      </Typography>
+                                      <Box
+                                        sx={{
+                                          display: 'flex',
+                                          flexWrap: 'wrap',
+                                          gap: 2,
+                                          p: 1,
+                                        }}
+                                      >
+                                        {sub.permissions.map((permission) => (
+                                          <FormControlLabel
+                                            key={permission.id}
+                                            control={
+                                              <Checkbox
+                                                checked={
+                                                  field.state.value.includes(
+                                                    permission.name,
+                                                  )
+                                                }
+                                                onChange={(event) => {
+                                                  const newPermissions = event.target
+                                                    .checked
+                                                    ? [...field.state.value, permission.name]
+                                                    : field.state.value.filter(
+                                                        (id) => id !== permission.name,
+                                                      )
+                                                  field.handleChange(newPermissions)
+                                                }}
+                                                sx={{
+                                                  '&.Mui-checked': {
+                                                    color: theme.palette.primary.main,
+                                                  },
+                                                }}
+                                              />
+                                            }
+                                            label={
+                                              <Typography
+                                                variant="body2"
+                                                sx={{
+                                                  fontWeight: 500,
+                                                  color: theme.palette.text.primary,
+                                                }}
+                                              >
+                                                {permission.label}
+                                              </Typography>
+                                            }
+                                            sx={{
+                                              alignItems: 'center',
+                                              m: 0,
+                                              '& .MuiFormControlLabel-label': {
+                                                ml: 1,
+                                              },
+                                            }}
+                                          />
+                                        ))}
+                                      </Box>
+                                    </Box>
                                   ))}
                                 </Box>
-                              </Box>
-                            ))}
-                          </Stack>
-                        </FormGroup>
-                        {field.state.meta.isTouched &&
-                          !field.state.meta.isValid && (
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: theme.palette.error.main,
-                                mt: 1,
-                              }}
-                            >
-                              {field.state.meta.errors.join(', ')}
-                            </Typography>
-                          )}
-                      </FormControl>
+                              ))}
+                            </Stack>
+                          </FormGroup>
+                          {field.state.meta.isTouched &&
+                            !field.state.meta.isValid && (
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: theme.palette.error.main,
+                                  mt: 1,
+                                }}
+                              >
+                                {field.state.meta.errors.join(', ')}
+                              </Typography>
+                            )}
+                        </FormControl>
+                      )}
                     </Box>
                   )}
                 </form.Field>
