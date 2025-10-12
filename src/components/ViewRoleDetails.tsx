@@ -7,6 +7,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   IconButton,
   Paper,
   Stack,
@@ -48,47 +49,25 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
     return <PersonIcon />
   }
 
-  const formatPermissions = (permissions: Array<string>) => {
-    const groupedPermissions: { [key: string]: Array<string> } = {}
 
-    permissions.forEach((permission) => {
-      // Extract category from permission (e.g., "USER_CREATE" -> "User Management")
-      const parts = permission.split('_')
-      const category = parts[0]
-      const action = parts.slice(1).join('_')
-
-      let categoryName = ''
-      switch (category.toUpperCase()) {
-        case 'USER':
-          categoryName = 'User Management'
-          break
-        case 'LETTER':
-          categoryName = 'Letter Management'
-          break
-        case 'CABINET':
-          categoryName = 'Cabinet Paper Management'
-          break
-        case 'DIVISION':
-          categoryName = 'Division Management'
-          break
-        default:
-          categoryName =
-            category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()
-      }
-
-      if (!groupedPermissions[categoryName]) {
-        groupedPermissions[categoryName] = []
-      }
-
-      groupedPermissions[categoryName].push(
-        action.toLowerCase().replace('_', ' '),
-      )
-    })
-
-    return groupedPermissions
+  // Group permissions by mainCategory and subCategory
+  type PermissionObj = {
+    mainCategory: string
+    subCategory: string | null
+    label: string
   }
-
-  const groupedPermissions = formatPermissions(role.permissions)
+  const groupPermissions = (permissions: PermissionObj[]) => {
+    const grouped: Record<string, Record<string, string[]>> = {}
+    permissions.forEach((perm) => {
+      const main = perm.mainCategory || 'Other'
+      const sub = perm.subCategory || ''
+      if (!grouped[main]) grouped[main] = {}
+      if (!grouped[main][sub]) grouped[main][sub] = []
+      grouped[main][sub].push(perm.label)
+    })
+    return grouped
+  }
+  const groupedPermissions = groupPermissions(role.permissions as any)
 
   return (
     <Dialog
@@ -391,32 +370,81 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
             </Typography>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {Object.entries(groupedPermissions)
-                .sort(([a], [b]) => b.localeCompare(a)) // Sort categories in descending order
-                .map(([category]) => (
-                  <Box key={category} sx={{ flex: 1 }}>
-                    <Paper
-                      elevation={0}
+              {Object.entries(groupedPermissions).map(([mainCategory, subGroups]) => (
+                <Box key={mainCategory} sx={{ flex: 1 }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      border: `1px solid ${theme.palette.divider}`,
+                      background: theme.palette.background.paper,
+                      mb: 1,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
                       sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        border: `1px solid ${theme.palette.divider}`,
-                        background: theme.palette.background.paper,
+                        fontWeight: 600,
+                        color: theme.palette.text.primary,
+                        mb: 3.5,
                       }}
                     >
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontWeight: 600,
-                          color: theme.palette.text.primary,
-                          mb: 1,
-                        }}
-                      >
-                        {category}
-                      </Typography>
-                    </Paper>
-                  </Box>
-                ))}
+                      {mainCategory}
+                    </Typography>
+                    {Object.entries(subGroups).map(([subCategory, labels], idx, arr) => (
+                      <React.Fragment key={subCategory}>
+                        <Box sx={{ ml: subCategory ? 2 : 0, mb: 1 }}>
+                          {subCategory && (
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ fontWeight: 500, color: theme.palette.text.secondary, mb: 2.5 }}
+                            >
+                              {subCategory}
+                            </Typography>
+                          )}
+                          <Box sx={{ mb: 3 }} />
+                          <Box
+                            sx={{
+                              display: 'grid',
+                              gridTemplateColumns: {
+                                xs: '1fr',
+                                sm: '1fr',
+                                md: '1fr 1fr',
+                                lg: '1fr 1fr 1fr',
+                              },
+                              gap: 2.5,
+                            }}
+                          >
+                            {labels.map((label, lidx) => (
+                              <Box
+                                key={label + lidx}
+                                sx={{
+                                  px: 1.5,
+                                  py: 0.5,
+                                  borderRadius: 1,
+                                  background: `${theme.palette.primary.main}10`,
+                                  color: theme.palette.text.primary,
+                                  fontSize: 14,
+                                  fontWeight: 500,
+                                  mb: 1.5,
+                                }}
+                              >
+                                {label}
+                              </Box>
+                            ))}
+                          </Box>
+                        </Box>
+                        {idx < arr.length - 1 && (
+                          <Box sx={{ my: 1 }}>
+                            <Divider sx={{ ml: subCategory ? 2 : 0 }} />
+                          </Box>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </Paper>
+                </Box>
+              ))}
             </Box>
           </Box>
         </Box>
