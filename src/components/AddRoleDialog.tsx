@@ -9,22 +9,28 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControl,
   FormControlLabel,
   FormGroup,
   IconButton,
+  Popover,
   Stack,
   TextField,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import type { RoleFormData } from '@/schemas'
 import { roleFormDataSchema } from '@/schemas'
 import { createRole, updateRole } from '@/api'
+import { getPermissions, type PermissionCategory } from '@/api/permissions'
+import { useSnackbar } from '@/components'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
 interface AddRoleDialogProps {
   open: boolean
@@ -34,55 +40,6 @@ interface AddRoleDialogProps {
   onSuccess?: () => void
 }
 
-// Available permission sections and their actions
-const PERMISSION_SECTIONS = [
-  {
-    id: 'LETTER_MANAGEMENT',
-    label: 'Letter Management',
-    permissions: [
-      { id: 'letter:create', label: 'Create Letters' },
-      { id: 'letter:view', label: 'View Letters' },
-      { id: 'letter:edit', label: 'Edit Letters' },
-      { id: 'letter:delete', label: 'Delete Letters' },
-      { id: 'letter:assign', label: 'Assign Letters' },
-      { id: 'letter:accept', label: 'Accept Letters' },
-      { id: 'letter:return', label: 'Return Letters' },
-      { id: 'letter:close', label: 'Close Letters' },
-    ],
-  },
-  {
-    id: 'USER_MANAGEMENT',
-    label: 'User Management',
-    permissions: [
-      { id: 'user:create', label: 'Create Users' },
-      { id: 'user:view', label: 'View Users' },
-      { id: 'user:edit', label: 'Edit Users' },
-      { id: 'user:delete', label: 'Delete Users' },
-      { id: 'user:manage_roles', label: 'Manage User Roles' },
-    ],
-  },
-  {
-    id: 'DIVISION_MANAGEMENT',
-    label: 'Division Management',
-    permissions: [
-      { id: 'division:create', label: 'Create Divisions' },
-      { id: 'division:view', label: 'View Divisions' },
-      { id: 'division:edit', label: 'Edit Divisions' },
-      { id: 'division:delete', label: 'Delete Divisions' },
-      { id: 'division:manage_users', label: 'Manage Division Users' },
-    ],
-  },
-  {
-    id: 'REPORTS_AND_SYSTEM',
-    label: 'Reports & System',
-    permissions: [
-      { id: 'report:view', label: 'View Reports' },
-      { id: 'report:generate', label: 'Generate Reports' },
-      { id: 'system:admin', label: 'System Administration' },
-      { id: 'settings:manage', label: 'Manage Settings' },
-    ],
-  },
-] as const
 
 export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
   open,
@@ -93,25 +50,47 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const { showSnackbar } = useSnackbar()
+
+  // Fetch permissions from backend
+  const {
+    data: permissionCategories = [],
+    isLoading: permissionsLoading,
+    error: permissionsError,
+  } = useQuery({
+    queryKey: ['permissions'],
+    queryFn: getPermissions,
+    staleTime: 5 * 60 * 1000,
+  })
 
   // Mutations for create and update
   const createRoleMutation = useMutation({
     mutationFn: createRole,
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+      showSnackbar({ message: data?.message || 'Role created Successfully.', severity: 'success' })
       onSuccess?.()
       handleClose()
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message?.trim() || error?.message || 'An unexpected error occurred. Please try again.'
+      showSnackbar({ message, severity: 'error' })
     },
   })
 
   const updateRoleMutation = useMutation({
     mutationFn: ({ id, roleData }: { id: string; roleData: RoleFormData }) =>
       updateRole(id, roleData),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+      showSnackbar({ message: data?.message || 'Role updated successfully.', severity: 'success' })
       onSuccess?.()
       handleClose()
     },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message?.trim() || error?.message || 'An unexpected error occurred. Please try again.'
+      showSnackbar({ message, severity: 'error' })
+    },
   })
-  console.log('initialData', initialData)
+
   // Form setup with TanStack Form
   const form = useForm({
     defaultValues: {
@@ -124,8 +103,6 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
     },
     onSubmit: ({ value }) => {
       if (editMode && initialData) {
-        // Assuming we have the role ID available somehow, you might need to pass it in initialData
-        // For now, let's assume initialData has an id property
         updateRoleMutation.mutate({
           id: initialData.id,
           roleData: value,
@@ -144,6 +121,11 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
   const isSubmitting =
     createRoleMutation.isPending || updateRoleMutation.isPending
   const error = createRoleMutation.error || updateRoleMutation.error
+
+  const [descPopover, setDescPopover] = React.useState<{ anchorEl: HTMLElement | null; desc: string }>({
+    anchorEl: null,
+    desc: '',
+  })
 
   return (
     <Dialog
@@ -212,22 +194,7 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
               }}
             >
               <Stack spacing={3}>
-                {/* Display mutation error */}
-                {error && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: theme.palette.error.main,
-                      p: 2,
-                      borderRadius: 1,
-                      backgroundColor: `${theme.palette.error.main}10`,
-                    }}
-                  >
-                    {error instanceof Error
-                      ? error.message
-                      : 'An error occurred'}
-                  </Typography>
-                )}
+                
 
                 {/* Role Name Field */}
                 <form.Field name="name">
@@ -240,11 +207,9 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                       error={!field.state.meta.isValid}
-                      helperText={
-                        field.state.meta.isTouched && !field.state.meta.isValid
-                          ? field.state.meta.errors.join(', ')
-                          : ''
-                      }
+                      helperText={field.state.meta.errors
+                        .map((err: any) => err.message)
+                        .join(', ')}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
@@ -270,11 +235,9 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                       error={!field.state.meta.isValid}
-                      helperText={
-                        field.state.meta.isTouched && !field.state.meta.isValid
-                          ? field.state.meta.errors.join(', ')
-                          : ''
-                      }
+                      helperText={field.state.meta.errors
+                        .map((err: any) => err.message)
+                        .join(', ')}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
@@ -312,112 +275,159 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
                         have
                       </Typography>
 
-                      <FormControl
-                        component="fieldset"
-                        variant="standard"
-                        error={!field.state.meta.isValid}
-                      >
-                        <FormGroup>
-                          <Stack spacing={3}>
-                            {PERMISSION_SECTIONS.map((section) => (
-                              <Box key={section.id}>
-                                <Typography
-                                  variant="subtitle1"
-                                  sx={{
-                                    fontWeight: 600,
-                                    color: theme.palette.text.primary,
-                                    mb: 1,
-                                  }}
-                                >
-                                  {section.label}
-                                </Typography>
-                                <Box
-                                  sx={{
-                                    display: 'grid',
-                                    gridTemplateColumns: {
-                                      xs: '1fr 1fr',
-                                      md: '1fr 1fr 1fr 1fr',
-                                    },
-                                    gap: 1,
-                                    p: 2,
-                                    borderRadius: 2,
-                                    border: `1px solid ${theme.palette.divider}`,
-                                    backgroundColor:
-                                      theme.palette.background.default,
-                                  }}
-                                >
-                                  {section.permissions.map((permission) => (
-                                    <FormControlLabel
-                                      key={permission.id}
-                                      control={
-                                        <Checkbox
-                                          checked={(() => {
-                                            console.log(
-                                              'pamudu',
-                                              field.state.value,
-                                            )
-                                            console.log('dinu', permission.id)
-                                            return field.state.value.includes(
-                                              permission.id,
-                                            )
-                                          })()}
-                                          onChange={(event) => {
-                                            const newPermissions = event.target
-                                              .checked
-                                              ? [
-                                                  ...field.state.value,
-                                                  permission.id,
-                                                ]
-                                              : field.state.value.filter(
-                                                  (id) => id !== permission.id,
-                                                )
-                                            field.handleChange(newPermissions)
-                                          }}
-                                          sx={{
-                                            '&.Mui-checked': {
-                                              color: theme.palette.primary.main,
-                                            },
-                                          }}
-                                        />
-                                      }
-                                      label={
-                                        <Typography
-                                          variant="body2"
-                                          sx={{
-                                            fontWeight: 500,
-                                            color: theme.palette.text.primary,
-                                          }}
-                                        >
-                                          {permission.label}
-                                        </Typography>
-                                      }
+                      {permissionsLoading ? (
+                        <Typography variant="body2" color="text.secondary">
+                          Loading permissions...
+                        </Typography>
+                      ) : permissionsError ? (
+                        <Typography variant="body2" color="error">
+                          Failed to load permissions.
+                        </Typography>
+                      ) : (
+                        <FormControl
+                          component="fieldset"
+                          variant="standard"
+                          error={!field.state.meta.isValid}
+                        >
+                          <FormGroup>
+                            <Stack spacing={3}>
+                              {permissionCategories.map((category, catIdx) => (
+                                <React.Fragment key={category.id}>
+                                  {catIdx > 0 && <Divider sx={{ my: 2 }} />}
+                                  <Box sx={{ mb: 2 }}>
+                                    <Typography
+                                      variant="subtitle1"
                                       sx={{
-                                        alignItems: 'center',
-                                        m: 0,
-                                        '& .MuiFormControlLabel-label': {
-                                          ml: 1,
-                                        },
+                                        fontWeight: 700,
+                                        color: theme.palette.text.primary,
+                                        mb: 1,
                                       }}
-                                    />
-                                  ))}
-                                </Box>
-                              </Box>
-                            ))}
-                          </Stack>
-                        </FormGroup>
-                        {field.state.meta.isTouched &&
-                          !field.state.meta.isValid && (
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: theme.palette.error.main,
-                                mt: 1,
-                              }}
-                            >
-                              {field.state.meta.errors.join(', ')}
-                            </Typography>
-                          )}
-                      </FormControl>
+                                    >
+                                      {category.name}
+                                    </Typography>
+                                    {category.subCategories.map((sub, subIdx) => (
+                                      <React.Fragment key={sub.id}>
+                                        {subIdx > 0 && (
+                                          <Divider
+                                            orientation="horizontal"
+                                            flexItem
+                                            sx={{ my: 1, ml: 2 }}
+                                          />
+                                        )}
+                                        <Box sx={{ mb: 1, ml: 2 }}>
+                                          <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                              fontWeight: 600,
+                                              color: theme.palette.text.secondary,
+                                              mb: 1,
+                                            }}
+                                          >
+                                            {sub.name}
+                                          </Typography>
+                                          <Box
+                                            sx={{
+                                              display: 'grid',
+                                              gridTemplateColumns: {
+                                                xs: '1fr',
+                                                sm: '1fr',
+                                                md: '1fr 1fr',
+                                                lg: '1fr 1fr 1fr',
+                                              },
+                                              gap: 2,
+                                              p: 1,
+                                            }}
+                                          >
+                                            {sub.permissions.map((permission) => (
+                                              <FormControlLabel
+                                                key={permission.id}
+                                                control={
+                                                  <Checkbox
+                                                    checked={field.state.value.includes(
+                                                      permission.name,
+                                                    )}
+                                                    onChange={(event) => {
+                                                      const newPermissions = event
+                                                        .target.checked
+                                                        ? [
+                                                            ...field.state.value,
+                                                            permission.name,
+                                                          ]
+                                                        : field.state.value.filter(
+                                                            (id) =>
+                                                              id !==
+                                                              permission.name,
+                                                          )
+                                                      field.handleChange(
+                                                        newPermissions,
+                                                      )
+                                                    }}
+                                                    sx={{
+                                                      '&.Mui-checked': {
+                                                        color:
+                                                          theme.palette.primary
+                                                            .main,
+                                                      },
+                                                    }}
+                                                  />
+                                                }
+                                                label={
+                                                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <Typography
+                                                      variant="body2"
+                                                      sx={{
+                                                        fontWeight: 500,
+                                                        color:
+                                                          theme.palette.text
+                                                            .primary,
+                                                      }}
+                                                    >
+                                                      {permission.label}
+                                                    </Typography>
+                                                    <IconButton
+                                                      size="small"
+                                                      sx={{ ml: 0.5, p: 0.5 }}
+                                                      onClick={e => setDescPopover({ anchorEl: e.currentTarget, desc: permission.description || '' })}
+                                                      aria-label="Show permission description"
+                                                    >
+                                                      <InfoOutlinedIcon fontSize="small" />
+                                                    </IconButton>
+                                                  </Box>
+                                                }
+                                                sx={{
+                                                  alignItems: 'center',
+                                                  m: 0,
+                                                  '& .MuiFormControlLabel-label': {
+                                                    ml: 1,
+                                                  },
+                                                }}
+                                              />
+                                            ))}
+                                          </Box>
+                                        </Box>
+                                      </React.Fragment>
+                                    ))}
+                                  </Box>
+                                </React.Fragment>
+                              ))}
+                            </Stack>
+                          </FormGroup>
+                          {field.state.meta.isTouched &&
+                            !field.state.meta.isValid && (
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: theme.palette.error.main,
+                                  mt: 1,
+                                }}
+                              >
+                                {field.state.meta.errors
+                                  .map((err: any) => err.message)
+                                  .join(', ')}
+                              </Typography>
+                            )}
+                        </FormControl>
+                      )}
                     </Box>
                   )}
                 </form.Field>
@@ -479,6 +489,17 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
           )}
         </form.Subscribe>
       </DialogActions>
+
+      <Popover
+        open={Boolean(descPopover.anchorEl)}
+        anchorEl={descPopover.anchorEl}
+        onClose={() => setDescPopover({ anchorEl: null, desc: '' })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        PaperProps={{ sx: { p: 1, maxWidth: 220 } }}
+      >
+        <Typography variant="caption">{descPopover.desc}</Typography>
+      </Popover>
     </Dialog>
   )
 }
