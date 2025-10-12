@@ -426,6 +426,34 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
               >
                 Active:
               </Typography>
+              {sentDateFrom && (
+                <Chip
+                  label={`Sent From: ${sentDateFrom}`}
+                  size="small"
+                  onDelete={() => setSentDateFrom('')}
+                />
+              )}
+              {sentDateTo && (
+                <Chip
+                  label={`Sent To: ${sentDateTo}`}
+                  size="small"
+                  onDelete={() => setSentDateTo('')}
+                />
+              )}
+              {receivedDateFrom && (
+                <Chip
+                  label={`Received From: ${receivedDateFrom}`}
+                  size="small"
+                  onDelete={() => setReceivedDateFrom('')}
+                />
+              )}
+              {receivedDateTo && (
+                <Chip
+                  label={`Received To: ${receivedDateTo}`}
+                  size="small"
+                  onDelete={() => setReceivedDateTo('')}
+                />
+              )}
               {status && (
                 <Chip
                   label={status.replace(/_/g, ' ')}
