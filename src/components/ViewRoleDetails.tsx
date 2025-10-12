@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Avatar,
   Box,
@@ -13,6 +13,7 @@ import {
   Stack,
   Typography,
   useTheme,
+  Popover,
 } from '@mui/material'
 import {
   AdminPanelSettings as AdminIcon,
@@ -55,19 +56,34 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
     mainCategory: string
     subCategory: string | null
     label: string
+    description?: string
   }
+  // Also keep a map of label to description for quick lookup
   const groupPermissions = (permissions: PermissionObj[]) => {
-    const grouped: Record<string, Record<string, string[]>> = {}
+    const grouped: Record<string, Record<string, PermissionObj[]>> = {}
     permissions.forEach((perm) => {
       const main = perm.mainCategory || 'Other'
       const sub = perm.subCategory || ''
       if (!grouped[main]) grouped[main] = {}
       if (!grouped[main][sub]) grouped[main][sub] = []
-      grouped[main][sub].push(perm.label)
+      grouped[main][sub].push(perm)
     })
     return grouped
   }
   const groupedPermissions = groupPermissions(role.permissions as any)
+
+  // State for popover
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [popoverContent, setPopoverContent] = useState<string>('')
+  const handleInfoClick = (event: React.MouseEvent<HTMLElement>, description?: string) => {
+    setAnchorEl(event.currentTarget)
+    setPopoverContent(description || 'No description available')
+  }
+  const handlePopoverClose = () => {
+    setAnchorEl(null)
+    setPopoverContent('')
+  }
+  const openPopover = Boolean(anchorEl)
 
   return (
     <Dialog
@@ -392,7 +408,7 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
                     >
                       {mainCategory}
                     </Typography>
-                    {Object.entries(subGroups).map(([subCategory, labels], idx, arr) => (
+                    {Object.entries(subGroups).map(([subCategory, perms], idx, arr) => (
                       <React.Fragment key={subCategory}>
                         <Box sx={{ ml: subCategory ? 2 : 0, mb: 1 }}>
                           {subCategory && (
@@ -416,10 +432,12 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
                               gap: 2.5,
                             }}
                           >
-                            {labels.map((label, lidx) => (
+                            {perms.map((perm, lidx) => (
                               <Box
-                                key={label + lidx}
+                                key={perm.label + lidx}
                                 sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
                                   px: 1.5,
                                   py: 0.5,
                                   borderRadius: 1,
@@ -428,14 +446,29 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
                                   fontSize: 14,
                                   fontWeight: 500,
                                   mb: 1.5,
+                                  gap: 0.5,
                                 }}
                               >
-                                {label}
+                                {perm.label}
+                                <IconButton
+                                  size="small"
+                                  sx={{ ml: 0.5, p: 0.5 }}
+                                  aria-label={`Show info for ${perm.label}`}
+                                  onClick={e => handleInfoClick(e, perm.description)}
+                                >
+                                  <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <circle cx="12" cy="12" r="10" stroke={theme.palette.primary.main} strokeWidth="2" fill="none" />
+                                      <rect x="11" y="10" width="2" height="6" rx="1" fill={theme.palette.primary.main} />
+                                      <rect x="11" y="7" width="2" height="2" rx="1" fill={theme.palette.primary.main} />
+                                    </svg>
+                                  </Box>
+                                </IconButton>
                               </Box>
                             ))}
                           </Box>
                         </Box>
-                        {idx < arr.length - 1 && (
+                        {typeof idx !== 'undefined' && arr && idx < arr.length - 1 && (
                           <Box sx={{ my: 1 }}>
                             <Divider sx={{ ml: subCategory ? 2 : 0 }} />
                           </Box>
@@ -445,6 +478,19 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
                   </Paper>
                 </Box>
               ))}
+              {/* Popover for permission description */}
+              <Popover
+                open={openPopover}
+                anchorEl={anchorEl}
+                onClose={handlePopoverClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                PaperProps={{ sx: { p: 2, maxWidth: 300 } }}
+              >
+                <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
+                  {popoverContent}
+                </Typography>
+              </Popover>
             </Box>
           </Box>
         </Box>
