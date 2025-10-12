@@ -21,17 +21,18 @@ import {
 } from '@mui/icons-material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import type { GetLettersParams } from '@/api'
+import type { LetterSearchParams } from '@/schemas'
 import {
   AddLetterDialog,
-  Filters,
   LetterCard,
+  LetterSearchBar,
   PaginationControls,
   SidebarLayout,
   StatusCardsGrid,
 } from '@/components'
 import { getLetters } from '@/api'
 import { Permission as P, useAuth } from '@/core'
-import { letterSearchParamsSchema } from '@/schemas/letter'
+import { letterSearchParamsSchema } from '@/schemas'
 
 export const Route = createFileRoute('/_authenticated/letters/')({
   beforeLoad: ({ context }) => {
@@ -59,10 +60,6 @@ function LettersPage() {
   const canCreate = hasAuthority(P.letterCreate)
 
   const searchParams = Route.useSearch()
-  const [page, setPage] = useState(searchParams.page)
-  const [pageSize, setPageSize] = useState(searchParams.pageSize)
-  const [query, setQuery] = useState(searchParams.query)
-
   const [isAddLetterDialogOpen, setIsAddLetterDialogOpen] = useState(false)
 
   // TanStack Query for fetching letters
@@ -74,9 +71,32 @@ function LettersPage() {
     queryKey: [
       'letters',
       {
-        ...(page && { page: page - 1 }), // API uses 0-based pagination
-        ...(pageSize && { pageSize }),
-        ...(query && { query }),
+        ...(searchParams.page && { page: searchParams.page - 1 }), // API uses 0-based pagination
+        ...(searchParams.pageSize && { pageSize: searchParams.pageSize }),
+        ...(searchParams.query && { query: searchParams.query }),
+        ...(searchParams.status && { status: searchParams.status }),
+        ...(searchParams.priority && { priority: searchParams.priority }),
+        ...(searchParams.modeOfArrival && {
+          modeOfArrival: searchParams.modeOfArrival,
+        }),
+        ...(searchParams.sender && { sender: searchParams.sender }),
+        ...(searchParams.receiver && { receiver: searchParams.receiver }),
+        ...(searchParams.assignedUser && {
+          assignedUser: searchParams.assignedUser,
+        }),
+        ...(searchParams.assignedDivision && {
+          assignedDivision: searchParams.assignedDivision,
+        }),
+        ...(searchParams.sentDateFrom && {
+          sentDateFrom: searchParams.sentDateFrom,
+        }),
+        ...(searchParams.sentDateTo && { sentDateTo: searchParams.sentDateTo }),
+        ...(searchParams.receivedDateFrom && {
+          receivedDateFrom: searchParams.receivedDateFrom,
+        }),
+        ...(searchParams.receivedDateTo && {
+          receivedDateTo: searchParams.receivedDateTo,
+        }),
       },
     ],
     queryFn: ({ queryKey }) => {
@@ -91,48 +111,38 @@ function LettersPage() {
   const letters = lettersResponse?.data || []
   const pagination = lettersResponse?.pagination
 
-  const handleSearchQueryChange = (newQuery: string) => {
-    setQuery(newQuery)
-    setPage(undefined)
+  const handleSearch = (newSearchParams: LetterSearchParams) => {
     navigate({
       to: '/letters',
       search: {
-        page,
-        pageSize,
-        query: newQuery,
+        ...newSearchParams,
+        page: undefined, // Reset to first page on new search
       },
     })
   }
 
   const handlePageChange = (newPage?: number) => {
-    setPage(newPage)
     navigate({
       to: '/letters',
       search: {
+        ...searchParams,
         page: newPage,
-        pageSize,
-        query,
       },
     })
   }
 
   const handlePageSizeChange = (newPageSize?: number) => {
-    setPage(undefined)
-    setPageSize(newPageSize)
     navigate({
       to: '/letters',
       search: {
-        page,
+        ...searchParams,
+        page: undefined,
         pageSize: newPageSize,
-        query,
       },
     })
   }
 
   const handleClearFilters = () => {
-    setQuery(undefined)
-    setPage(undefined)
-    setPageSize(undefined)
     navigate({
       to: '/letters',
     })
@@ -278,17 +288,13 @@ function LettersPage() {
           </Box>
         </Fade>
 
-        {/* Enhanced Filters */}
+        {/* Enhanced Search and Filters */}
         <Fade in timeout={1000}>
           <div>
-            <Filters
-              query={query}
-              statusFilter={''}
-              priorityFilter={''}
-              onSearchChange={handleSearchQueryChange}
-              onStatusFilterChange={() => {}}
-              onPriorityFilterChange={() => {}}
-              onClearAllFilters={handleClearFilters}
+            <LetterSearchBar
+              searchParams={searchParams}
+              onSearch={handleSearch}
+              onClear={handleClearFilters}
             />
           </div>
         </Fade>

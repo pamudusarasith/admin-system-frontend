@@ -1,5 +1,27 @@
 import * as z from 'zod'
 
+export const modeOfArrivalEnum = z.enum([
+  'REGISTERED_POST',
+  'UNREGISTERED_POST',
+  'EMAIL',
+  'WHATSAPP',
+  'HAND_DELIVERED',
+  'FAX',
+  'OTHER',
+])
+
+export const letterPriorityEnum = z.enum(['NORMAL', 'HIGH', 'URGENT'])
+
+export const letterStatusEnum = z.enum([
+  'NEW',
+  'ASSIGNED_TO_DIVISION',
+  'PENDING_ACCEPTANCE',
+  'ASSIGNED_TO_OFFICER',
+  'RETURNED_FROM_OFFICER',
+  'RETURNED_FROM_DIVISION',
+  'CLOSED',
+])
+
 export const createLetterSchema = z.object({
   reference: z.string().min(1),
   sender_details: z.object({
@@ -15,18 +37,10 @@ export const createLetterSchema = z.object({
   }),
   sent_date: z.iso.date().optional(),
   received_date: z.iso.date(),
-  mode_of_arrival: z.enum([
-    'REGISTERED_POST',
-    'UNREGISTERED_POST',
-    'EMAIL',
-    'WHATSAPP',
-    'HAND_DELIVERED',
-    'FAX',
-    'OTHER',
-  ]),
+  mode_of_arrival: modeOfArrivalEnum,
   subject: z.string().min(1),
   content: z.string().optional(),
-  priority: z.enum(['NORMAL', 'HIGH', 'URGENT']),
+  priority: letterPriorityEnum,
   attachments: z.array(z.file()).optional(),
 })
 
@@ -53,8 +67,22 @@ export const letterSearchParamsSchema = z.object({
   page: z.number().min(1).optional().catch(undefined),
   pageSize: z.number().min(1).max(100).optional().catch(undefined),
   query: z.string().optional().catch(undefined),
+  status: letterStatusEnum.optional().catch(undefined),
+  priority: letterPriorityEnum.optional().catch(undefined),
+  modeOfArrival: modeOfArrivalEnum.optional().catch(undefined),
+  sender: z.string().optional().catch(undefined),
+  receiver: z.string().optional().catch(undefined),
+  assignedUser: z.string().optional().catch(undefined),
+  assignedDivision: z.string().optional().catch(undefined),
+  sentDateFrom: z.string().optional().catch(undefined),
+  sentDateTo: z.string().optional().catch(undefined),
+  receivedDateFrom: z.string().optional().catch(undefined),
+  receivedDateTo: z.string().optional().catch(undefined),
 })
 
+export type ModeOfArrival = z.infer<typeof modeOfArrivalEnum>
+export type LetterPriority = z.infer<typeof letterPriorityEnum>
+export type LetterStatus = z.infer<typeof letterStatusEnum>
 export type LetterFormData = z.infer<typeof createLetterSchema>
 export type AddNoteFormData = z.infer<typeof addNoteSchema>
 export type LetterSearchParams = z.infer<typeof letterSearchParamsSchema>

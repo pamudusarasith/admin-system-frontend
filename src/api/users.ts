@@ -1,8 +1,5 @@
 import { client } from './client'
-import type {
-  CreateUserPayload,
-  UpdateUserProfilePayload,
-} from '@/schemas/users'
+import type { CreateUserPayload, UpdateUserProfilePayload } from '@/schemas'
 
 // Define the User interface based on the API response
 export interface User {
