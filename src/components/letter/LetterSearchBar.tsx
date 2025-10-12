@@ -20,25 +20,12 @@ import {
   FilterAlt as FilterAltIcon,
   Search as SearchIcon,
 } from '@mui/icons-material'
-import type { LetterSearchParams } from '@/schemas/letter'
-
-type StatusEnum =
-  | 'NEW'
-  | 'ASSIGNED_TO_DIVISION'
-  | 'PENDING_ACCEPTANCE'
-  | 'ASSIGNED_TO_OFFICER'
-  | 'RETURNED_FROM_OFFICER'
-  | 'RETURNED_FROM_DIVISION'
-  | 'CLOSED'
-type PriorityEnum = 'NORMAL' | 'HIGH' | 'URGENT'
-type ModeOfArrivalEnum =
-  | 'REGISTERED_POST'
-  | 'UNREGISTERED_POST'
-  | 'EMAIL'
-  | 'WHATSAPP'
-  | 'HAND_DELIVERED'
-  | 'FAX'
-  | 'OTHER'
+import type {
+  LetterPriority,
+  LetterSearchParams,
+  LetterStatus,
+  ModeOfArrival,
+} from '@/schemas'
 
 interface LetterSearchBarProps {
   searchParams: LetterSearchParams
@@ -55,13 +42,13 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
 
   // Local state for filters before applying
   const [query, setQuery] = useState(searchParams.query || '')
-  const [status, setStatus] = useState<StatusEnum | ''>(
+  const [status, setStatus] = useState<LetterStatus | ''>(
     searchParams.status || '',
   )
-  const [priority, setPriority] = useState<PriorityEnum | ''>(
+  const [priority, setPriority] = useState<LetterPriority | ''>(
     searchParams.priority || '',
   )
-  const [modeOfArrival, setModeOfArrival] = useState<ModeOfArrivalEnum | ''>(
+  const [modeOfArrival, setModeOfArrival] = useState<ModeOfArrival | ''>(
     searchParams.modeOfArrival || '',
   )
   const [sender, setSender] = useState(searchParams.sender || '')
@@ -288,7 +275,7 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
               <InputLabel>Status</InputLabel>
               <Select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as StatusEnum | '')}
+                onChange={(e) => setStatus(e.target.value as LetterStatus | '')}
                 label="Status"
               >
                 <MenuItem value="">All</MenuItem>
@@ -317,7 +304,7 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
               <Select
                 value={priority}
                 onChange={(e) =>
-                  setPriority(e.target.value as PriorityEnum | '')
+                  setPriority(e.target.value as LetterPriority | '')
                 }
                 label="Priority"
               >
@@ -333,7 +320,7 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
               <Select
                 value={modeOfArrival}
                 onChange={(e) =>
-                  setModeOfArrival(e.target.value as ModeOfArrivalEnum | '')
+                  setModeOfArrival(e.target.value as ModeOfArrival | '')
                 }
                 label="Mode"
               >

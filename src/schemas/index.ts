@@ -1,6 +1,20 @@
 // Letter schemas
-export { createLetterSchema, addNoteSchema } from './letter'
-export type { LetterFormData, AddNoteFormData } from './letter'
+export {
+  modeOfArrivalEnum,
+  letterStatusEnum,
+  letterPriorityEnum as priorityEnum,
+  createLetterSchema,
+  addNoteSchema,
+  letterSearchParamsSchema,
+} from './letter'
+export type {
+  ModeOfArrival,
+  LetterPriority,
+  LetterStatus,
+  LetterFormData,
+  AddNoteFormData,
+  LetterSearchParams,
+} from './letter'
 
 // Role schemas
 export { roleFormDataSchema } from './role'

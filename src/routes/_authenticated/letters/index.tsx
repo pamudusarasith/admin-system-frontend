@@ -21,7 +21,7 @@ import {
 } from '@mui/icons-material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import type { GetLettersParams } from '@/api'
-import type { LetterSearchParams } from '@/schemas/letter'
+import type { LetterSearchParams } from '@/schemas'
 import {
   AddLetterDialog,
   LetterCard,
@@ -32,7 +32,7 @@ import {
 } from '@/components'
 import { getLetters } from '@/api'
 import { Permission as P, useAuth } from '@/core'
-import { letterSearchParamsSchema } from '@/schemas/letter'
+import { letterSearchParamsSchema } from '@/schemas'
 
 export const Route = createFileRoute('/_authenticated/letters/')({
   beforeLoad: ({ context }) => {
