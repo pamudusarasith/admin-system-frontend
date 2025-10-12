@@ -41,6 +41,7 @@ export { LetterDetailsGrid } from './letter/LetterDetailsGrid'
 export { LetterDialogs } from './letter/LetterDialogs'
 export { LetterHeader } from './letter/LetterHeader'
 export { LetterTimeline } from './letter/LetterTimeline'
+export { LetterSearchBar } from './letter/LetterSearchBar'
 
 // ============================================
 // Common/Utility Components (from ./common)
@@ -57,6 +58,5 @@ export { SnackbarProvider, useSnackbar } from './common/Snackbar'
 export { ActionButtons } from './ActionButtons'
 export { AnimatedIcon } from './AnimatedIcon'
 export { ErrorPage } from './ErrorPage'
-export { Filters } from './Filters'
 export { SearchBar } from './SearchBar'
 export { default as ViewRoleDetails } from './ViewRoleDetails'

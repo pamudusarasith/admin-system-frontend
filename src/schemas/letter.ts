@@ -53,6 +53,39 @@ export const letterSearchParamsSchema = z.object({
   page: z.number().min(1).optional().catch(undefined),
   pageSize: z.number().min(1).max(100).optional().catch(undefined),
   query: z.string().optional().catch(undefined),
+  status: z
+    .enum([
+      'NEW',
+      'ASSIGNED_TO_DIVISION',
+      'PENDING_ACCEPTANCE',
+      'ASSIGNED_TO_OFFICER',
+      'RETURNED_FROM_OFFICER',
+      'RETURNED_FROM_DIVISION',
+      'CLOSED',
+    ])
+    .optional()
+    .catch(undefined),
+  priority: z.enum(['NORMAL', 'HIGH', 'URGENT']).optional().catch(undefined),
+  modeOfArrival: z
+    .enum([
+      'REGISTERED_POST',
+      'UNREGISTERED_POST',
+      'EMAIL',
+      'WHATSAPP',
+      'HAND_DELIVERED',
+      'FAX',
+      'OTHER',
+    ])
+    .optional()
+    .catch(undefined),
+  sender: z.string().optional().catch(undefined),
+  receiver: z.string().optional().catch(undefined),
+  assignedUser: z.string().optional().catch(undefined),
+  assignedDivision: z.string().optional().catch(undefined),
+  sentDateFrom: z.string().optional().catch(undefined),
+  sentDateTo: z.string().optional().catch(undefined),
+  receivedDateFrom: z.string().optional().catch(undefined),
+  receivedDateTo: z.string().optional().catch(undefined),
 })
 
 export type LetterFormData = z.infer<typeof createLetterSchema>
