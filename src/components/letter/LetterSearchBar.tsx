@@ -134,7 +134,7 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
     onClear?.()
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch()
     }
@@ -144,34 +144,33 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
     <Paper
       elevation={0}
       sx={{
-        mb: 3,
+        mb: 2,
         border: `1px solid ${theme.palette.divider}`,
-        borderRadius: 2,
+        borderRadius: 1,
         overflow: 'hidden',
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          boxShadow: theme.shadows[2],
-        },
+        transition: 'box-shadow 0.2s ease',
+        background: 'transparent',
       }}
     >
-      {/* Main Search Bar - Always Visible */}
-      <Box sx={{ p: 2 }}>
+      {/* Main Search Bar - Compact */}
+      <Box sx={{ p: 1, px: 1.5 }}>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <TextField
             fullWidth
-            placeholder="Search letters by subject, reference, or content..."
+            placeholder="Search letters..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            size="medium"
+            onKeyDown={handleKeyDown}
+            size="small"
+            variant="outlined"
             slotProps={{
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ color: 'primary.main' }} />
+                    <SearchIcon fontSize="small" color="action" />
                   </InputAdornment>
                 ),
-                endAdornment: query && (
+                endAdornment: query ? (
                   <InputAdornment position="end">
                     <IconButton
                       size="small"
@@ -181,115 +180,95 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
                       <ClearIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
-                ),
+                ) : undefined,
               },
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                backgroundColor: theme.palette.background.default,
-                transition: 'all 0.2s',
-                '&:hover': {
-                  backgroundColor: theme.palette.background.paper,
-                },
-                '&.Mui-focused': {
-                  backgroundColor: theme.palette.background.paper,
-                  boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`,
-                },
+                height: 40,
+                borderRadius: 1,
+                backgroundColor: theme.palette.background.paper,
+                '& fieldset': { borderColor: theme.palette.divider },
               },
+              '& .MuiInputBase-input': { padding: '8px 10px' },
             }}
           />
 
           <Button
             variant="contained"
             onClick={handleSearch}
-            startIcon={<SearchIcon />}
+            size="small"
+            aria-label="Search"
             sx={{
-              minWidth: { xs: '100px', sm: '120px' },
-              height: '56px',
-              borderRadius: 1.5,
+              minWidth: 88,
+              height: 40,
+              borderRadius: 1,
               textTransform: 'none',
               fontWeight: 600,
             }}
           >
-            Search
+            <SearchIcon fontSize="small" />
           </Button>
 
           <IconButton
             onClick={() => setExpandedFilters(!expandedFilters)}
+            size="small"
+            aria-label="Toggle filters"
             sx={{
-              height: '56px',
-              width: '56px',
+              height: 36,
+              width: 36,
               border: `1px solid ${theme.palette.divider}`,
-              borderRadius: 1.5,
-              backgroundColor: expandedFilters
-                ? 'primary.main'
-                : 'background.paper',
+              borderRadius: 1,
+              backgroundColor: expandedFilters ? 'primary.main' : 'transparent',
               color: expandedFilters ? 'white' : 'text.primary',
-              transition: 'all 0.3s',
-              '&:hover': {
-                backgroundColor: expandedFilters
-                  ? 'primary.dark'
-                  : 'action.hover',
-              },
             }}
           >
             {activeFilterCount > 0 && (
               <Box
                 sx={{
                   position: 'absolute',
-                  top: -4,
-                  right: -4,
+                  top: -6,
+                  right: -6,
                   backgroundColor: 'error.main',
                   color: 'white',
                   borderRadius: '50%',
-                  minWidth: 20,
-                  height: 20,
+                  minWidth: 18,
+                  height: 18,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '0.7rem',
-                  fontWeight: 'bold',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
                 }}
               >
                 {activeFilterCount}
               </Box>
             )}
-            <FilterAltIcon />
+            <FilterAltIcon fontSize="small" />
           </IconButton>
         </Box>
       </Box>
 
-      {/* Advanced Filters - Expandable */}
+      {/* Advanced Filters - Compact */}
       <Collapse in={expandedFilters}>
         <Box
           sx={{
             borderTop: `1px solid ${theme.palette.divider}`,
             backgroundColor: theme.palette.background.default,
-            p: 3,
+            p: 2,
           }}
         >
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 2,
-            }}
-          >
-            <Typography variant="subtitle1" fontWeight={600} color="primary">
-              Advanced Filters
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="body2" fontWeight={600} color="text.primary">
+              Filters
             </Typography>
             {activeFilterCount > 0 && (
               <Button
                 size="small"
                 onClick={handleClear}
-                startIcon={<ClearIcon />}
-                sx={{
-                  textTransform: 'none',
-                  color: 'text.secondary',
-                }}
+                sx={{ textTransform: 'none' }}
               >
-                Clear All
+                Clear
               </Button>
             )}
           </Box>
@@ -302,10 +281,9 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
                 sm: 'repeat(2, 1fr)',
                 md: 'repeat(3, 1fr)',
               },
-              gap: 2,
+              gap: 1,
             }}
           >
-            {/* Status */}
             <FormControl fullWidth size="small">
               <InputLabel>Status</InputLabel>
               <Select
@@ -334,7 +312,6 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
               </Select>
             </FormControl>
 
-            {/* Priority */}
             <FormControl fullWidth size="small">
               <InputLabel>Priority</InputLabel>
               <Select
@@ -351,15 +328,14 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
               </Select>
             </FormControl>
 
-            {/* Mode of Arrival */}
             <FormControl fullWidth size="small">
-              <InputLabel>Mode of Arrival</InputLabel>
+              <InputLabel>Mode</InputLabel>
               <Select
                 value={modeOfArrival}
                 onChange={(e) =>
                   setModeOfArrival(e.target.value as ModeOfArrivalEnum | '')
                 }
-                label="Mode of Arrival"
+                label="Mode"
               >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="REGISTERED_POST">Registered Post</MenuItem>
@@ -372,230 +348,154 @@ export const LetterSearchBar: React.FC<LetterSearchBarProps> = ({
               </Select>
             </FormControl>
 
-            {/* Sender */}
             <TextField
               fullWidth
               size="small"
               label="Sender"
               value={sender}
               onChange={(e) => setSender(e.target.value)}
-              placeholder="Search by sender name"
             />
-
-            {/* Receiver */}
             <TextField
               fullWidth
               size="small"
               label="Receiver"
               value={receiver}
               onChange={(e) => setReceiver(e.target.value)}
-              placeholder="Search by receiver name"
             />
-
-            {/* Assigned User */}
             <TextField
               fullWidth
               size="small"
               label="Assigned User"
               value={assignedUser}
               onChange={(e) => setAssignedUser(e.target.value)}
-              placeholder="Search by assigned user"
             />
 
-            {/* Assigned Division */}
             <TextField
               fullWidth
               size="small"
               label="Assigned Division"
               value={assignedDivision}
               onChange={(e) => setAssignedDivision(e.target.value)}
-              placeholder="Search by division"
             />
 
-            {/* Sent Date From */}
             <TextField
               fullWidth
               size="small"
               type="date"
-              label="Sent Date From"
+              label="Sent From"
               value={sentDateFrom}
               onChange={(e) => setSentDateFrom(e.target.value)}
-              slotProps={{
-                inputLabel: { shrink: true },
-              }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
-
-            {/* Sent Date To */}
             <TextField
               fullWidth
               size="small"
               type="date"
-              label="Sent Date To"
+              label="Sent To"
               value={sentDateTo}
               onChange={(e) => setSentDateTo(e.target.value)}
-              slotProps={{
-                inputLabel: { shrink: true },
-              }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
-
-            {/* Received Date From */}
             <TextField
               fullWidth
               size="small"
               type="date"
-              label="Received Date From"
+              label="Received From"
               value={receivedDateFrom}
               onChange={(e) => setReceivedDateFrom(e.target.value)}
-              slotProps={{
-                inputLabel: { shrink: true },
-              }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
 
-            {/* Received Date To */}
             <TextField
               fullWidth
               size="small"
               type="date"
-              label="Received Date To"
+              label="Received To"
               value={receivedDateTo}
               onChange={(e) => setReceivedDateTo(e.target.value)}
-              slotProps={{
-                inputLabel: { shrink: true },
-              }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Box>
 
-          {/* Active Filter Chips */}
           {activeFilterCount > 0 && (
-            <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ mr: 1, lineHeight: '32px' }}
+                sx={{ mr: 1 }}
               >
-                Active Filters:
+                Active:
               </Typography>
               {status && (
                 <Chip
-                  label={`Status: ${status.replace(/_/g, ' ')}`}
+                  label={status.replace(/_/g, ' ')}
                   size="small"
                   onDelete={() => setStatus('')}
-                  color="primary"
-                  variant="outlined"
                 />
               )}
               {priority && (
                 <Chip
-                  label={`Priority: ${priority}`}
+                  label={priority}
                   size="small"
                   onDelete={() => setPriority('')}
-                  color="primary"
-                  variant="outlined"
                 />
               )}
               {modeOfArrival && (
                 <Chip
-                  label={`Mode: ${modeOfArrival.replace(/_/g, ' ')}`}
+                  label={modeOfArrival.replace(/_/g, ' ')}
                   size="small"
                   onDelete={() => setModeOfArrival('')}
-                  color="primary"
-                  variant="outlined"
                 />
               )}
               {sender && (
                 <Chip
-                  label={`Sender: ${sender}`}
+                  label={sender}
                   size="small"
                   onDelete={() => setSender('')}
-                  color="primary"
-                  variant="outlined"
                 />
               )}
               {receiver && (
                 <Chip
-                  label={`Receiver: ${receiver}`}
+                  label={receiver}
                   size="small"
                   onDelete={() => setReceiver('')}
-                  color="primary"
-                  variant="outlined"
                 />
               )}
               {assignedUser && (
                 <Chip
-                  label={`User: ${assignedUser}`}
+                  label={assignedUser}
                   size="small"
                   onDelete={() => setAssignedUser('')}
-                  color="primary"
-                  variant="outlined"
                 />
               )}
               {assignedDivision && (
                 <Chip
-                  label={`Division: ${assignedDivision}`}
+                  label={assignedDivision}
                   size="small"
                   onDelete={() => setAssignedDivision('')}
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-              {sentDateFrom && (
-                <Chip
-                  label={`Sent From: ${sentDateFrom}`}
-                  size="small"
-                  onDelete={() => setSentDateFrom('')}
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-              {sentDateTo && (
-                <Chip
-                  label={`Sent To: ${sentDateTo}`}
-                  size="small"
-                  onDelete={() => setSentDateTo('')}
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-              {receivedDateFrom && (
-                <Chip
-                  label={`Received From: ${receivedDateFrom}`}
-                  size="small"
-                  onDelete={() => setReceivedDateFrom('')}
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-              {receivedDateTo && (
-                <Chip
-                  label={`Received To: ${receivedDateTo}`}
-                  size="small"
-                  onDelete={() => setReceivedDateTo('')}
-                  color="primary"
-                  variant="outlined"
                 />
               )}
             </Box>
           )}
 
-          {/* Apply Filters Button */}
           <Box
-            sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'flex-end' }}
+            sx={{
+              mt: 1.5,
+              display: 'flex',
+              gap: 1,
+              justifyContent: 'flex-end',
+            }}
           >
-            <Button
-              variant="outlined"
-              onClick={handleClear}
-              startIcon={<ClearIcon />}
-              sx={{ textTransform: 'none' }}
-            >
-              Clear All
+            <Button variant="text" onClick={handleClear} size="small">
+              Clear
             </Button>
             <Button
               variant="contained"
               onClick={handleSearch}
-              startIcon={<SearchIcon />}
-              sx={{ textTransform: 'none', fontWeight: 600 }}
+              size="small"
+              sx={{ fontWeight: 600 }}
             >
-              Apply Filters
+              Apply
             </Button>
           </Box>
         </Box>
