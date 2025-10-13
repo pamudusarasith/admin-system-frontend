@@ -71,11 +71,11 @@ export const AssignUserDialog: React.FC<AssignUserDialogProps> = ({
   }, [open])
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm.trim())
     }, 300)
 
-    return () => window.clearTimeout(timer)
+    return () => clearTimeout(timer)
   }, [searchTerm])
 
   const divisionId = letter.assignedDivision?.id
@@ -149,7 +149,7 @@ export const AssignUserDialog: React.FC<AssignUserDialogProps> = ({
       showSnackbar({ message, severity: 'success' })
       handleClose()
     },
-    onError: (e: AxiosError<ApiResponse<any>>) => {
+    onError: (e: AxiosError<ApiResponse<unknown>>) => {
       const message =
         e.response?.data.message?.trim() ||
         'Failed to assign user. Please try again.'

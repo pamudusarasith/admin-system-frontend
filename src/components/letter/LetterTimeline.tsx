@@ -376,7 +376,7 @@ function AssignedUserStatusEvent({ user }: AssignedUserStatusEventProps) {
         .map((part) => part[0])
         .join('')
         .slice(0, 2)
-    : user.username.slice(0, 2).toUpperCase()
+    : user.username.slice(0, 2).toUpperCase() || '??'
 
   return (
     <TimelineCard
