@@ -6,6 +6,7 @@ import { getLetterById } from '@/api'
 import {
   AddNoteDialog,
   AssignDivisionDialog,
+  AssignUserDialog,
   ErrorMessage,
   LetterActionMenu,
   LetterDetailsGrid,
@@ -27,6 +28,7 @@ function LetterThreadView() {
   const [addNoteDialogOpen, setAddNoteDialogOpen] = useState(false)
   const [assignDivisionDialogOpen, setAssignDivisionDialogOpen] =
     useState(false)
+  const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const { letterId } = Route.useParams()
@@ -136,6 +138,7 @@ function LetterThreadView() {
           letter={letter}
           onAddNote={() => setAddNoteDialogOpen(true)}
           onAssignDivision={() => setAssignDivisionDialogOpen(true)}
+          onAssignUser={() => setAssignUserDialogOpen(true)}
         />
 
         <LetterDialogs
@@ -156,6 +159,12 @@ function LetterThreadView() {
           letterId={Number(letterId)}
           open={assignDivisionDialogOpen}
           onClose={() => setAssignDivisionDialogOpen(false)}
+        />
+
+        <AssignUserDialog
+          letter={letter}
+          open={assignUserDialogOpen}
+          onClose={() => setAssignUserDialogOpen(false)}
         />
       </Container>
     </SidebarLayout>

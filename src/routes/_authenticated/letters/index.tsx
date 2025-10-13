@@ -279,12 +279,12 @@ function LettersPage() {
             </Box>
 
             {/* Enhanced Status Overview Cards */}
-            <StatusCardsGrid
+            {/* <StatusCardsGrid
               statusCounts={statusCounts}
               statusFilter={''}
               onStatusFilterChange={() => {}}
               getStatusColor={getStatusColor}
-            />
+            /> */}
           </Box>
         </Fade>
 

@@ -41,6 +41,7 @@ export {
   getLetterById,
   addNote,
   assignDivision,
+  assignUser,
 } from './letters'
 export type {
   SenderDetails,

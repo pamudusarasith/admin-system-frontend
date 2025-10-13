@@ -28,6 +28,7 @@ export interface Attachment {
 export interface ChangeStatusEventDetails {
   newStatus: string
   assignedDivision?: Division
+  assignedUser?: User
 }
 
 export interface AddNoteEventDetails {
@@ -188,6 +189,19 @@ export async function assignDivision(
       `Failed to assign division to letter with ID ${letterId}:`,
       error,
     )
+    throw error
+  }
+}
+
+export async function assignUser(
+  letterId: number,
+  userId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.put(`/letters/${letterId}/user`, { userId })
+    return response.data
+  } catch (error) {
+    console.error(`Failed to assign user to letter with ID ${letterId}:`, error)
     throw error
   }
 }
