@@ -22,6 +22,8 @@ import {
 import { useForm } from '@tanstack/react-form'
 import { AnimatedIcon } from '@/components'
 import { useAuth } from '@/core'
+import { getUserProfile } from '@/api'
+import { useQueryClient } from '@tanstack/react-query'
 
 export const Route = createFileRoute('/login')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -42,6 +44,7 @@ function LoginPage() {
   const { login, error, clearError, isLoading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const search = Route.useSearch()
+  const queryClient = useQueryClient()
 
   const form = useForm({
     defaultValues: {
@@ -52,6 +55,18 @@ function LoginPage() {
       clearError()
       const isLoggedIn = await login(username, password)
       if (isLoggedIn) {
+        // Invalidate userProfile cache so next page gets fresh data
+        await queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+        // Optionally, fetch the user profile and redirect to profile if needed
+        try {
+          const user = await getUserProfile()
+          if (user.accountSetupRequired) {
+            navigate({ to: '/profile', replace: true })
+            return
+          }
+        } catch (e) {
+          // fallback: just go to redirect
+        }
         navigate({ to: search.redirect, replace: true })
       }
     },

@@ -41,14 +41,22 @@ export function CreateUser({ onClose }: CreateUserProps) {
     queryFn: getRoles,
   })
 
+  // Define the Division type if not already defined
+  interface Division {
+    id: number
+    name: string
+  }
+
   const {
-    data: divisions = [],
+    data: divisionsResponse,
     isLoading: divisionsLoading,
     error: divisionsError,
   } = useQuery({
     queryKey: ['divisions'],
-    queryFn: getDivisions,
+    queryFn:  getDivisions,
   })
+
+  const divisions = divisionsResponse?.data ?? []
 
   const form = useForm({
     defaultValues: {

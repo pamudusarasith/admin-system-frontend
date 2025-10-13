@@ -14,12 +14,13 @@ export interface User {
   role: string
   division: string
   isActive?: boolean
+  accountSetupRequired?: boolean
 }
 
 export async function getUsers(): Promise<Array<User>> {
   try {
     const response = await client.get('/users')
-    return response.data
+    return response.data.data
   } catch (error) {
     console.error('Failed to fetch users:', error)
     throw error
@@ -34,7 +35,7 @@ export const createUser = async (data: CreateUserPayload) => {
 export async function getUserProfile(): Promise<User> {
   try {
     const response = await client.get('/profile')
-    return response.data
+    return response.data.data
   } catch (error) {
     console.error('Failed to fetch user profile:', error)
     throw error
@@ -45,7 +46,8 @@ export async function updateProfile(
   data: UpdateUserProfilePayload,
 ): Promise<void> {
   try {
-    await client.put(`/profile`, data)
+    const response = await client.put(`/profile`, data)
+    return response.data
   } catch (error) {
     console.error('Failed to update profile:', error)
     throw error

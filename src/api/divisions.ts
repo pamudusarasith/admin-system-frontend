@@ -23,13 +23,23 @@ interface GetDivisionsParams {
   pageSize?: number
 }
 
-export async function getDivisions(
-  params?: GetDivisionsParams,
-): Promise<ApiResponse<Array<Division>>> {
+// export async function getDivisions(
+//   params?: GetDivisionsParams,
+// ): Promise<ApiResponse<Array<Division>>> {
+//   try {
+//     const response = await client.get('/divisions', {
+//       params: params,
+//     })
+//     return response.data.data
+//   } catch (error) {
+//     console.error('Failed to fetch divisions:', error)
+//     throw error
+//   }
+// }
+
+export async function getDivisions(): Promise<ApiResponse<Array<Division>>> {
   try {
-    const response = await client.get('/divisions', {
-      params: params,
-    })
+    const response = await client.get('/divisions')
     return response.data
   } catch (error) {
     console.error('Failed to fetch divisions:', error)
