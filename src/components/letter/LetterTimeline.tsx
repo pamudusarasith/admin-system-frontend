@@ -21,6 +21,7 @@ import {
   AttachFile as AttachFileIcon,
   FiberNew as FiberNewIcon,
   NoteAlt as NoteAltIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material'
 import mime from 'mime'
 import { alpha } from '@mui/material/styles'
@@ -220,6 +221,10 @@ function ChangeStatusEvent({
       return details.assignedDivision ? (
         <AssignedDivisionStatusEvent division={details.assignedDivision} />
       ) : null
+    case 'PENDING_ACCEPTANCE':
+      return details.assignedUser ? (
+        <AssignedUserStatusEvent user={details.assignedUser} />
+      ) : null
     default:
       return (
         <GenericStatusEvent
@@ -354,6 +359,82 @@ function AssignedDivisionStatusEvent({
               {division.description}
             </Typography>
           )}
+        </Box>
+      </Stack>
+    </TimelineCard>
+  )
+}
+
+interface AssignedUserStatusEventProps {
+  readonly user: User
+}
+
+function AssignedUserStatusEvent({ user }: AssignedUserStatusEventProps) {
+  const initials = user.fullName
+    ? user.fullName
+        .split(' ')
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+    : user.username.slice(0, 2).toUpperCase() || '??'
+
+  return (
+    <TimelineCard
+      icon={<PersonIcon sx={{ fontSize: 16, color: 'secondary.main' }} />}
+      title="Assigned to user"
+      borderColor={(t) => `${t.palette.secondary.main}40`}
+      headerColor={(t) => t.palette.secondary.main}
+    >
+      <Stack direction="row" spacing={1.5} alignItems="center">
+        <Avatar
+          sx={{
+            width: 40,
+            height: 40,
+            fontSize: 16,
+            fontWeight: 600,
+            backgroundColor: (t) => t.palette.secondary.main,
+            color: 'white',
+          }}
+        >
+          {initials}
+        </Avatar>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            {user.fullName || user.username}
+          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
+            {user.email && (
+              <Typography variant="body2" color="text.secondary">
+                {user.email}
+              </Typography>
+            )}
+          </Stack>
+          <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
+            {user.role && (
+              <Chip
+                label={user.role}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: '0.7rem',
+                  fontWeight: 500,
+                }}
+              />
+            )}
+            {user.division && (
+              <Chip
+                label={user.division}
+                size="small"
+                color="primary"
+                variant="outlined"
+                sx={{
+                  height: 20,
+                  fontSize: '0.7rem',
+                  fontWeight: 500,
+                }}
+              />
+            )}
+          </Stack>
         </Box>
       </Stack>
     </TimelineCard>

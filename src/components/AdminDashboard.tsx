@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
   Avatar,
   Box,
@@ -30,7 +30,6 @@ import {
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
 import DivisionWorkloadCard from './DivisionWorkloadCard'
-import type { Division } from '@/api'
 import { getDivisions, getUsers } from '@/api'
 
 interface DashboardStats {
@@ -63,22 +62,22 @@ interface QuickAction {
 
 export const AdminDashboard: React.FC = () => {
   const theme = useTheme()
-  const [refreshKey] = useState(0)
 
   // API Queries
-  const { data: divisions = [], isLoading: divisionsLoading } = useQuery<
-    Array<Division>
-  >({
-    queryKey: ['divisions', refreshKey],
-    queryFn: () => getDivisions(),
+  const { data: divisionsResponse, isLoading: divisionsLoading } = useQuery({
+    queryKey: ['divisions'],
+    queryFn: () => getDivisions({}),
     staleTime: 5 * 60 * 1000,
   })
 
-  const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ['users', refreshKey],
-    queryFn: getUsers,
+  const { data: usersResponse, isLoading: usersLoading } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => getUsers({}),
     staleTime: 5 * 60 * 1000,
   })
+
+  const divisions = divisionsResponse?.data ?? []
+  const users = usersResponse?.data ?? []
 
   // Mock data for dashboard stats
   const dashboardStats: Array<DashboardStats> = [

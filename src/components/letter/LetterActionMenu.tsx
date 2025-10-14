@@ -19,6 +19,7 @@ interface LetterActionMenuProps {
   letter: Letter
   onAddNote: () => void
   onAssignDivision: () => void
+  onAssignUser: () => void
 }
 
 export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
@@ -28,6 +29,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   letter,
   onAddNote,
   onAssignDivision,
+  onAssignUser,
 }) => {
   const { hasAnyAuthority } = useAuth()
 
@@ -88,7 +90,12 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         </MenuItem>
       )}
       {canAssignUser && (
-        <MenuItem onClick={onClose}>
+        <MenuItem
+          onClick={() => {
+            onAssignUser()
+            onClose()
+          }}
+        >
           <AssignmentIndIcon sx={{ mr: 2 }} />
           Assign To User
         </MenuItem>
