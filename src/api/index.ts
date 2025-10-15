@@ -28,11 +28,7 @@ export {
   updateDivision,
   deleteDivision,
 } from './divisions'
-export type {
-  Division,
-  CreateDivisionRequest,
-  UpdateDivisionRequest,
-} from './divisions'
+export type { Division } from './divisions'
 
 // Letter exports
 export {

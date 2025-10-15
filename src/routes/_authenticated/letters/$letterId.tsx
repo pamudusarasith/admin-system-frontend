@@ -9,7 +9,7 @@ import {
   AddNoteDialog,
   AssignDivisionDialog,
   AssignUserDialog,
-  ConfirmationModal,
+  ConfirmationDialog,
   ErrorMessage,
   LetterActionMenu,
   LetterDetailsGrid,
@@ -29,7 +29,7 @@ function LetterThreadView() {
   const theme = useTheme()
   const queryClient = useQueryClient()
   const { showSnackbar } = useSnackbar()
-  
+
   const [replyDialogOpen, setReplyDialogOpen] = useState(false)
   const [replyContent, setReplyContent] = useState('')
   const [addNoteDialogOpen, setAddNoteDialogOpen] = useState(false)
@@ -50,7 +50,8 @@ function LetterThreadView() {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['letter', Number(letterId)] })
       queryClient.invalidateQueries({ queryKey: ['letters'] })
-      const message = response.message?.trim() || 'Letter accepted successfully.'
+      const message =
+        response.message?.trim() || 'Letter accepted successfully.'
       setAcceptLetterDialogOpen(false)
       showSnackbar({ message, severity: 'success' })
     },
@@ -193,7 +194,7 @@ function LetterThreadView() {
           onClose={() => setAssignUserDialogOpen(false)}
         />
 
-        <ConfirmationModal
+        <ConfirmationDialog
           open={acceptLetterDialogOpen}
           onClose={() => setAcceptLetterDialogOpen(false)}
           onConfirm={() => acceptLetterMutation.mutate()}

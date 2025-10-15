@@ -18,7 +18,7 @@ export { default as DivisionWorkloadCard } from './DivisionWorkloadCard'
 // ============================================
 export { AddButton } from './AddButton'
 export { AddCabinetPaperDialog } from './AddCabinetPaperDialog'
-export { AddDivisionDialog } from './AddDivisionDialog'
+export { DivisionDialog } from './DivisionDialog'
 export { AddRoleDialog } from './AddRoleDialog'
 export { DeleteConfirmationBox } from './DeleteConfirmationBox'
 
@@ -47,8 +47,8 @@ export { LetterSearchBar } from './letter/LetterSearchBar'
 // ============================================
 // Common/Utility Components (from ./common)
 // ============================================
-export { ConfirmationModal } from './common/ConfirmationModal'
-export type { ConfirmationVariant } from './common/ConfirmationModal'
+export { ConfirmationDialog } from './common/ConfirmationDialog'
+export type { ConfirmationVariant } from './common/ConfirmationDialog'
 export { ErrorMessage } from './common/ErrorMessage'
 export { FileUploadField } from './common/FileUploadField'
 export { LoadingSpinner, AuthLoadingSpinner } from './common/LoadingSpinner'

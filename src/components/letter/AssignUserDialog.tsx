@@ -144,8 +144,7 @@ export const AssignUserDialog: React.FC<AssignUserDialogProps> = ({
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['letter', letter.id] })
       queryClient.invalidateQueries({ queryKey: ['letters'] })
-      const message =
-        response.message?.trim() || 'User assigned successfully.'
+      const message = response.message?.trim() || 'User assigned successfully.'
       showSnackbar({ message, severity: 'success' })
       handleClose()
     },
@@ -367,10 +366,7 @@ export const AssignUserDialog: React.FC<AssignUserDialogProps> = ({
                           sx={{ mt: 0.5 }}
                         >
                           {option.email && (
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                            >
+                            <Typography variant="body2" color="text.secondary">
                               {option.email}
                             </Typography>
                           )}
@@ -469,10 +465,7 @@ export const AssignUserDialog: React.FC<AssignUserDialogProps> = ({
                             {selectedUser.fullName || selectedUser.username}
                           </Typography>
                           {selectedUser.email && (
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                            >
+                            <Typography variant="body2" color="text.secondary">
                               {selectedUser.email}
                             </Typography>
                           )}
@@ -502,7 +495,9 @@ export const AssignUserDialog: React.FC<AssignUserDialogProps> = ({
                               selectedUser.isActive ? 'Active' : 'Inactive'
                             }
                             size="small"
-                            color={selectedUser.isActive ? 'success' : 'default'}
+                            color={
+                              selectedUser.isActive ? 'success' : 'default'
+                            }
                             variant="outlined"
                           />
                         )}

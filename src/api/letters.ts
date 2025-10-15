@@ -177,7 +177,7 @@ export async function addNote(
 
 export async function assignDivision(
   letterId: number,
-  divisionId: string,
+  divisionId: number,
 ): Promise<ApiResponse<any>> {
   try {
     const response = await client.put(`/letters/${letterId}/division`, {

@@ -23,3 +23,7 @@ export type { RoleFormData } from './role'
 // User schemas
 export { createUserSchema, updateUserProfileSchema } from './users'
 export type { CreateUserPayload, UpdateUserProfilePayload } from './users'
+
+// Division schemas
+export { divisionSchema } from './division'
+export type { DivisionFormData } from './division'

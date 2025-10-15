@@ -135,7 +135,7 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
   )
 
   const assignDivisionMutation = useMutation({
-    mutationFn: (divisionId: string) => assignDivision(letterId, divisionId),
+    mutationFn: (divisionId: number) => assignDivision(letterId, divisionId),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['letter', letterId] })
       queryClient.invalidateQueries({ queryKey: ['letters'] })

@@ -28,7 +28,7 @@ export type ConfirmationVariant =
   | 'error'
   | 'help'
 
-interface ConfirmationModalProps {
+interface ConfirmationDialogProps {
   readonly open: boolean
   readonly onClose: () => void
   readonly onConfirm: () => void | Promise<void>
@@ -76,7 +76,7 @@ const variantConfig = {
   },
 }
 
-export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   open,
   onClose,
   onConfirm,
