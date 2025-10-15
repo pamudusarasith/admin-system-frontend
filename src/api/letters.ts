@@ -27,8 +27,8 @@ export interface Attachment {
 
 export interface ChangeStatusEventDetails {
   newStatus: string
-  assignedDivision?: Division
-  assignedUser?: User
+  division?: Division
+  user?: User
 }
 
 export interface AddNoteEventDetails {
@@ -202,6 +202,24 @@ export async function assignUser(
     return response.data
   } catch (error) {
     console.error(`Failed to assign user to letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
+
+export async function acceptLetter(
+  letterId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.patch(
+      `/letters/${letterId}/user`,
+      undefined,
+      {
+        params: { action: 'accept' },
+      },
+    )
+    return response.data
+  } catch (error) {
+    console.error(`Failed to accept letter with ID ${letterId}:`, error)
     throw error
   }
 }

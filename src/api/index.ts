@@ -42,6 +42,7 @@ export {
   addNote,
   assignDivision,
   assignUser,
+  acceptLetter,
 } from './letters'
 export type {
   SenderDetails,

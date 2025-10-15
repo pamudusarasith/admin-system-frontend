@@ -1,12 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Container, useTheme } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
-import { getLetterById } from '@/api'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
+import type { ApiResponse } from '@/api'
+import { acceptLetter, getLetterById } from '@/api'
 import {
   AddNoteDialog,
   AssignDivisionDialog,
   AssignUserDialog,
+  ConfirmationModal,
   ErrorMessage,
   LetterActionMenu,
   LetterDetailsGrid,
@@ -15,6 +18,7 @@ import {
   LetterTimeline,
   LoadingSpinner,
   SidebarLayout,
+  useSnackbar,
 } from '@/components'
 
 export const Route = createFileRoute('/_authenticated/letters/$letterId')({
@@ -23,18 +27,39 @@ export const Route = createFileRoute('/_authenticated/letters/$letterId')({
 
 function LetterThreadView() {
   const theme = useTheme()
+  const queryClient = useQueryClient()
+  const { showSnackbar } = useSnackbar()
+  
   const [replyDialogOpen, setReplyDialogOpen] = useState(false)
   const [replyContent, setReplyContent] = useState('')
   const [addNoteDialogOpen, setAddNoteDialogOpen] = useState(false)
   const [assignDivisionDialogOpen, setAssignDivisionDialogOpen] =
     useState(false)
   const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false)
+  const [acceptLetterDialogOpen, setAcceptLetterDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const { letterId } = Route.useParams()
   const result = useQuery({
     queryKey: ['letter', Number(letterId)],
     queryFn: () => getLetterById(Number(letterId)),
+  })
+
+  const acceptLetterMutation = useMutation({
+    mutationFn: () => acceptLetter(Number(letterId)),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['letter', Number(letterId)] })
+      queryClient.invalidateQueries({ queryKey: ['letters'] })
+      const message = response.message?.trim() || 'Letter accepted successfully.'
+      setAcceptLetterDialogOpen(false)
+      showSnackbar({ message, severity: 'success' })
+    },
+    onError: (e: AxiosError<ApiResponse<any>>) => {
+      const message =
+        e.response?.data.message?.trim() ||
+        'Failed to accept letter. Please try again.'
+      showSnackbar({ message, severity: 'error' })
+    },
   })
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -139,6 +164,7 @@ function LetterThreadView() {
           onAddNote={() => setAddNoteDialogOpen(true)}
           onAssignDivision={() => setAssignDivisionDialogOpen(true)}
           onAssignUser={() => setAssignUserDialogOpen(true)}
+          onAcceptLetter={() => setAcceptLetterDialogOpen(true)}
         />
 
         <LetterDialogs
@@ -165,6 +191,18 @@ function LetterThreadView() {
           letter={letter}
           open={assignUserDialogOpen}
           onClose={() => setAssignUserDialogOpen(false)}
+        />
+
+        <ConfirmationModal
+          open={acceptLetterDialogOpen}
+          onClose={() => setAcceptLetterDialogOpen(false)}
+          onConfirm={() => acceptLetterMutation.mutate()}
+          title="Accept Letter"
+          message={`Are you sure you want to accept this letter "${letter.subject}"? You will be responsible for handling this letter and its tasks.`}
+          confirmText="Accept Letter"
+          cancelText="Cancel"
+          variant="success"
+          loading={acceptLetterMutation.isPending}
         />
       </Container>
     </SidebarLayout>
