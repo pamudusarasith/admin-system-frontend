@@ -205,3 +205,21 @@ export async function assignUser(
     throw error
   }
 }
+
+export async function acceptLetter(
+  letterId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.patch(
+      `/letters/${letterId}/user`,
+      undefined,
+      {
+        params: { action: 'accept' },
+      },
+    )
+    return response.data
+  } catch (error) {
+    console.error(`Failed to accept letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
