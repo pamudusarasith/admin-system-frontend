@@ -33,7 +33,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   onAssignUser,
   onAcceptLetter,
 }) => {
-  const { user, hasAnyAuthority } = useAuth()
+  const { user, hasAuthority, hasAnyAuthority } = useAuth()
 
   const canEdit = hasAnyAuthority([
     P.letterAllUpdate,
@@ -42,15 +42,17 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
     P.letterOwnUpdate,
   ])
   const canAssignDivision =
-    !letter.assignedDivision && hasAnyAuthority([P.letterAssignDivision])
+    !letter.assignedDivision && hasAuthority(P.letterAssignDivision)
   const canAssignUser =
     letter.assignedDivision &&
+    letter.assignedDivision.id === user?.divisionId &&
     !letter.assignedUser &&
-    hasAnyAuthority([P.letterAssignUser])
+    hasAuthority(P.letterAssignUser)
   const canAcceptLetter =
     letter.assignedDivision &&
     letter.assignedUser &&
-    letter.assignedUser.id === user?.id
+    letter.assignedUser.id === user?.id &&
+    letter.status === 'PENDING_ACCEPTANCE'
   const canChangePriority = hasAnyAuthority([
     P.letterAllUpdatePriority,
     P.letterUnassignedUpdatePriority,
