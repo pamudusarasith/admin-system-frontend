@@ -9,7 +9,7 @@ import {
   AddNoteDialog,
   AssignDivisionDialog,
   AssignUserDialog,
-  ConfirmationModal,
+  ConfirmationDialog,
   ErrorMessage,
   LetterActionMenu,
   LetterDetailsGrid,
@@ -194,7 +194,7 @@ function LetterThreadView() {
           onClose={() => setAssignUserDialogOpen(false)}
         />
 
-        <ConfirmationModal
+        <ConfirmationDialog
           open={acceptLetterDialogOpen}
           onClose={() => setAcceptLetterDialogOpen(false)}
           onConfirm={() => acceptLetterMutation.mutate()}

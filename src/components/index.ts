@@ -47,8 +47,8 @@ export { LetterSearchBar } from './letter/LetterSearchBar'
 // ============================================
 // Common/Utility Components (from ./common)
 // ============================================
-export { ConfirmationModal } from './common/ConfirmationModal'
-export type { ConfirmationVariant } from './common/ConfirmationModal'
+export { ConfirmationDialog } from './common/ConfirmationDialog'
+export type { ConfirmationVariant } from './common/ConfirmationDialog'
 export { ErrorMessage } from './common/ErrorMessage'
 export { FileUploadField } from './common/FileUploadField'
 export { LoadingSpinner, AuthLoadingSpinner } from './common/LoadingSpinner'

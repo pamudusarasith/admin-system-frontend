@@ -23,7 +23,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Division } from '@/api'
 import {
   AddButton,
-  DeleteConfirmationBox,
+  ConfirmationDialog,
   DivisionDialog,
   PaginationControls,
   SearchBar,
@@ -410,12 +410,20 @@ function DivisionPage() {
         />
 
         {/* Delete Confirmation Dialog */}
-        <DeleteConfirmationBox
+        <ConfirmationDialog
           open={deleteDialogOpen}
           onClose={cancelDeleteDivision}
           onConfirm={confirmDeleteDivision}
           title="Delete Division"
-          itemName={divisionToDelete ? `${divisionToDelete.name}` : undefined}
+          message={
+            divisionToDelete
+              ? `Are you sure you want to delete "${divisionToDelete.name}"? This action cannot be undone.`
+              : 'Are you sure you want to delete this division?'
+          }
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="error"
+          danger
           loading={deleteDivisionMutation.isPending}
         />
       </Container>
