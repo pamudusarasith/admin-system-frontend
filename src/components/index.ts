@@ -18,7 +18,7 @@ export { default as DivisionWorkloadCard } from './DivisionWorkloadCard'
 // ============================================
 export { AddButton } from './AddButton'
 export { AddCabinetPaperDialog } from './AddCabinetPaperDialog'
-export { AddDivisionDialog } from './AddDivisionDialog'
+export { DivisionDialog } from './DivisionDialog'
 export { AddRoleDialog } from './AddRoleDialog'
 export { DeleteConfirmationBox } from './DeleteConfirmationBox'
 
