@@ -218,12 +218,12 @@ function ChangeStatusEvent({
     case 'NEW':
       return <NewStatusEvent />
     case 'ASSIGNED_TO_DIVISION':
-      return details.assignedDivision ? (
-        <AssignedDivisionStatusEvent division={details.assignedDivision} />
+      return details.division ? (
+        <AssignedDivisionStatusEvent division={details.division} />
       ) : null
     case 'PENDING_ACCEPTANCE':
-      return details.assignedUser ? (
-        <AssignedUserStatusEvent user={details.assignedUser} />
+      return details.user ? (
+        <AssignedUserStatusEvent user={details.user} />
       ) : null
     default:
       return (

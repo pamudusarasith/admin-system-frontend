@@ -27,8 +27,8 @@ export interface Attachment {
 
 export interface ChangeStatusEventDetails {
   newStatus: string
-  assignedDivision?: Division
-  assignedUser?: User
+  division?: Division
+  user?: User
 }
 
 export interface AddNoteEventDetails {
