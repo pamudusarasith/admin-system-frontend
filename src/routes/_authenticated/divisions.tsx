@@ -18,18 +18,21 @@ import {
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
-  KeyboardArrowLeft as KeyboardArrowLeftIcon,
-  KeyboardArrowRight as KeyboardArrowRightIcon,
 } from '@mui/icons-material'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateDivisionRequest, UpdateDivisionRequest } from '@/api'
+import type {
+  CreateDivisionRequest,
+  Division,
+  UpdateDivisionRequest,
+} from '@/api'
 import {
   AddButton,
   AddDivisionDialog,
   DeleteConfirmationBox,
+  PaginationControls,
   SearchBar,
   SidebarLayout,
 } from '@/components'
@@ -44,16 +47,12 @@ export const Route = createFileRoute('/_authenticated/divisions')({
   component: DivisionPage,
 })
 
-interface Division {
-  id: string
-  name: string
-  description: string
-}
-
 function DivisionPage() {
   const theme = useTheme()
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [query, setQuery] = useState('')
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const [editingDivision, setEditingDivision] = useState<Division | null>(null)
   const [isEditMode, setIsEditMode] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -62,19 +61,22 @@ function DivisionPage() {
   )
   const queryClient = useQueryClient()
 
-  // React Query to fetch divisions with search
+  // React Query to fetch divisions with search and pagination
   const {
-    data: divisions = [],
+    data: response,
     isLoading,
     isError,
     error,
     refetch,
   } = useQuery({
-    queryKey: ['divisions', searchTerm],
-    queryFn: () => getDivisions(searchTerm),
+    queryKey: ['divisions', query, page, pageSize],
+    queryFn: () => getDivisions({ query, page, pageSize }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   })
+
+  const divisions = response?.data ?? []
+  const pagination = response?.pagination
 
   // Mutation for creating divisions
   const createDivisionMutation = useMutation({
@@ -117,15 +119,26 @@ function DivisionPage() {
     },
   })
 
-  // No need to filter client-side, use server response directly
-  const filteredDivisions = divisions
-
   const handleRefresh = () => {
     refetch()
   }
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
+    setQuery(value)
+    setPage(0) // Reset to first page on search
+  }
+
+  const handlePageChange = (newPage?: number) => {
+    if (newPage !== undefined) {
+      setPage(newPage - 1) // Convert to 0-indexed
+    }
+  }
+
+  const handlePageSizeChange = (newPageSize?: number) => {
+    if (newPageSize !== undefined) {
+      setPageSize(newPageSize)
+      setPage(0) // Reset to first page when changing page size
+    }
   }
 
   const handleOpenAddDialog = () => {
@@ -155,7 +168,7 @@ function DivisionPage() {
     if (!divisionToDelete) return
 
     try {
-      await deleteDivisionMutation.mutateAsync(divisionToDelete.id)
+      await deleteDivisionMutation.mutateAsync(String(divisionToDelete.id))
       setDeleteDialogOpen(false)
       setDivisionToDelete(null)
     } catch (e) {
@@ -179,7 +192,7 @@ function DivisionPage() {
         }
 
         await updateDivisionMutation.mutateAsync({
-          id: editingDivision.id,
+          id: String(editingDivision.id),
           data: updateRequest,
         })
       } else {
@@ -197,6 +210,7 @@ function DivisionPage() {
       // The onError callback will handle error logging
     }
   }
+
   return (
     <SidebarLayout>
       <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -268,8 +282,8 @@ function DivisionPage() {
               <Box>
                 <SearchBar
                   placeholder="Search divisions by name or description..."
-                  value={searchTerm}
-                  onChange={setSearchTerm}
+                  value={query}
+                  onChange={setQuery}
                   onSearch={handleSearch}
                 />
               </Box>
@@ -418,7 +432,7 @@ function DivisionPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredDivisions.length === 0 ? (
+                  {divisions.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={3}
@@ -431,7 +445,7 @@ function DivisionPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredDivisions.map((division: Division) => (
+                    divisions.map((division: Division) => (
                       <TableRow
                         key={division.id}
                         sx={{
@@ -492,50 +506,13 @@ function DivisionPage() {
               </Table>
             </TableContainer>
 
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                p: 2,
-                flexWrap: 'wrap',
-                gap: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: { xs: 1, sm: 2 },
-                  flexWrap: 'wrap',
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
-                >
-                  Rows per page: 5
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    ml: { xs: 1, sm: 2 },
-                    mr: 1,
-                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  }}
-                >
-                  1-{filteredDivisions.length} of {filteredDivisions.length}
-                </Typography>
-                <IconButton size="small" disabled>
-                  <KeyboardArrowLeftIcon />
-                </IconButton>
-                <IconButton size="small" disabled>
-                  <KeyboardArrowRightIcon />
-                </IconButton>
-              </Box>
-            </Box>
+            {pagination && (
+              <PaginationControls
+                pagination={pagination}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            )}
           </Paper>
         )}
 
@@ -549,7 +526,7 @@ function DivisionPage() {
             editingDivision
               ? {
                   divisionName: editingDivision.name,
-                  description: editingDivision.description,
+                  description: editingDivision.description ?? '',
                 }
               : undefined
           }
