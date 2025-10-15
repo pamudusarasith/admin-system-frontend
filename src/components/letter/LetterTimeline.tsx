@@ -223,7 +223,11 @@ function ChangeStatusEvent({
       ) : null
     case 'PENDING_ACCEPTANCE':
       return details.user ? (
-        <AssignedUserStatusEvent user={details.user} />
+        <AssignedToOfficerStatusEvent user={details.user} />
+      ) : null
+    case 'ASSIGNED_TO_OFFICER':
+      return details.user ? (
+        <AcceptedByOfficerStatusEvent user={details.user} />
       ) : null
     default:
       return (
@@ -365,17 +369,36 @@ function AssignedDivisionStatusEvent({
   )
 }
 
-interface AssignedUserStatusEventProps {
+interface AssignedToOfficerStatusEventProps {
   user: User
 }
 
-function AssignedUserStatusEvent({
+function AssignedToOfficerStatusEvent({
   user,
-}: Readonly<AssignedUserStatusEventProps>) {
+}: Readonly<AssignedToOfficerStatusEventProps>) {
   return (
     <TimelineCard
       icon={<PersonIcon sx={{ fontSize: 16, color: 'secondary.main' }} />}
-      title="Assigned to user"
+      title="Assigned to officer"
+      borderColor={(t) => `${t.palette.secondary.main}40`}
+      headerColor={(t) => t.palette.secondary.main}
+    >
+      <UserDetails user={user} />
+    </TimelineCard>
+  )
+}
+
+interface AcceptedByOfficerStatusEventProps {
+  user: User
+}
+
+function AcceptedByOfficerStatusEvent({
+  user,
+}: Readonly<AcceptedByOfficerStatusEventProps>) {
+  return (
+    <TimelineCard
+      icon={<PersonIcon sx={{ fontSize: 16, color: 'secondary.main' }} />}
+      title="Accepted by officer"
       borderColor={(t) => `${t.palette.secondary.main}40`}
       headerColor={(t) => t.palette.secondary.main}
     >
