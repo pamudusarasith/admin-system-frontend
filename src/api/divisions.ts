@@ -2,7 +2,7 @@ import { client } from './client'
 import type { ApiResponse } from './client'
 
 export interface Division {
-  id: string
+  id: number
   name: string
   description?: string
 }
