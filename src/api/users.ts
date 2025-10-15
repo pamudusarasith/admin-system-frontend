@@ -1,8 +1,6 @@
 import { client } from './client'
-import type {
-  CreateUserPayload,
-  UpdateUserProfilePayload,
-} from '@/schemas/users'
+import type { ApiResponse } from './client'
+import type { CreateUserPayload, UpdateUserProfilePayload } from '@/schemas'
 
 // Define the User interface based on the API response
 export interface User {
@@ -17,10 +15,19 @@ export interface User {
   accountSetupRequired?: boolean
 }
 
-export async function getUsers(): Promise<Array<User>> {
+interface GetUsersParams {
+  query?: string
+  divisionId?: number
+  page?: number
+  pageSize?: number
+}
+
+export async function getUsers(
+  params: GetUsersParams,
+): Promise<ApiResponse<Array<User>>> {
   try {
-    const response = await client.get('/users')
-    return response.data.data
+    const response = await client.get('/users', { params })
+    return response.data
   } catch (error) {
     console.error('Failed to fetch users:', error)
     throw error

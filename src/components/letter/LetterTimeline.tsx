@@ -21,6 +21,7 @@ import {
   AttachFile as AttachFileIcon,
   FiberNew as FiberNewIcon,
   NoteAlt as NoteAltIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material'
 import mime from 'mime'
 import { alpha } from '@mui/material/styles'
@@ -217,8 +218,16 @@ function ChangeStatusEvent({
     case 'NEW':
       return <NewStatusEvent />
     case 'ASSIGNED_TO_DIVISION':
-      return details.assignedDivision ? (
-        <AssignedDivisionStatusEvent division={details.assignedDivision} />
+      return details.division ? (
+        <AssignedDivisionStatusEvent division={details.division} />
+      ) : null
+    case 'PENDING_ACCEPTANCE':
+      return details.user ? (
+        <AssignedToOfficerStatusEvent user={details.user} />
+      ) : null
+    case 'ASSIGNED_TO_OFFICER':
+      return details.user ? (
+        <AcceptedByOfficerStatusEvent user={details.user} />
       ) : null
     default:
       return (
@@ -356,6 +365,44 @@ function AssignedDivisionStatusEvent({
           )}
         </Box>
       </Stack>
+    </TimelineCard>
+  )
+}
+
+interface AssignedToOfficerStatusEventProps {
+  user: User
+}
+
+function AssignedToOfficerStatusEvent({
+  user,
+}: Readonly<AssignedToOfficerStatusEventProps>) {
+  return (
+    <TimelineCard
+      icon={<PersonIcon sx={{ fontSize: 16, color: 'secondary.main' }} />}
+      title="Assigned to officer"
+      borderColor={(t) => `${t.palette.secondary.main}40`}
+      headerColor={(t) => t.palette.secondary.main}
+    >
+      <UserDetails user={user} />
+    </TimelineCard>
+  )
+}
+
+interface AcceptedByOfficerStatusEventProps {
+  user: User
+}
+
+function AcceptedByOfficerStatusEvent({
+  user,
+}: Readonly<AcceptedByOfficerStatusEventProps>) {
+  return (
+    <TimelineCard
+      icon={<PersonIcon sx={{ fontSize: 16, color: 'secondary.main' }} />}
+      title="Accepted by officer"
+      borderColor={(t) => `${t.palette.secondary.main}40`}
+      headerColor={(t) => t.palette.secondary.main}
+    >
+      <UserDetails user={user} />
     </TimelineCard>
   )
 }
@@ -510,5 +557,74 @@ function TimelineCard({
       </Box>
       <Box sx={{ px: 2, py: 1.5 }}>{children}</Box>
     </Box>
+  )
+}
+
+interface UserDetailsProps {
+  user: User
+}
+
+function UserDetails({ user }: Readonly<UserDetailsProps>) {
+  const initials = user.fullName
+    ? user.fullName
+        .split(' ')
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+    : user.username.slice(0, 2).toUpperCase() || '??'
+
+  return (
+    <Stack direction="row" spacing={1.5} alignItems="center">
+      <Avatar
+        sx={{
+          width: 40,
+          height: 40,
+          fontSize: 16,
+          fontWeight: 600,
+          backgroundColor: (t) => t.palette.secondary.main,
+          color: 'white',
+        }}
+      >
+        {initials}
+      </Avatar>
+      <Box sx={{ flex: 1 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          {user.fullName || user.username}
+        </Typography>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
+          {user.email && (
+            <Typography variant="body2" color="text.secondary">
+              {user.email}
+            </Typography>
+          )}
+        </Stack>
+        <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
+          {user.role && (
+            <Chip
+              label={user.role}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: '0.7rem',
+                fontWeight: 500,
+              }}
+            />
+          )}
+          {user.division && (
+            <Chip
+              label={user.division}
+              size="small"
+              color="primary"
+              variant="outlined"
+              sx={{
+                height: 20,
+                fontSize: '0.7rem',
+                fontWeight: 500,
+              }}
+            />
+          )}
+        </Stack>
+      </Box>
+    </Stack>
   )
 }

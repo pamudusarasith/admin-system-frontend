@@ -27,7 +27,8 @@ export interface Attachment {
 
 export interface ChangeStatusEventDetails {
   newStatus: string
-  assignedDivision?: Division
+  division?: Division
+  user?: User
 }
 
 export interface AddNoteEventDetails {
@@ -176,7 +177,7 @@ export async function addNote(
 
 export async function assignDivision(
   letterId: number,
-  divisionId: string,
+  divisionId: number,
 ): Promise<ApiResponse<any>> {
   try {
     const response = await client.put(`/letters/${letterId}/division`, {
@@ -188,6 +189,37 @@ export async function assignDivision(
       `Failed to assign division to letter with ID ${letterId}:`,
       error,
     )
+    throw error
+  }
+}
+
+export async function assignUser(
+  letterId: number,
+  userId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.put(`/letters/${letterId}/user`, { userId })
+    return response.data
+  } catch (error) {
+    console.error(`Failed to assign user to letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
+
+export async function acceptLetter(
+  letterId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.patch(
+      `/letters/${letterId}/user`,
+      undefined,
+      {
+        params: { action: 'accept' },
+      },
+    )
+    return response.data
+  } catch (error) {
+    console.error(`Failed to accept letter with ID ${letterId}:`, error)
     throw error
   }
 }

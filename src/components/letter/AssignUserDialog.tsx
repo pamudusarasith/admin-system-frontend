@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -19,9 +20,9 @@ import {
   useTheme,
 } from '@mui/material'
 import {
-  Apartment as ApartmentIcon,
   Close as CloseIcon,
-  SwapHoriz as SwapHorizIcon,
+  PersonAdd as PersonAddIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material'
 import {
   useInfiniteQuery,
@@ -29,24 +30,24 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
-import type { ApiResponse, Division } from '@/api'
-import { assignDivision, getDivisions } from '@/api'
+import type { ApiResponse, Letter, User } from '@/api'
+import { assignUser, getUsers } from '@/api'
 import { useSnackbar } from '@/components'
 
-interface AssignDivisionDialogProps {
-  readonly letterId: number
+interface AssignUserDialogProps {
+  readonly letter: Letter
   readonly open: boolean
   readonly onClose: () => void
 }
 
 const PAGE_SIZE = 10
 
-interface DivisionOption extends Division {
+interface UserOption extends User {
   readonly highlight?: string
 }
 
-export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
-  letterId,
+export const AssignUserDialog: React.FC<AssignUserDialogProps> = ({
+  letter,
   open,
   onClose,
 }) => {
@@ -58,25 +59,28 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [autocompleteOpen, setAutocompleteOpen] = useState(false)
-  const [selectedDivision, setSelectedDivision] =
-    useState<DivisionOption | null>(null)
+  const [selectedUser, setSelectedUser] = useState<UserOption | null>(null)
 
   useEffect(() => {
     if (!open) {
       setSearchTerm('')
       setDebouncedSearch('')
       setAutocompleteOpen(false)
-      setSelectedDivision(null)
+      setSelectedUser(null)
     }
   }, [open])
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm.trim())
     }, 300)
 
-    return () => window.clearTimeout(timer)
+    return () => clearTimeout(timer)
   }, [searchTerm])
+
+  const divisionId = letter.assignedDivision?.id
+    ? Number(letter.assignedDivision.id)
+    : undefined
 
   const {
     data,
@@ -86,10 +90,11 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
     fetchNextPage,
     error,
   } = useInfiniteQuery({
-    queryKey: ['divisions-search', debouncedSearch],
+    queryKey: ['users-search', debouncedSearch, divisionId],
     queryFn: ({ pageParam = 0 }) =>
-      getDivisions({
+      getUsers({
         query: debouncedSearch || undefined,
+        divisionId,
         page: pageParam,
         pageSize: PAGE_SIZE,
       }),
@@ -100,16 +105,16 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
       return nextPage < pagination.totalPages ? nextPage : undefined
     },
     initialPageParam: 0,
-    enabled: open && autocompleteOpen,
+    enabled: open && autocompleteOpen && divisionId !== undefined,
     staleTime: 5 * 60 * 1000,
   })
 
-  const divisionOptions: Array<DivisionOption> = useMemo(() => {
+  const userOptions: Array<UserOption> = useMemo(() => {
     return (
       data?.pages
         .flatMap((page) => page.data ?? [])
-        .map((division) => ({
-          ...division,
+        .map((user) => ({
+          ...user,
           highlight: debouncedSearch,
         })) ?? []
     )
@@ -134,35 +139,34 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
     [fetchNextPage, hasNextPage, isFetchingNextPage],
   )
 
-  const assignDivisionMutation = useMutation({
-    mutationFn: (divisionId: number) => assignDivision(letterId, divisionId),
+  const assignUserMutation = useMutation({
+    mutationFn: (userId: number) => assignUser(letter.id, userId),
     onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['letter', letterId] })
+      queryClient.invalidateQueries({ queryKey: ['letter', letter.id] })
       queryClient.invalidateQueries({ queryKey: ['letters'] })
-      const message =
-        response.message?.trim() || 'Division assigned successfully.'
+      const message = response.message?.trim() || 'User assigned successfully.'
       showSnackbar({ message, severity: 'success' })
       handleClose()
     },
-    onError: (e: AxiosError<ApiResponse<any>>) => {
+    onError: (e: AxiosError<ApiResponse<unknown>>) => {
       const message =
         e.response?.data.message?.trim() ||
-        'Failed to assign division. Please try again.'
+        'Failed to assign user. Please try again.'
       showSnackbar({ message, severity: 'error' })
     },
   })
 
   const handleClose = useCallback(() => {
     setSearchTerm('')
-    setSelectedDivision(null)
+    setSelectedUser(null)
     setAutocompleteOpen(false)
     onClose()
   }, [onClose])
 
   const handleAssign = useCallback(() => {
-    if (!selectedDivision) return
-    assignDivisionMutation.mutate(selectedDivision.id)
-  }, [assignDivisionMutation, selectedDivision])
+    if (!selectedUser) return
+    assignUserMutation.mutate(selectedUser.id)
+  }, [assignUserMutation, selectedUser])
 
   const loading = isLoading || isFetchingNextPage
   const hasError = Boolean(error)
@@ -185,34 +189,50 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
     >
       <DialogTitle
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
           pb: 2,
           borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <SwapHorizIcon color="primary" />
-          <Typography
-            variant={isMobile ? 'h6' : 'h5'}
-            sx={{ fontWeight: 700, color: theme.palette.text.primary }}
-          >
-            Assign Division
-          </Typography>
-        </Stack>
-        <IconButton
-          onClick={handleClose}
+        <Box
           sx={{
-            color: theme.palette.text.secondary,
-            '&:hover': {
-              color: theme.palette.error.main,
-              backgroundColor: `${theme.palette.error.main}10`,
-            },
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
           }}
         >
-          <CloseIcon />
-        </IconButton>
+          <Box>
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <PersonAddIcon color="primary" />
+              <Typography
+                variant={isMobile ? 'h6' : 'h5'}
+                sx={{ fontWeight: 700, color: theme.palette.text.primary }}
+              >
+                Assign User
+              </Typography>
+            </Stack>
+            {letter.assignedDivision && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 0.5, ml: 4.5 }}
+              >
+                Division: <strong>{letter.assignedDivision.name}</strong>
+              </Typography>
+            )}
+          </Box>
+          <IconButton
+            onClick={handleClose}
+            sx={{
+              color: theme.palette.text.secondary,
+              '&:hover': {
+                color: theme.palette.error.main,
+                backgroundColor: `${theme.palette.error.main}10`,
+              },
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
       <DialogContent sx={{ p: 0 }}>
@@ -228,18 +248,18 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
                     mb: 1,
                   }}
                 >
-                  Search Division
+                  Search User
                 </Typography>
                 <Autocomplete
                   open={autocompleteOpen}
                   onOpen={() => setAutocompleteOpen(true)}
                   onClose={() => setAutocompleteOpen(false)}
-                  options={divisionOptions}
+                  options={userOptions}
                   loading={loading}
                   inputValue={searchTerm}
-                  value={selectedDivision}
+                  value={selectedUser}
                   onChange={(_event, value) => {
-                    setSelectedDivision(value)
+                    setSelectedUser(value)
                     if (value) {
                       setAutocompleteOpen(false)
                     }
@@ -248,15 +268,17 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
                     if (reason === 'reset') return
                     setSearchTerm(value)
                   }}
-                  getOptionLabel={(option) => option.name}
+                  getOptionLabel={(option) =>
+                    option.fullName || option.username
+                  }
                   isOptionEqualToValue={(option, value) =>
                     option.id === value.id
                   }
                   filterOptions={(options) => options}
                   noOptionsText={
                     debouncedSearch
-                      ? 'No divisions match your search.'
-                      : 'No divisions available.'
+                      ? 'No users match your search.'
+                      : 'No users available.'
                   }
                   slotProps={{
                     listbox: {
@@ -279,7 +301,7 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
                     return (
                       <TextField
                         {...restParams}
-                        placeholder="Type to search divisions..."
+                        placeholder="Type to search users..."
                         fullWidth
                         slotProps={{
                           input: {
@@ -328,22 +350,45 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
                           justifyContent: 'center',
                         }}
                       >
-                        <ApartmentIcon color="primary" fontSize="small" />
+                        <PersonIcon color="primary" fontSize="small" />
                       </Box>
                       <Box sx={{ flex: 1 }}>
                         <Typography
                           variant="subtitle2"
                           sx={{ fontWeight: 600 }}
                         >
-                          {option.name}
+                          {option.fullName || option.username}
                         </Typography>
-                        {option.description && (
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          alignItems="center"
+                          sx={{ mt: 0.5 }}
+                        >
+                          {option.email && (
+                            <Typography variant="body2" color="text.secondary">
+                              {option.email}
+                            </Typography>
+                          )}
+                          {option.role && (
+                            <Chip
+                              label={option.role}
+                              size="small"
+                              sx={{
+                                height: 20,
+                                fontSize: '0.7rem',
+                                fontWeight: 500,
+                              }}
+                            />
+                          )}
+                        </Stack>
+                        {option.division && (
                           <Typography
-                            variant="body2"
+                            variant="caption"
                             color="text.secondary"
-                            sx={{ mt: 0.5 }}
+                            sx={{ display: 'block', mt: 0.5 }}
                           >
-                            {option.description}
+                            Division: {option.division}
                           </Typography>
                         )}
                       </Box>
@@ -355,12 +400,19 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
                   color="text.secondary"
                   sx={{ display: 'block', mt: 1.5 }}
                 >
-                  Start typing or scroll to explore available divisions. Results
-                  update automatically.
+                  {letter.assignedDivision ? (
+                    <>
+                      Showing users from{' '}
+                      <strong>{letter.assignedDivision.name}</strong> division.
+                      Start typing to search or scroll to explore.
+                    </>
+                  ) : (
+                    'Start typing or scroll to explore available users. Results update automatically.'
+                  )}
                 </Typography>
                 {hasError && (
                   <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                    Unable to load divisions. Please try again.
+                    Unable to load users. Please try again.
                   </Typography>
                 )}
               </Box>
@@ -376,9 +428,9 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
                     mb: 2,
                   }}
                 >
-                  Selected Division
+                  Selected User
                 </Typography>
-                {selectedDivision ? (
+                {selectedUser ? (
                   <Card
                     variant="outlined"
                     sx={{
@@ -406,18 +458,54 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
                             justifyContent: 'center',
                           }}
                         >
-                          <ApartmentIcon color="primary" />
+                          <PersonIcon color="primary" />
                         </Box>
-                        <Box>
+                        <Box sx={{ flex: 1 }}>
                           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                            {selectedDivision.name}
+                            {selectedUser.fullName || selectedUser.username}
                           </Typography>
+                          {selectedUser.email && (
+                            <Typography variant="body2" color="text.secondary">
+                              {selectedUser.email}
+                            </Typography>
+                          )}
                         </Box>
                       </Stack>
 
-                      {selectedDivision.description && (
+                      <Stack direction="row" spacing={1} flexWrap="wrap">
+                        {selectedUser.role && (
+                          <Chip
+                            label={`Role: ${selectedUser.role}`}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        )}
+                        {selectedUser.division && (
+                          <Chip
+                            label={`Division: ${selectedUser.division}`}
+                            size="small"
+                            color="secondary"
+                            variant="outlined"
+                          />
+                        )}
+                        {selectedUser.isActive !== undefined && (
+                          <Chip
+                            label={
+                              selectedUser.isActive ? 'Active' : 'Inactive'
+                            }
+                            size="small"
+                            color={
+                              selectedUser.isActive ? 'success' : 'default'
+                            }
+                            variant="outlined"
+                          />
+                        )}
+                      </Stack>
+
+                      {selectedUser.phoneNumber && (
                         <Typography variant="body2" color="text.secondary">
-                          {selectedDivision.description}
+                          Phone: {selectedUser.phoneNumber}
                         </Typography>
                       )}
                     </CardContent>
@@ -433,11 +521,12 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
                     }}
                   >
                     <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                      No division selected yet.
+                      No user selected yet.
                     </Typography>
                     <Typography variant="body2" sx={{ mt: 0.5 }}>
-                      Use the search above to choose the most suitable division
-                      for this letter.
+                      {letter.assignedDivision
+                        ? `Use the search above to choose a user from the ${letter.assignedDivision.name} division.`
+                        : 'Use the search above to choose the most suitable user for this letter.'}
                     </Typography>
                   </Box>
                 )}
@@ -469,8 +558,8 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
         <Button
           onClick={handleAssign}
           variant="contained"
-          startIcon={<SwapHorizIcon />}
-          disabled={!selectedDivision || assignDivisionMutation.isPending}
+          startIcon={<PersonAddIcon />}
+          disabled={!selectedUser || assignUserMutation.isPending}
           sx={{
             borderRadius: 2,
             textTransform: 'none',
@@ -484,9 +573,7 @@ export const AssignDivisionDialog: React.FC<AssignDivisionDialogProps> = ({
             },
           }}
         >
-          {assignDivisionMutation.isPending
-            ? 'Assigning...'
-            : 'Assign Division'}
+          {assignUserMutation.isPending ? 'Assigning...' : 'Assign User'}
         </Button>
       </DialogActions>
     </Dialog>

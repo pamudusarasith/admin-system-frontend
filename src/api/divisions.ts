@@ -1,19 +1,10 @@
 import { client } from './client'
+import type { DivisionFormData } from '@/schemas'
 import type { ApiResponse } from './client'
 
 export interface Division {
-  id: string
+  id: number
   name: string
-  description?: string
-}
-
-export interface CreateDivisionRequest {
-  name: string
-  description?: string
-}
-
-export interface UpdateDivisionRequest {
-  name?: string
   description?: string
 }
 
@@ -48,10 +39,10 @@ export async function getDivisions(): Promise<ApiResponse<Array<Division>>> {
 }
 
 export async function createDivision(
-  divisionData: CreateDivisionRequest,
-): Promise<Division> {
+  data: DivisionFormData,
+): Promise<ApiResponse<any>> {
   try {
-    const response = await client.post('/divisions', divisionData)
+    const response = await client.post('/divisions', data)
     return response.data
   } catch (error) {
     console.error('Failed to create division:', error)
@@ -61,10 +52,10 @@ export async function createDivision(
 
 export async function updateDivision(
   id: string,
-  divisionData: UpdateDivisionRequest,
-): Promise<Division> {
+  data: DivisionFormData,
+): Promise<ApiResponse<any>> {
   try {
-    const response = await client.put(`/divisions/${id}`, divisionData)
+    const response = await client.put(`/divisions/${id}`, data)
     return response.data
   } catch (error) {
     console.error('Failed to update division:', error)
@@ -72,9 +63,10 @@ export async function updateDivision(
   }
 }
 
-export async function deleteDivision(id: string): Promise<void> {
+export async function deleteDivision(id: string): Promise<ApiResponse<any>> {
   try {
-    await client.delete(`/divisions/${id}`)
+    const response = await client.delete(`/divisions/${id}`)
+    return response.data
   } catch (error) {
     console.error('Failed to delete division:', error)
     throw error

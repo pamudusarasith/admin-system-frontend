@@ -19,6 +19,8 @@ interface LetterActionMenuProps {
   letter: Letter
   onAddNote: () => void
   onAssignDivision: () => void
+  onAssignUser: () => void
+  onAcceptLetter: () => void
 }
 
 export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
@@ -28,8 +30,10 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   letter,
   onAddNote,
   onAssignDivision,
+  onAssignUser,
+  onAcceptLetter,
 }) => {
-  const { hasAnyAuthority } = useAuth()
+  const { user, hasAuthority, hasAnyAuthority } = useAuth()
 
   const canEdit = hasAnyAuthority([
     P.letterAllUpdate,
@@ -38,11 +42,17 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
     P.letterOwnUpdate,
   ])
   const canAssignDivision =
-    !letter.assignedDivision && hasAnyAuthority([P.letterAssignDivision])
+    !letter.assignedDivision && hasAuthority(P.letterAssignDivision)
   const canAssignUser =
     letter.assignedDivision &&
+    letter.assignedDivision.id === user?.divisionId &&
     !letter.assignedUser &&
-    hasAnyAuthority([P.letterAssignUser])
+    hasAuthority(P.letterAssignUser)
+  const canAcceptLetter =
+    letter.assignedDivision &&
+    letter.assignedUser &&
+    letter.assignedUser.id === user?.id &&
+    letter.status === 'PENDING_ACCEPTANCE'
   const canChangePriority = hasAnyAuthority([
     P.letterAllUpdatePriority,
     P.letterUnassignedUpdatePriority,
@@ -88,9 +98,25 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         </MenuItem>
       )}
       {canAssignUser && (
-        <MenuItem onClick={onClose}>
+        <MenuItem
+          onClick={() => {
+            onAssignUser()
+            onClose()
+          }}
+        >
           <AssignmentIndIcon sx={{ mr: 2 }} />
           Assign To User
+        </MenuItem>
+      )}
+      {canAcceptLetter && (
+        <MenuItem
+          onClick={() => {
+            onAcceptLetter()
+            onClose()
+          }}
+        >
+          <CheckIcon sx={{ mr: 2 }} />
+          Accept Letter
         </MenuItem>
       )}
       {canChangePriority && (

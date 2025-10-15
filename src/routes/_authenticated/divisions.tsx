@@ -15,135 +15,99 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import {
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  KeyboardArrowLeft as KeyboardArrowLeftIcon,
-  KeyboardArrowRight as KeyboardArrowRightIcon,
-} from '@mui/icons-material'
+import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateDivisionRequest, UpdateDivisionRequest } from '@/api'
+import type { Division } from '@/api'
 import {
   AddButton,
-  AddDivisionDialog,
-  DeleteConfirmationBox,
+  ConfirmationDialog,
+  DivisionDialog,
+  PaginationControls,
   SearchBar,
   SidebarLayout,
 } from '@/components'
-import {
-  createDivision,
-  deleteDivision,
-  getDivisions,
-  updateDivision,
-} from '@/api'
+import { deleteDivision, getDivisions } from '@/api'
 
 export const Route = createFileRoute('/_authenticated/divisions')({
   component: DivisionPage,
 })
 
-interface Division {
-  id: string
-  name: string
-  description: string
-}
-
 function DivisionPage() {
   const theme = useTheme()
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [isDivisionDialogOpen, setIsDivisionDialogOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const [editingDivision, setEditingDivision] = useState<Division | null>(null)
-  const [isEditMode, setIsEditMode] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [divisionToDelete, setDivisionToDelete] = useState<Division | null>(
     null,
   )
   const queryClient = useQueryClient()
 
-  // React Query to fetch divisions with search
+  // React Query to fetch divisions with search and pagination
   const {
-    data: divisions = [],
+    data: response,
     isLoading,
     isError,
     error,
     refetch,
   } = useQuery({
-    queryKey: ['divisions', searchTerm],
-    queryFn: () => getDivisions(searchTerm),
+    queryKey: ['divisions', query, page, pageSize],
+    queryFn: () => getDivisions({ query, page, pageSize }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   })
 
-  // Mutation for creating divisions
-  const createDivisionMutation = useMutation({
-    mutationFn: createDivision,
-    onSuccess: () => {
-      // Invalidate and refetch divisions data
-      queryClient.invalidateQueries({ queryKey: ['divisions'] })
-      setIsAddDialogOpen(false)
-    },
-    onError: (e) => {
-      console.error('Failed to create division:', e)
-    },
-  })
-
-  // Mutation for updating divisions
-  const updateDivisionMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateDivisionRequest }) =>
-      updateDivision(id, data),
-    onSuccess: () => {
-      // Invalidate and refetch divisions data
-      queryClient.invalidateQueries({ queryKey: ['divisions'] })
-      setIsAddDialogOpen(false)
-      setIsEditMode(false)
-      setEditingDivision(null)
-    },
-    onError: (e) => {
-      console.error('Failed to update division:', e)
-    },
-  })
+  const divisions = response?.data ?? []
+  const pagination = response?.pagination
 
   // Mutation for deleting divisions
   const deleteDivisionMutation = useMutation({
     mutationFn: deleteDivision,
     onSuccess: () => {
-      // Invalidate and refetch divisions data
       queryClient.invalidateQueries({ queryKey: ['divisions'] })
+      setDeleteDialogOpen(false)
+      setDivisionToDelete(null)
     },
     onError: (e) => {
       console.error('Failed to delete division:', e)
     },
   })
 
-  // No need to filter client-side, use server response directly
-  const filteredDivisions = divisions
-
   const handleRefresh = () => {
     refetch()
   }
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
+    setQuery(value)
+    setPage(0) // Reset to first page on search
   }
 
-  const handleOpenAddDialog = () => {
-    setIsEditMode(false)
+  const handlePageChange = (newPage?: number) => {
+    if (newPage !== undefined) {
+      setPage(newPage - 1) // Convert to 0-indexed
+    }
+  }
+
+  const handlePageSizeChange = (newPageSize?: number) => {
+    if (newPageSize !== undefined) {
+      setPageSize(newPageSize)
+      setPage(0) // Reset to first page when changing page size
+    }
+  }
+
+  const handleOpenDivisionDialog = (division?: Division) => {
+    setEditingDivision(division || null)
+    setIsDivisionDialogOpen(true)
+  }
+
+  const handleCloseDivisionDialog = () => {
+    setIsDivisionDialogOpen(false)
     setEditingDivision(null)
-    setIsAddDialogOpen(true)
-  }
-
-  const handleCloseAddDialog = () => {
-    setIsAddDialogOpen(false)
-    setIsEditMode(false)
-    setEditingDivision(null)
-  }
-
-  const handleEditDivision = (division: Division) => {
-    setEditingDivision(division)
-    setIsEditMode(true)
-    setIsAddDialogOpen(true)
   }
 
   const handleDeleteDivision = (division: Division) => {
@@ -155,12 +119,9 @@ function DivisionPage() {
     if (!divisionToDelete) return
 
     try {
-      await deleteDivisionMutation.mutateAsync(divisionToDelete.id)
-      setDeleteDialogOpen(false)
-      setDivisionToDelete(null)
+      await deleteDivisionMutation.mutateAsync(String(divisionToDelete.id))
     } catch (e) {
       console.error('Error deleting division:', e)
-      // Keep dialog open on error to show error message
     }
   }
 
@@ -169,34 +130,6 @@ function DivisionPage() {
     setDivisionToDelete(null)
   }
 
-  const handleSubmitDivision = async (divisionData: any) => {
-    try {
-      if (isEditMode && editingDivision) {
-        // Update existing division
-        const updateRequest: UpdateDivisionRequest = {
-          name: divisionData.divisionName || divisionData.name,
-          description: divisionData.description,
-        }
-
-        await updateDivisionMutation.mutateAsync({
-          id: editingDivision.id,
-          data: updateRequest,
-        })
-      } else {
-        // Create new division
-        const createRequest: CreateDivisionRequest = {
-          name: divisionData.divisionName || divisionData.name,
-          description: divisionData.description,
-        }
-
-        await createDivisionMutation.mutateAsync(createRequest)
-      }
-      // The onSuccess callback will handle closing the dialog and refetching data
-    } catch (e) {
-      console.error('Error saving division:', e)
-      // The onError callback will handle error logging
-    }
-  }
   return (
     <SidebarLayout>
       <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -237,11 +170,7 @@ function DivisionPage() {
             <AddButton
               label="Add new Division"
               tooltip="Add a new division"
-              onClick={handleOpenAddDialog}
-              disabled={
-                createDivisionMutation.isPending ||
-                updateDivisionMutation.isPending
-              }
+              onClick={() => handleOpenDivisionDialog()}
             />
           </Box>
         </Box>
@@ -268,8 +197,8 @@ function DivisionPage() {
               <Box>
                 <SearchBar
                   placeholder="Search divisions by name or description..."
-                  value={searchTerm}
-                  onChange={setSearchTerm}
+                  value={query}
+                  onChange={setQuery}
                   onSearch={handleSearch}
                 />
               </Box>
@@ -290,34 +219,6 @@ function DivisionPage() {
           >
             Failed to load divisions.{' '}
             {error instanceof Error ? error.message : 'Please try again.'}
-          </Alert>
-        )}
-
-        {/* Create Division Error Alert */}
-        {createDivisionMutation.isError && (
-          <Alert
-            severity="error"
-            sx={{ maxWidth: '1300px', mx: 'auto', mb: 2 }}
-            onClose={() => createDivisionMutation.reset()}
-          >
-            Failed to create division.{' '}
-            {createDivisionMutation.error instanceof Error
-              ? createDivisionMutation.error.message
-              : 'Please try again.'}
-          </Alert>
-        )}
-
-        {/* Update Division Error Alert */}
-        {updateDivisionMutation.isError && (
-          <Alert
-            severity="error"
-            sx={{ maxWidth: '1300px', mx: 'auto', mb: 2 }}
-            onClose={() => updateDivisionMutation.reset()}
-          >
-            Failed to update division.{' '}
-            {updateDivisionMutation.error instanceof Error
-              ? updateDivisionMutation.error.message
-              : 'Please try again.'}
           </Alert>
         )}
 
@@ -418,7 +319,7 @@ function DivisionPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredDivisions.length === 0 ? (
+                  {divisions.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={3}
@@ -431,7 +332,7 @@ function DivisionPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredDivisions.map((division: Division) => (
+                    divisions.map((division: Division) => (
                       <TableRow
                         key={division.id}
                         sx={{
@@ -471,8 +372,7 @@ function DivisionPage() {
                         <TableCell align="right">
                           <IconButton
                             size="small"
-                            onClick={() => handleEditDivision(division)}
-                            disabled={updateDivisionMutation.isPending}
+                            onClick={() => handleOpenDivisionDialog(division)}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
@@ -492,76 +392,38 @@ function DivisionPage() {
               </Table>
             </TableContainer>
 
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                p: 2,
-                flexWrap: 'wrap',
-                gap: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: { xs: 1, sm: 2 },
-                  flexWrap: 'wrap',
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
-                >
-                  Rows per page: 5
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    ml: { xs: 1, sm: 2 },
-                    mr: 1,
-                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  }}
-                >
-                  1-{filteredDivisions.length} of {filteredDivisions.length}
-                </Typography>
-                <IconButton size="small" disabled>
-                  <KeyboardArrowLeftIcon />
-                </IconButton>
-                <IconButton size="small" disabled>
-                  <KeyboardArrowRightIcon />
-                </IconButton>
-              </Box>
-            </Box>
+            {pagination && (
+              <PaginationControls
+                pagination={pagination}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            )}
           </Paper>
         )}
 
-        {/* Add/Edit Division Dialog */}
-        <AddDivisionDialog
-          open={isAddDialogOpen}
-          onClose={handleCloseAddDialog}
-          onSubmit={handleSubmitDivision}
-          editMode={isEditMode}
-          initialData={
-            editingDivision
-              ? {
-                  divisionName: editingDivision.name,
-                  description: editingDivision.description,
-                }
-              : undefined
-          }
+        {/* Division Dialog */}
+        <DivisionDialog
+          open={isDivisionDialogOpen}
+          onClose={handleCloseDivisionDialog}
+          division={editingDivision}
         />
 
         {/* Delete Confirmation Dialog */}
-        <DeleteConfirmationBox
+        <ConfirmationDialog
           open={deleteDialogOpen}
           onClose={cancelDeleteDivision}
           onConfirm={confirmDeleteDivision}
           title="Delete Division"
-          itemName={divisionToDelete ? `${divisionToDelete.name}` : undefined}
+          message={
+            divisionToDelete
+              ? `Are you sure you want to delete "${divisionToDelete.name}"? This action cannot be undone.`
+              : 'Are you sure you want to delete this division?'
+          }
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="error"
+          danger
           loading={deleteDivisionMutation.isPending}
         />
       </Container>
