@@ -20,6 +20,7 @@ interface LetterActionMenuProps {
   onAddNote: () => void
   onAssignDivision: () => void
   onAssignUser: () => void
+  onAcceptLetter: () => void
 }
 
 export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
@@ -30,8 +31,9 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   onAddNote,
   onAssignDivision,
   onAssignUser,
+  onAcceptLetter,
 }) => {
-  const { hasAnyAuthority } = useAuth()
+  const { user, hasAnyAuthority } = useAuth()
 
   const canEdit = hasAnyAuthority([
     P.letterAllUpdate,
@@ -45,6 +47,10 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
     letter.assignedDivision &&
     !letter.assignedUser &&
     hasAnyAuthority([P.letterAssignUser])
+  const canAcceptLetter =
+    letter.assignedDivision &&
+    letter.assignedUser &&
+    letter.assignedUser.id === user?.id
   const canChangePriority = hasAnyAuthority([
     P.letterAllUpdatePriority,
     P.letterUnassignedUpdatePriority,
@@ -98,6 +104,17 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         >
           <AssignmentIndIcon sx={{ mr: 2 }} />
           Assign To User
+        </MenuItem>
+      )}
+      {canAcceptLetter && (
+        <MenuItem
+          onClick={() => {
+            onAcceptLetter()
+            onClose()
+          }}
+        >
+          <CheckIcon sx={{ mr: 2 }} />
+          Accept Letter
         </MenuItem>
       )}
       {canChangePriority && (
