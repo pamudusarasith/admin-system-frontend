@@ -29,6 +29,7 @@ export interface ChangeStatusEventDetails {
   newStatus: string
   division?: Division
   user?: User
+  reason?: string
 }
 
 export interface AddNoteEventDetails {
@@ -202,6 +203,24 @@ export async function assignUser(
     return response.data
   } catch (error) {
     console.error(`Failed to assign user to letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
+
+export async function returnFromDivision(
+  letterId: number,
+  reason: string,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.delete(`/letters/${letterId}/division`, {
+      data: { reason },
+    })
+    return response.data
+  } catch (error) {
+    console.error(
+      `Failed to return letter with ID ${letterId} from division:`,
+      error,
+    )
     throw error
   }
 }
