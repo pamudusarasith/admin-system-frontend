@@ -238,7 +238,7 @@ function LetterThreadView() {
             setReturnReason('')
           }}
           onConfirm={() => {
-            returnFromDivisionMutation.mutate(returnReason.trim() || '')
+            returnFromDivisionMutation.mutate(returnReason.trim())
           }}
           title="Return from Division"
           message={`You are about to return "${letter.subject}" from your division. You may optionally provide a reason for returning this letter:`}

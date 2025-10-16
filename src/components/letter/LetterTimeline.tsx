@@ -417,7 +417,6 @@ interface ReturnedFromDivisionStatusEventProps {
 function ReturnedFromDivisionStatusEvent({
   details,
 }: Readonly<ReturnedFromDivisionStatusEventProps>) {
-
   return (
     <TimelineCard
       icon={<ReturnIcon sx={{ fontSize: 16, color: 'warning.main' }} />}
