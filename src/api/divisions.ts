@@ -21,7 +21,7 @@ export async function getDivisions(
     const response = await client.get('/divisions', {
       params: params,
     })
-    return response.data.data
+    return response.data
   } catch (error) {
     console.error('Failed to fetch divisions:', error)
     throw error
