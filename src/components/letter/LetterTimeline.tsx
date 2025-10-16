@@ -227,9 +227,7 @@ function ChangeStatusEvent({
         <AssignedToOfficerStatusEvent user={details.user} />
       ) : null
     case 'ASSIGNED_TO_OFFICER':
-      return details.user ? (
-        <AcceptedByOfficerStatusEvent user={details.user} />
-      ) : null
+      return <AcceptedByOfficerStatusEvent />
     case 'RETURNED_FROM_DIVISION':
       return <ReturnedFromDivisionStatusEvent details={details} />
     default:
@@ -391,21 +389,23 @@ function AssignedToOfficerStatusEvent({
   )
 }
 
-interface AcceptedByOfficerStatusEventProps {
-  user: User
-}
-
-function AcceptedByOfficerStatusEvent({
-  user,
-}: Readonly<AcceptedByOfficerStatusEventProps>) {
+function AcceptedByOfficerStatusEvent() {
   return (
     <TimelineCard
-      icon={<PersonIcon sx={{ fontSize: 16, color: 'secondary.main' }} />}
-      title="Accepted by officer"
-      borderColor={(t) => `${t.palette.secondary.main}40`}
-      headerColor={(t) => t.palette.secondary.main}
+      icon={<PersonIcon sx={{ fontSize: 16, color: 'success.main' }} />}
+      title="Letter accepted"
+      borderColor={(t) => `${t.palette.success.main}40`}
+      headerColor={(t) => t.palette.success.main}
     >
-      <UserDetails user={user} />
+      <Typography
+        variant="body2"
+        sx={{
+          lineHeight: 1.6,
+          fontWeight: 500,
+        }}
+      >
+        Officer accepted responsibility for handling this letter
+      </Typography>
     </TimelineCard>
   )
 }
