@@ -16,10 +16,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { Edit } from '@mui/icons-material'
 import type { UpdateUserProfilePayload } from '@/schemas'
-import { EditProfileForm, SidebarLayout } from '@/components'
+import { EditProfileForm, SidebarLayout, useSnackbar  } from '@/components'
 
 import { getUserProfile, updateProfile } from '@/api'
-import { useSnackbar } from '@/components'
 
 export const Route = createFileRoute('/_authenticated/profile')({
   component: ProfilePage,
@@ -48,7 +47,10 @@ function ProfilePage() {
     mutationFn: (data: UpdateUserProfilePayload) => updateProfile(data),
     onSuccess: (data: any) => {
       // Invalidate and refetch user profile data
-      showSnackbar({ message: data?.message || 'Profile updated successfully.', severity: 'success' })
+      showSnackbar({
+        message: data?.message || 'Profile updated successfully.',
+        severity: 'success',
+      })
       queryClient.invalidateQueries({ queryKey: ['userProfile'] })
       setEditFormOpen(false)
     },
@@ -124,10 +126,10 @@ function ProfilePage() {
     )
   }
 
-console.log('User Profile Name:', user)
-console.log('User Profile Name:', user.fullName)
-console.log('User Profile Phone:', user.phoneNumber)
-console.log('User Profile Status:', user.isActive)
+  console.log('User Profile Name:', user)
+  console.log('User Profile Name:', user.fullName)
+  console.log('User Profile Phone:', user.phoneNumber)
+  console.log('User Profile Status:', user.isActive)
 
   return (
     <SidebarLayout>

@@ -13,23 +13,23 @@ export interface Permission {
 export interface PermissionSubCategory {
   id: number
   name: string
-  permissions: Permission[]
+  permissions: Array<Permission>
 }
 
 // Top-level Category object
 export interface PermissionCategory {
   id: number
   name: string
-  subCategories: PermissionSubCategory[]
+  subCategories: Array<PermissionSubCategory>
 }
 
 // API response shape
 export interface GetPermissionsResponse {
-  data: PermissionCategory[]
+  data: Array<PermissionCategory>
 }
 
 // Fetch permissions from the backend
-export async function getPermissions(): Promise<PermissionCategory[]> {
+export async function getPermissions(): Promise<Array<PermissionCategory>> {
   const response = await client.get<GetPermissionsResponse>('/permissions')
   return response.data.data
 }

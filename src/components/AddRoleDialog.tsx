@@ -25,12 +25,12 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import type { RoleFormData } from '@/schemas'
 import { roleFormDataSchema } from '@/schemas'
 import { createRole, updateRole } from '@/api'
-import { getPermissions, type PermissionCategory } from '@/api/permissions'
+import {  getPermissions } from '@/api/permissions'
 import { useSnackbar } from '@/components'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
 interface AddRoleDialogProps {
   open: boolean
@@ -39,7 +39,6 @@ interface AddRoleDialogProps {
   initialData?: { id: string } & RoleFormData
   onSuccess?: () => void
 }
-
 
 export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
   open,
@@ -67,12 +66,18 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
   const createRoleMutation = useMutation({
     mutationFn: createRole,
     onSuccess: (data: any) => {
-      showSnackbar({ message: data?.message || 'Role created Successfully.', severity: 'success' })
+      showSnackbar({
+        message: data?.message || 'Role created Successfully.',
+        severity: 'success',
+      })
       onSuccess?.()
       handleClose()
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message?.trim() || error?.message || 'An unexpected error occurred. Please try again.'
+      const message =
+        error?.response?.data?.message?.trim() ||
+        error?.message ||
+        'An unexpected error occurred. Please try again.'
       showSnackbar({ message, severity: 'error' })
     },
   })
@@ -81,12 +86,18 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
     mutationFn: ({ id, roleData }: { id: string; roleData: RoleFormData }) =>
       updateRole(id, roleData),
     onSuccess: (data: any) => {
-      showSnackbar({ message: data?.message || 'Role updated successfully.', severity: 'success' })
+      showSnackbar({
+        message: data?.message || 'Role updated successfully.',
+        severity: 'success',
+      })
       onSuccess?.()
       handleClose()
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message?.trim() || error?.message || 'An unexpected error occurred. Please try again.'
+      const message =
+        error?.response?.data?.message?.trim() ||
+        error?.message ||
+        'An unexpected error occurred. Please try again.'
       showSnackbar({ message, severity: 'error' })
     },
   })
@@ -122,7 +133,10 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
     createRoleMutation.isPending || updateRoleMutation.isPending
   const error = createRoleMutation.error || updateRoleMutation.error
 
-  const [descPopover, setDescPopover] = React.useState<{ anchorEl: HTMLElement | null; desc: string }>({
+  const [descPopover, setDescPopover] = React.useState<{
+    anchorEl: HTMLElement | null
+    desc: string
+  }>({
     anchorEl: null,
     desc: '',
   })
@@ -194,8 +208,6 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
               }}
             >
               <Stack spacing={3}>
-                
-
                 {/* Role Name Field */}
                 <form.Field name="name">
                   {(field) => (
@@ -305,108 +317,131 @@ export const AddRoleDialog: React.FC<AddRoleDialogProps> = ({
                                     >
                                       {category.name}
                                     </Typography>
-                                    {category.subCategories.map((sub, subIdx) => (
-                                      <React.Fragment key={sub.id}>
-                                        {subIdx > 0 && (
-                                          <Divider
-                                            orientation="horizontal"
-                                            flexItem
-                                            sx={{ my: 1, ml: 2 }}
-                                          />
-                                        )}
-                                        <Box sx={{ mb: 1, ml: 2 }}>
-                                          <Typography
-                                            variant="subtitle2"
-                                            sx={{
-                                              fontWeight: 600,
-                                              color: theme.palette.text.secondary,
-                                              mb: 1,
-                                            }}
-                                          >
-                                            {sub.name}
-                                          </Typography>
-                                          <Box
-                                            sx={{
-                                              display: 'grid',
-                                              gridTemplateColumns: {
-                                                xs: '1fr',
-                                                sm: '1fr',
-                                                md: '1fr 1fr',
-                                                lg: '1fr 1fr 1fr',
-                                              },
-                                              gap: 2,
-                                              p: 1,
-                                            }}
-                                          >
-                                            {sub.permissions.map((permission) => (
-                                              <FormControlLabel
-                                                key={permission.id}
-                                                control={
-                                                  <Checkbox
-                                                    checked={field.state.value.includes(
-                                                      permission.name,
-                                                    )}
-                                                    onChange={(event) => {
-                                                      const newPermissions = event
-                                                        .target.checked
-                                                        ? [
-                                                            ...field.state.value,
-                                                            permission.name,
-                                                          ]
-                                                        : field.state.value.filter(
-                                                            (id) =>
-                                                              id !==
-                                                              permission.name,
+                                    {category.subCategories.map(
+                                      (sub, subIdx) => (
+                                        <React.Fragment key={sub.id}>
+                                          {subIdx > 0 && (
+                                            <Divider
+                                              orientation="horizontal"
+                                              flexItem
+                                              sx={{ my: 1, ml: 2 }}
+                                            />
+                                          )}
+                                          <Box sx={{ mb: 1, ml: 2 }}>
+                                            <Typography
+                                              variant="subtitle2"
+                                              sx={{
+                                                fontWeight: 600,
+                                                color:
+                                                  theme.palette.text.secondary,
+                                                mb: 1,
+                                              }}
+                                            >
+                                              {sub.name}
+                                            </Typography>
+                                            <Box
+                                              sx={{
+                                                display: 'grid',
+                                                gridTemplateColumns: {
+                                                  xs: '1fr',
+                                                  sm: '1fr',
+                                                  md: '1fr 1fr',
+                                                  lg: '1fr 1fr 1fr',
+                                                },
+                                                gap: 2,
+                                                p: 1,
+                                              }}
+                                            >
+                                              {sub.permissions.map(
+                                                (permission) => (
+                                                  <FormControlLabel
+                                                    key={permission.id}
+                                                    control={
+                                                      <Checkbox
+                                                        checked={field.state.value.includes(
+                                                          permission.name,
+                                                        )}
+                                                        onChange={(event) => {
+                                                          const newPermissions =
+                                                            event.target.checked
+                                                              ? [
+                                                                  ...field.state
+                                                                    .value,
+                                                                  permission.name,
+                                                                ]
+                                                              : field.state.value.filter(
+                                                                  (id) =>
+                                                                    id !==
+                                                                    permission.name,
+                                                                )
+                                                          field.handleChange(
+                                                            newPermissions,
                                                           )
-                                                      field.handleChange(
-                                                        newPermissions,
-                                                      )
-                                                    }}
+                                                        }}
+                                                        sx={{
+                                                          '&.Mui-checked': {
+                                                            color:
+                                                              theme.palette
+                                                                .primary.main,
+                                                          },
+                                                        }}
+                                                      />
+                                                    }
+                                                    label={
+                                                      <Box
+                                                        sx={{
+                                                          display: 'flex',
+                                                          alignItems: 'center',
+                                                        }}
+                                                      >
+                                                        <Typography
+                                                          variant="body2"
+                                                          sx={{
+                                                            fontWeight: 500,
+                                                            color:
+                                                              theme.palette.text
+                                                                .primary,
+                                                          }}
+                                                        >
+                                                          {permission.label}
+                                                        </Typography>
+                                                        <IconButton
+                                                          size="small"
+                                                          sx={{
+                                                            ml: 0.5,
+                                                            p: 0.5,
+                                                          }}
+                                                          onClick={(e) =>
+                                                            setDescPopover({
+                                                              anchorEl:
+                                                                e.currentTarget,
+                                                              desc:
+                                                                permission.description ||
+                                                                '',
+                                                            })
+                                                          }
+                                                          aria-label="Show permission description"
+                                                        >
+                                                          <InfoOutlinedIcon fontSize="small" />
+                                                        </IconButton>
+                                                      </Box>
+                                                    }
                                                     sx={{
-                                                      '&.Mui-checked': {
-                                                        color:
-                                                          theme.palette.primary
-                                                            .main,
-                                                      },
+                                                      alignItems: 'center',
+                                                      m: 0,
+                                                      '& .MuiFormControlLabel-label':
+                                                        {
+                                                          ml: 1,
+                                                        },
                                                     }}
                                                   />
-                                                }
-                                                label={
-                                                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography
-                                                      variant="body2"
-                                                      sx={{
-                                                        fontWeight: 500,
-                                                        color:
-                                                          theme.palette.text
-                                                            .primary,
-                                                      }}
-                                                    >
-                                                      {permission.label}
-                                                    </Typography>
-                                                    <IconButton
-                                                      size="small"
-                                                      sx={{ ml: 0.5, p: 0.5 }}
-                                                      onClick={e => setDescPopover({ anchorEl: e.currentTarget, desc: permission.description || '' })}
-                                                      aria-label="Show permission description"
-                                                    >
-                                                      <InfoOutlinedIcon fontSize="small" />
-                                                    </IconButton>
-                                                  </Box>
-                                                }
-                                                sx={{
-                                                  alignItems: 'center',
-                                                  m: 0,
-                                                  '& .MuiFormControlLabel-label': {
-                                                    ml: 1,
-                                                  },
-                                                }}
-                                              />
-                                            ))}
+                                                ),
+                                              )}
+                                            </Box>
                                           </Box>
-                                        </Box>
-                                      </React.Fragment>
-                                    ))}
+                                        </React.Fragment>
+                                      ),
+                                    )}
                                   </Box>
                                 </React.Fragment>
                               ))}

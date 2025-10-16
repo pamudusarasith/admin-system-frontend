@@ -20,10 +20,10 @@ import {
   VisibilityOff,
 } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
+import { useQueryClient } from '@tanstack/react-query'
 import { AnimatedIcon } from '@/components'
 import { useAuth } from '@/core'
 import { getUserProfile } from '@/api'
-import { useQueryClient } from '@tanstack/react-query'
 
 export const Route = createFileRoute('/login')({
   validateSearch: (search: Record<string, unknown>) => ({

@@ -10,10 +10,10 @@ import {
   Divider,
   IconButton,
   Paper,
+  Popover,
   Stack,
   Typography,
   useTheme,
-  Popover,
 } from '@mui/material'
 import {
   AdminPanelSettings as AdminIcon,
@@ -50,7 +50,6 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
     return <PersonIcon />
   }
 
-
   // Group permissions by mainCategory and subCategory
   type PermissionObj = {
     mainCategory: string
@@ -59,8 +58,8 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
     description?: string
   }
   // Also keep a map of label to description for quick lookup
-  const groupPermissions = (permissions: PermissionObj[]) => {
-    const grouped: Record<string, Record<string, PermissionObj[]>> = {}
+  const groupPermissions = (permissions: Array<PermissionObj>) => {
+    const grouped: Record<string, Record<string, Array<PermissionObj>>> = {}
     permissions.forEach((perm) => {
       const main = perm.mainCategory || 'Other'
       const sub = perm.subCategory || ''
@@ -75,7 +74,10 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
   // State for popover
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [popoverContent, setPopoverContent] = useState<string>('')
-  const handleInfoClick = (event: React.MouseEvent<HTMLElement>, description?: string) => {
+  const handleInfoClick = (
+    event: React.MouseEvent<HTMLElement>,
+    description?: string,
+  ) => {
     setAnchorEl(event.currentTarget)
     setPopoverContent(description || 'No description available')
   }
@@ -386,98 +388,143 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
             </Typography>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {Object.entries(groupedPermissions).map(([mainCategory, subGroups]) => (
-                <Box key={mainCategory} sx={{ flex: 1 }}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: `1px solid ${theme.palette.divider}`,
-                      background: theme.palette.background.paper,
-                      mb: 1,
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
+              {Object.entries(groupedPermissions).map(
+                ([mainCategory, subGroups]) => (
+                  <Box key={mainCategory} sx={{ flex: 1 }}>
+                    <Paper
+                      elevation={0}
                       sx={{
-                        fontWeight: 600,
-                        color: theme.palette.text.primary,
-                        mb: 3.5,
+                        p: 2,
+                        borderRadius: 2,
+                        border: `1px solid ${theme.palette.divider}`,
+                        background: theme.palette.background.paper,
+                        mb: 1,
                       }}
                     >
-                      {mainCategory}
-                    </Typography>
-                    {Object.entries(subGroups).map(([subCategory, perms], idx, arr) => (
-                      <React.Fragment key={subCategory}>
-                        <Box sx={{ ml: subCategory ? 2 : 0, mb: 1 }}>
-                          {subCategory && (
-                            <Typography
-                              variant="subtitle2"
-                              sx={{ fontWeight: 500, color: theme.palette.text.secondary, mb: 2.5 }}
-                            >
-                              {subCategory}
-                            </Typography>
-                          )}
-                          <Box sx={{ mb: 3 }} />
-                          <Box
-                            sx={{
-                              display: 'grid',
-                              gridTemplateColumns: {
-                                xs: '1fr',
-                                sm: '1fr',
-                                md: '1fr 1fr',
-                                lg: '1fr 1fr 1fr',
-                              },
-                              gap: 2.5,
-                            }}
-                          >
-                            {perms.map((perm, lidx) => (
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 600,
+                          color: theme.palette.text.primary,
+                          mb: 3.5,
+                        }}
+                      >
+                        {mainCategory}
+                      </Typography>
+                      {Object.entries(subGroups).map(
+                        ([subCategory, perms], idx, arr) => (
+                          <React.Fragment key={subCategory}>
+                            <Box sx={{ ml: subCategory ? 2 : 0, mb: 1 }}>
+                              {subCategory && (
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontWeight: 500,
+                                    color: theme.palette.text.secondary,
+                                    mb: 2.5,
+                                  }}
+                                >
+                                  {subCategory}
+                                </Typography>
+                              )}
+                              <Box sx={{ mb: 3 }} />
                               <Box
-                                key={perm.label + lidx}
                                 sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  px: 1.5,
-                                  py: 0.5,
-                                  borderRadius: 1,
-                                  background: `${theme.palette.primary.main}10`,
-                                  color: theme.palette.text.primary,
-                                  fontSize: 14,
-                                  fontWeight: 500,
-                                  mb: 1.5,
-                                  gap: 0.5,
+                                  display: 'grid',
+                                  gridTemplateColumns: {
+                                    xs: '1fr',
+                                    sm: '1fr',
+                                    md: '1fr 1fr',
+                                    lg: '1fr 1fr 1fr',
+                                  },
+                                  gap: 2.5,
                                 }}
                               >
-                                {perm.label}
-                                <IconButton
-                                  size="small"
-                                  sx={{ ml: 0.5, p: 0.5 }}
-                                  aria-label={`Show info for ${perm.label}`}
-                                  onClick={e => handleInfoClick(e, perm.description)}
-                                >
-                                  <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                      <circle cx="12" cy="12" r="10" stroke={theme.palette.primary.main} strokeWidth="2" fill="none" />
-                                      <rect x="11" y="10" width="2" height="6" rx="1" fill={theme.palette.primary.main} />
-                                      <rect x="11" y="7" width="2" height="2" rx="1" fill={theme.palette.primary.main} />
-                                    </svg>
+                                {perms.map((perm, lidx) => (
+                                  <Box
+                                    key={perm.label + lidx}
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      px: 1.5,
+                                      py: 0.5,
+                                      borderRadius: 1,
+                                      background: `${theme.palette.primary.main}10`,
+                                      color: theme.palette.text.primary,
+                                      fontSize: 14,
+                                      fontWeight: 500,
+                                      mb: 1.5,
+                                      gap: 0.5,
+                                    }}
+                                  >
+                                    {perm.label}
+                                    <IconButton
+                                      size="small"
+                                      sx={{ ml: 0.5, p: 0.5 }}
+                                      aria-label={`Show info for ${perm.label}`}
+                                      onClick={(e) =>
+                                        handleInfoClick(e, perm.description)
+                                      }
+                                    >
+                                      <Box
+                                        component="span"
+                                        sx={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                        }}
+                                      >
+                                        <svg
+                                          width="18"
+                                          height="18"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke={theme.palette.primary.main}
+                                            strokeWidth="2"
+                                            fill="none"
+                                          />
+                                          <rect
+                                            x="11"
+                                            y="10"
+                                            width="2"
+                                            height="6"
+                                            rx="1"
+                                            fill={theme.palette.primary.main}
+                                          />
+                                          <rect
+                                            x="11"
+                                            y="7"
+                                            width="2"
+                                            height="2"
+                                            rx="1"
+                                            fill={theme.palette.primary.main}
+                                          />
+                                        </svg>
+                                      </Box>
+                                    </IconButton>
                                   </Box>
-                                </IconButton>
+                                ))}
                               </Box>
-                            ))}
-                          </Box>
-                        </Box>
-                        {typeof idx !== 'undefined' && arr && idx < arr.length - 1 && (
-                          <Box sx={{ my: 1 }}>
-                            <Divider sx={{ ml: subCategory ? 2 : 0 }} />
-                          </Box>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </Paper>
-                </Box>
-              ))}
+                            </Box>
+                            {typeof idx !== 'undefined' &&
+                              arr &&
+                              idx < arr.length - 1 && (
+                                <Box sx={{ my: 1 }}>
+                                  <Divider sx={{ ml: subCategory ? 2 : 0 }} />
+                                </Box>
+                              )}
+                          </React.Fragment>
+                        ),
+                      )}
+                    </Paper>
+                  </Box>
+                ),
+              )}
               {/* Popover for permission description */}
               <Popover
                 open={openPopover}
@@ -487,7 +534,10 @@ const ViewRoleDetails: React.FC<ViewRoleDetailsProps> = ({
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                 PaperProps={{ sx: { p: 2, maxWidth: 300 } }}
               >
-                <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: theme.palette.text.primary }}
+                >
                   {popoverContent}
                 </Typography>
               </Popover>
