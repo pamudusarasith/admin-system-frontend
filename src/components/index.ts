@@ -45,6 +45,15 @@ export { LetterTimeline } from './letter/LetterTimeline'
 export { LetterSearchBar } from './letter/LetterSearchBar'
 
 // ============================================
+// Role Components (from ./roles)
+// ============================================
+export { RoleCard } from './roles/RoleCard'
+export { RoleActionMenu } from './roles/RoleActionMenu'
+export { RolesHeader } from './roles/RolesHeader'
+export { RolesSearchFilter } from './roles/RolesSearchFilter'
+export { RolesGrid } from './roles/RolesGrid'
+
+// ============================================
 // Common/Utility Components (from ./common)
 // ============================================
 export { ConfirmationDialog } from './common/ConfirmationDialog'

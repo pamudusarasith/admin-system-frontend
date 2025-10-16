@@ -29,7 +29,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import type { RoleFormData } from '@/schemas'
 import { roleFormDataSchema } from '@/schemas'
 import { createRole, updateRole } from '@/api'
-import {  getPermissions } from '@/api/permissions'
+import { getPermissions } from '@/api/permissions'
 import { useSnackbar } from '@/components'
 
 interface AddRoleDialogProps {
