@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Container, useTheme } from '@mui/material'
+import { Container, TextField, useTheme } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import type { ApiResponse } from '@/api'
-import { acceptLetter, getLetterById } from '@/api'
+import { acceptLetter, getLetterById, returnFromDivision } from '@/api'
 import {
   AddNoteDialog,
   AssignDivisionDialog,
@@ -37,6 +37,9 @@ function LetterThreadView() {
     useState(false)
   const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false)
   const [acceptLetterDialogOpen, setAcceptLetterDialogOpen] = useState(false)
+  const [returnFromDivisionDialogOpen, setReturnFromDivisionDialogOpen] =
+    useState(false)
+  const [returnReason, setReturnReason] = useState('')
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const { letterId } = Route.useParams()
@@ -59,6 +62,27 @@ function LetterThreadView() {
       const message =
         e.response?.data.message?.trim() ||
         'Failed to accept letter. Please try again.'
+      showSnackbar({ message, severity: 'error' })
+    },
+  })
+
+  const returnFromDivisionMutation = useMutation({
+    mutationFn: (reason: string) =>
+      returnFromDivision(Number(letterId), reason),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['letter', Number(letterId)] })
+      queryClient.invalidateQueries({ queryKey: ['letters'] })
+      const message =
+        response.message?.trim() ||
+        'Letter returned from division successfully.'
+      setReturnFromDivisionDialogOpen(false)
+      setReturnReason('')
+      showSnackbar({ message, severity: 'success' })
+    },
+    onError: (e: AxiosError<ApiResponse<any>>) => {
+      const message =
+        e.response?.data.message?.trim() ||
+        'Failed to return letter from division. Please try again.'
       showSnackbar({ message, severity: 'error' })
     },
   })
@@ -166,6 +190,7 @@ function LetterThreadView() {
           onAssignDivision={() => setAssignDivisionDialogOpen(true)}
           onAssignUser={() => setAssignUserDialogOpen(true)}
           onAcceptLetter={() => setAcceptLetterDialogOpen(true)}
+          onReturnFromDivision={() => setReturnFromDivisionDialogOpen(true)}
         />
 
         <LetterDialogs
@@ -205,6 +230,39 @@ function LetterThreadView() {
           variant="success"
           loading={acceptLetterMutation.isPending}
         />
+
+        <ConfirmationDialog
+          open={returnFromDivisionDialogOpen}
+          onClose={() => {
+            setReturnFromDivisionDialogOpen(false)
+            setReturnReason('')
+          }}
+          onConfirm={() => {
+            returnFromDivisionMutation.mutate(returnReason.trim() || '')
+          }}
+          title="Return from Division"
+          message={`You are about to return "${letter.subject}" from your division. You may optionally provide a reason for returning this letter:`}
+          confirmText="Return Letter"
+          cancelText="Cancel"
+          variant="warning"
+          danger
+          loading={returnFromDivisionMutation.isPending}
+        >
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            placeholder="Enter the reason for returning this letter (optional)..."
+            value={returnReason}
+            onChange={(e) => setReturnReason(e.target.value)}
+            sx={{
+              mt: 1,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              },
+            }}
+          />
+        </ConfirmationDialog>
       </Container>
     </SidebarLayout>
   )
