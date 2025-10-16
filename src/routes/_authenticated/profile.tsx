@@ -16,7 +16,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { Edit } from '@mui/icons-material'
 import type { UpdateUserProfilePayload } from '@/schemas'
-import { EditProfileForm, SidebarLayout } from '@/components'
+import { EditProfileForm, SidebarLayout, useSnackbar  } from '@/components'
 
 import { getUserProfile, updateProfile } from '@/api'
 
@@ -28,6 +28,7 @@ function ProfilePage() {
   const theme = useTheme()
   const [editFormOpen, setEditFormOpen] = useState(false)
   const queryClient = useQueryClient()
+  const { showSnackbar } = useSnackbar()
 
   // TanStack Query for fetching user profile
   const {
@@ -44,8 +45,12 @@ function ProfilePage() {
 
   const updateProfileMutation = useMutation({
     mutationFn: (data: UpdateUserProfilePayload) => updateProfile(data),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       // Invalidate and refetch user profile data
+      showSnackbar({
+        message: data?.message || 'Profile updated successfully.',
+        severity: 'success',
+      })
       queryClient.invalidateQueries({ queryKey: ['userProfile'] })
       setEditFormOpen(false)
     },
@@ -120,6 +125,11 @@ function ProfilePage() {
       </SidebarLayout>
     )
   }
+
+  console.log('User Profile Name:', user)
+  console.log('User Profile Name:', user.fullName)
+  console.log('User Profile Phone:', user.phoneNumber)
+  console.log('User Profile Status:', user.isActive)
 
   return (
     <SidebarLayout>

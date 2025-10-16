@@ -58,13 +58,15 @@ function RouteComponent() {
 
   // Fetch users using TanStack Query
   const {
-    data: users = [],
+    data: usersResponse,
     isLoading,
     error,
   } = useQuery<Array<User>>({
     queryKey: ['users'],
-    queryFn: getUsers,
+    queryFn: () => getUsers({}),
   })
+
+  const users = usersResponse?.data ?? []
 
   const handleOpen = () => {
     setOpen(true)

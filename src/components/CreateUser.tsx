@@ -42,13 +42,15 @@ export function CreateUser({ onClose }: CreateUserProps) {
   })
 
   const {
-    data: divisions = [],
+    data: divisionsResponse,
     isLoading: divisionsLoading,
     error: divisionsError,
   } = useQuery({
     queryKey: ['divisions'],
-    queryFn: getDivisions,
+    queryFn: () => getDivisions({}),
   })
+
+  const divisions = divisionsResponse?.data ?? []
 
   const form = useForm({
     defaultValues: {
