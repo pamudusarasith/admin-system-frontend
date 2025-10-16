@@ -33,7 +33,7 @@ interface ConfirmationDialogProps {
   readonly onClose: () => void
   readonly onConfirm: () => void | Promise<void>
   readonly title: string
-  readonly message: string | React.ReactNode
+  readonly message?: string | React.ReactNode
   readonly confirmText?: string
   readonly cancelText?: string
   readonly variant?: ConfirmationVariant
@@ -41,6 +41,7 @@ interface ConfirmationDialogProps {
   readonly danger?: boolean
   readonly icon?: React.ReactNode
   readonly maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  readonly children?: React.ReactNode
 }
 
 const variantConfig = {
@@ -89,6 +90,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   danger = false,
   icon,
   maxWidth = 'sm',
+  children,
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -177,19 +179,24 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           pt: 1,
         }}
       >
-        {typeof message === 'string' ? (
-          <Typography
-            variant="body2"
-            sx={{
-              color: theme.palette.text.secondary,
-              lineHeight: 1.6,
-            }}
-          >
-            {message}
-          </Typography>
-        ) : (
-          message
+        {message && (
+          <Box sx={{ mb: children ? 2 : 0 }}>
+            {typeof message === 'string' ? (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.text.secondary,
+                  lineHeight: 1.6,
+                }}
+              >
+                {message}
+              </Typography>
+            ) : (
+              message
+            )}
+          </Box>
         )}
+        {children}
       </DialogContent>
 
       <DialogActions
