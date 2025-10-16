@@ -2,12 +2,13 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Box, Button, Container, Typography } from '@mui/material'
-import type { Role } from '@/api'
+import type { AxiosError } from 'axios'
+import type { ApiResponse, Role } from '@/api'
 import { deleteRole, getRoles } from '@/api'
 import { roleSearchParamsSchema } from '@/schemas'
 import {
   AddRoleDialog,
-  DeleteConfirmationBox,
+  ConfirmationDialog,
   PaginationControls,
   RoleActionMenu,
   RolesGrid,
@@ -15,6 +16,7 @@ import {
   RolesSearchFilter,
   SidebarLayout,
   ViewRoleDetails,
+  useSnackbar,
 } from '@/components'
 
 export const Route = createFileRoute('/_authenticated/roles')({
@@ -25,6 +27,7 @@ export const Route = createFileRoute('/_authenticated/roles')({
 function RolesPage() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { showSnackbar } = useSnackbar()
   const searchParams = Route.useSearch()
 
   const [openDialog, setOpenDialog] = useState(false)
@@ -59,11 +62,17 @@ function RolesPage() {
   // Delete role mutation
   const deleteRoleMutation = useMutation({
     mutationFn: deleteRole,
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['roles'] })
+      const message = response.message?.trim() || 'Role deleted successfully.'
+      showSnackbar({ message, severity: 'success' })
       handleMenuClose()
     },
-    onError: (e) => {
+    onError: (e: AxiosError<ApiResponse<any>>) => {
+      const message =
+        e.response?.data.message?.trim() ||
+        'Failed to delete role. Please try again.'
+      showSnackbar({ message, severity: 'error' })
       console.error('Failed to delete role:', e)
     },
   })
@@ -295,13 +304,20 @@ function RolesPage() {
         />
 
         {/* Delete Confirmation Dialog */}
-        <DeleteConfirmationBox
+        <ConfirmationDialog
           open={deleteDialogOpen}
           onClose={handleCancelDelete}
           onConfirm={handleConfirmDelete}
           title="Delete Role"
-          itemName={roleToDelete?.name}
-          message={`Are you sure you want to delete the role "${roleToDelete?.name}"? This action cannot be undone and will affect ${roleToDelete?.userCount || 0} user(s).`}
+          message={
+            roleToDelete
+              ? `Are you sure you want to delete the role "${roleToDelete.name}"? This action cannot be undone and will affect ${roleToDelete.userCount || 0} user(s).`
+              : 'Are you sure you want to delete this role?'
+          }
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="error"
+          danger
           loading={deleteRoleMutation.isPending}
         />
 
