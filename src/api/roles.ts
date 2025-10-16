@@ -10,8 +10,16 @@ export interface Role {
   userCount?: number
 }
 
-export async function getRoles(): Promise<ApiResponse<Array<Role>>> {
-  const response = await client.get('/roles')
+interface GetRolesParams {
+  query?: string
+  page?: number
+  pageSize?: number
+}
+
+export async function getRoles(
+  params: GetRolesParams,
+): Promise<ApiResponse<Array<Role>>> {
+  const response = await client.get('/roles', { params })
   return response.data
 }
 

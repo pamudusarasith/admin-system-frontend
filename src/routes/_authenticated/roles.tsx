@@ -1,12 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Box, Button, Container, Typography } from '@mui/material'
 import type { Role } from '@/api'
 import { deleteRole, getRoles } from '@/api'
+import { roleSearchParamsSchema } from '@/schemas'
 import {
   AddRoleDialog,
   DeleteConfirmationBox,
+  PaginationControls,
   RoleActionMenu,
   RolesGrid,
   RolesHeader,
@@ -15,16 +17,16 @@ import {
   ViewRoleDetails,
 } from '@/components'
 
-// We fetch user roles from backend using the getRoles function imported from '@/api'.
-// This is called inside the loadRoles function, which is triggered in a useEffect when the component mounts.
-
 export const Route = createFileRoute('/_authenticated/roles')({
   component: RolesPage,
+  validateSearch: roleSearchParamsSchema,
 })
 
 function RolesPage() {
   const queryClient = useQueryClient()
-  const [searchTerm, setSearchTerm] = useState('')
+  const navigate = useNavigate()
+  const searchParams = Route.useSearch()
+
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -35,18 +37,24 @@ function RolesPage() {
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false)
   const [roleToView, setRoleToView] = useState<Role | null>(null)
 
+  // Get values from search params with defaults
+  const query = searchParams.query ?? ''
+  const page = searchParams.page ?? 0 // 0-indexed
+  const pageSize = searchParams.pageSize ?? 10
+
   // TanStack Query for fetching roles
   const {
     data: rolesResponse,
     isLoading: loading,
     error,
   } = useQuery({
-    queryKey: ['roles'],
-    queryFn: () => getRoles(),
+    queryKey: ['roles', query, page, pageSize],
+    queryFn: () => getRoles({ query, page, pageSize }),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
   const roles = rolesResponse?.data ?? []
+  const pagination = rolesResponse?.pagination
 
   // Delete role mutation
   const deleteRoleMutation = useMutation({
@@ -60,11 +68,32 @@ function RolesPage() {
     },
   })
 
-  const filteredRoles = roles.filter(
-    (role) =>
-      role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      role.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const filteredRoles = roles
+
+  const handlePageChange = (newPage?: number) => {
+    if (newPage !== undefined) {
+      navigate({
+        to: '/roles',
+        search: {
+          ...searchParams,
+          page: newPage - 1 || undefined, // Convert to 0-indexed, undefined if 0
+        },
+      })
+    }
+  }
+
+  const handlePageSizeChange = (newPageSize?: number) => {
+    if (newPageSize !== undefined) {
+      navigate({
+        to: '/roles',
+        search: {
+          ...searchParams,
+          pageSize: newPageSize,
+          page: undefined, // Reset to first page (0), don't show in URL
+        },
+      })
+    }
+  }
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, role: Role) => {
     setAnchorEl(event.currentTarget)
@@ -134,7 +163,14 @@ function RolesPage() {
   }
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
+    navigate({
+      to: '/roles',
+      search: {
+        ...searchParams,
+        query: value || undefined,
+        page: undefined, // Reset to first page (0), don't show in URL
+      },
+    })
   }
 
   // Show error state if there's an error
@@ -186,8 +222,13 @@ function RolesPage() {
 
         {/* Search and Filter Section */}
         <RolesSearchFilter
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+          searchTerm={query}
+          onSearchChange={(value) =>
+            navigate({
+              to: '/roles',
+              search: { ...searchParams, query: value || undefined },
+            })
+          }
           onSearch={handleSearch}
           filteredRoles={filteredRoles}
         />
@@ -208,12 +249,23 @@ function RolesPage() {
         >
           <RolesGrid
             loading={loading}
-            searchTerm={searchTerm}
+            searchTerm={query}
             filteredRoles={filteredRoles}
             onViewDetails={handleViewDetails}
             onMenuOpen={handleMenuOpen}
           />
         </Box>
+
+        {/* Pagination Controls */}
+        {pagination && (
+          <Box sx={{ maxWidth: '1300px', mx: 'auto', mt: 4 }}>
+            <PaginationControls
+              pagination={pagination}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </Box>
+        )}
 
         {/* Action Menu */}
         <RoleActionMenu
