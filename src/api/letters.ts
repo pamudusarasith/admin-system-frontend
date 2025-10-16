@@ -29,6 +29,7 @@ export interface ChangeStatusEventDetails {
   newStatus: string
   division?: Division
   user?: User
+  reason?: string
 }
 
 export interface AddNoteEventDetails {
