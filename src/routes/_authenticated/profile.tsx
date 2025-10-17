@@ -174,7 +174,7 @@ function ProfilePage() {
                   {/* User Profile Typography */}
                   <Box
                     sx={{
-                      border: `2px solid ${theme.palette.secondary}`,
+                      border: `2px solid ${theme.palette.secondary.main}`,
                       borderRadius: 2,
                       bgcolor: theme.palette.background.default,
                       px: 3,

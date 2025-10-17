@@ -103,8 +103,6 @@ function RolesPage() {
     },
   })
 
-  const filteredRoles = roles
-
   const handlePageChange = (newPage?: number) => {
     if (newPage !== undefined) {
       navigate({
@@ -260,7 +258,6 @@ function RolesPage() {
           searchTerm={searchInput}
           onSearchChange={setSearchInput}
           onSearch={handleSearch}
-          filteredRoles={filteredRoles}
         />
 
         {/* Roles Grid */}
@@ -280,7 +277,7 @@ function RolesPage() {
           <RolesGrid
             loading={loading}
             searchTerm={query}
-            filteredRoles={filteredRoles}
+            roles={roles}
             onViewDetails={handleViewDetails}
             onMenuOpen={handleMenuOpen}
           />
