@@ -24,6 +24,7 @@ import {
   Person as PersonIcon,
   DomainVerification as DomainVerificationIcon,
   KeyboardReturn as ReturnIcon,
+  Restore as RestoreIcon,
 } from '@mui/icons-material'
 import mime from 'mime'
 import { alpha } from '@mui/material/styles'
@@ -228,11 +229,11 @@ function ChangeStatusEvent({
         <AssignedToOfficerStatusEvent user={details.user} />
       ) : null
     case 'ASSIGNED_TO_OFFICER':
-      return details.user ? (
-        <AcceptedByOfficerStatusEvent  />
-      ) : null
+      return details.user ? <AcceptedByOfficerStatusEvent /> : null
     case 'CLOSED':
-      return <MarkAsCompleted />     
+      return <MarkAsCompleted />
+    case 'REOPENED':
+      return <Reopen />
     case 'RETURNED_FROM_DIVISION':
       return <ReturnedFromDivisionStatusEvent details={details} />
     default:
@@ -606,10 +607,12 @@ function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
 function MarkAsCompleted() {
   return (
     <TimelineCard
-      icon={<DomainVerificationIcon sx={{ fontSize: 16, color: 'success.main' }} />}
+      icon={
+        <DomainVerificationIcon sx={{ fontSize: 16, color: 'error.main' }} />
+      }
       title="Marked as completed"
-      borderColor={(t) => `${t.palette.success.main}40`}
-      headerColor={(t) => t.palette.success.main}
+      borderColor={(t) => `${t.palette.error.main}40`}
+      headerColor={(t) => t.palette.error.main}
     >
       <Typography
         variant="body2"
@@ -619,6 +622,27 @@ function MarkAsCompleted() {
         }}
       >
         Letter marked as completed
+      </Typography>
+    </TimelineCard>
+  )
+}
+
+function Reopen() {
+  return (
+    <TimelineCard
+      icon={<RestoreIcon sx={{ fontSize: 16, color: (t) => t.palette.purple.main }} />}
+      title="Letter Reopened"
+      borderColor={(t) => `${t.palette.purple.main}40`}
+      headerColor={(t) => t.palette.purple.main}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          lineHeight: 1.6,
+          fontWeight: 500,
+        }}
+      >
+        Letter reopened
       </Typography>
     </TimelineCard>
   )

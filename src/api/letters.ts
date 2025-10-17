@@ -257,3 +257,17 @@ export async function markAsComplete(
     throw error
   }
 }
+
+export async function reopenLetter(
+  letterId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.patch(`/letters/${letterId}`, undefined, {
+      params: { action: 'reopen' },
+    })
+    return response.data
+  } catch (error) {
+    console.error(`Failed to reopen letter with ID ${letterId}:`, error)
+    throw error
+  }
+}

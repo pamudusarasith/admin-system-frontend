@@ -92,6 +92,24 @@ const infoCyan = {
   900: '#006064',
 }
 
+// Purple (Material Purple shades)
+const purpleViolet = {
+  50: '#f3e5f5',
+  100: '#e1bee7',
+  200: '#ce93d8',
+  300: '#ba68c8',
+  400: '#ab47bc',
+  500: '#9c27b0', // Main purple
+  600: '#8e24aa',
+  700: '#7b1fa2',
+  800: '#6a1b9a',
+  900: '#4a148c',
+  A100: '#ea80fc',
+  A200: '#e040fb',
+  A400: '#d500f9',
+  A700: '#aa00ff',
+}
+
 export const lightPalette: PaletteOptions = {
   mode: 'light',
   primary: {
@@ -122,6 +140,11 @@ export const lightPalette: PaletteOptions = {
   info: {
     ...infoCyan,
     main: infoCyan[600],
+    contrastText: '#ffffff',
+  },
+  purple: {
+    ...purpleViolet,
+    main: purpleViolet[500],
     contrastText: '#ffffff',
   },
   background: {
@@ -174,6 +197,11 @@ export const darkPalette: PaletteOptions = {
   info: {
     ...infoCyan,
     main: infoCyan[400],
+    contrastText: '#000000',
+  },
+  purple: {
+    ...purpleViolet,
+    main: purpleViolet[400],
     contrastText: '#000000',
   },
   background: {

@@ -14,6 +14,7 @@ import {
 import type { Letter } from '@/api'
 import { Permission as P, useAuth } from '@/core'
 
+
 interface LetterActionMenuProps {
   anchorEl: HTMLElement | null
   open: boolean
@@ -24,6 +25,7 @@ interface LetterActionMenuProps {
   onAssignUser: () => void
   onAcceptLetter: () => void
   onMarkAsComplete: () => void
+  onReopen: () => void
   onReturnFromDivision: () => void
 }
 
@@ -37,6 +39,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   onAssignUser,
   onAcceptLetter,
   onMarkAsComplete,
+  onReopen,
   onReturnFromDivision,
 }) => {
   const { user, hasAuthority, hasAnyAuthority } = useAuth()
@@ -190,7 +193,11 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         </MenuItem>
       )}
       {canReopen && (
-        <MenuItem onClick={onClose}>
+        <MenuItem 
+        onClick={() => {
+            onReopen()
+            onClose()
+          }}>
           <RestoreIcon sx={{ mr: 2 }} />
           Reopen
         </MenuItem>

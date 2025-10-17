@@ -42,6 +42,7 @@ export { LetterDetailsGrid } from './letter/LetterDetailsGrid'
 export { LetterDialogs } from './letter/LetterDialogs'
 export { LetterHeader } from './letter/LetterHeader'
 export { LetterTimeline } from './letter/LetterTimeline'
+export { ReOpenDialog } from './letter/ReOpenDialog'
 export { LetterSearchBar } from './letter/LetterSearchBar'
 export { MarkAsCompleteDialog } from './letter/MarkAsCompleteDialog'
 
