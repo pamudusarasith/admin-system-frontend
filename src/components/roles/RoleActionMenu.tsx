@@ -16,7 +16,7 @@ export function RoleActionMenu({
   onClose,
   onEdit,
   onDelete,
-}: RoleActionMenuProps) {
+}: Readonly<RoleActionMenuProps>) {
   return (
     <Menu
       anchorEl={anchorEl}

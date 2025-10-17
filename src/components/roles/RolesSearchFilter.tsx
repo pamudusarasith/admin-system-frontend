@@ -15,7 +15,7 @@ export function RolesSearchFilter({
   onSearchChange,
   onSearch,
   filteredRoles,
-}: RolesSearchFilterProps) {
+}: Readonly<RolesSearchFilterProps>) {
   const theme = useTheme()
 
   return (

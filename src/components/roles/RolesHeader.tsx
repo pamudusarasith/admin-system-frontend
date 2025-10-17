@@ -2,7 +2,7 @@ import { Box, Typography, useTheme } from '@mui/material'
 import { AddButton } from '@/components'
 
 interface RolesHeaderProps {
-  onAddRole: () => void
+  readonly onAddRole: () => void
 }
 
 export function RolesHeader({ onAddRole }: RolesHeaderProps) {

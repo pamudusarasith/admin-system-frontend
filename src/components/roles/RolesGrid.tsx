@@ -16,7 +16,7 @@ export function RolesGrid({
   filteredRoles,
   onViewDetails,
   onMenuOpen,
-}: RolesGridProps) {
+}: Readonly<RolesGridProps>) {
   if (loading) {
     return (
       <Box

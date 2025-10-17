@@ -23,7 +23,11 @@ interface RoleCardProps {
   onMenuOpen: (event: React.MouseEvent<HTMLElement>, role: Role) => void
 }
 
-export function RoleCard({ role, onViewDetails, onMenuOpen }: RoleCardProps) {
+export function RoleCard({
+  role,
+  onViewDetails,
+  onMenuOpen,
+}: Readonly<RoleCardProps>) {
   const theme = useTheme()
 
   return (

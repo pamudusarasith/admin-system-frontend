@@ -1,29 +1,10 @@
 import { useState } from 'react'
-import {
-  Box,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-  useTheme,
-} from '@mui/material'
-import {
-  ChevronRight as ChevronRightIcon,
-  Close as CloseIcon,
-  ExpandMore as ExpandMoreIcon,
-} from '@mui/icons-material'
+import { Dialog, DialogContent, Stack, TextField } from '@mui/material'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { PermissionsField } from './PermissionsField'
+import { RoleDialogActions } from './RoleDialogActions'
+import { RoleDialogHeader } from './RoleDialogHeader'
 import type { AxiosError } from 'axios'
 import type { RoleFormData } from '@/schemas'
 import type { ApiResponse } from '@/api'
@@ -46,7 +27,6 @@ export function RoleDialog({
   role,
   onSuccess,
 }: RoleDialogProps) {
-  const theme = useTheme()
   const { showSnackbar } = useSnackbar()
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(
     new Set(),
@@ -179,46 +159,33 @@ export function RoleDialog({
   }
 
   // Toggle all permissions in a category
-  const toggleCategoryPermissions = (
+  const handleToggleAllCategory = (
     category: PermissionCategory,
     current: Array<string>,
-    onChange: (value: Array<string>) => void,
   ) => {
     const categoryPerms = getAllCategoryPermissions(category)
 
     if (areAllPermissionsSelected(category, current)) {
-      onChange(current.filter((p) => !categoryPerms.includes(p)))
+      return current.filter((p) => !categoryPerms.includes(p))
     } else {
-      onChange([...new Set([...current, ...categoryPerms])])
+      return [...new Set([...current, ...categoryPerms])]
     }
   }
 
-  // Get button text based on state
-  const getButtonText = () => {
-    if (editMode) {
-      return isSubmitting ? 'Updating...' : 'Update Role'
-    }
-    return isSubmitting ? 'Creating...' : 'Create Role'
+  // Handle individual permission toggle
+  const handlePermissionToggle = (
+    permissionName: string,
+    checked: boolean,
+    currentValue: Array<string>,
+  ) => {
+    return checked
+      ? [...currentValue, permissionName]
+      : currentValue.filter((p) => p !== permissionName)
   }
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Typography variant="h6">
-            {editMode ? 'Edit Role' : 'Add New Role'}
-          </Typography>
-          <IconButton onClick={handleClose} size="small">
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
+      <RoleDialogHeader editMode={editMode} onClose={handleClose} />
 
       <DialogContent>
         <form
@@ -268,321 +235,42 @@ export function RoleDialog({
             {/* Permissions Field */}
             <form.Field name="permissions">
               {(field) => (
-                <Box>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                    Permissions *
-                  </Typography>
-
-                  {permissionsLoading && (
-                    <Typography variant="body2" color="text.secondary">
-                      Loading permissions...
-                    </Typography>
-                  )}
-
-                  {!permissionsLoading && permissionsError && (
-                    <Typography variant="body2" color="error">
-                      Failed to load permissions.
-                    </Typography>
-                  )}
-
-                  {!permissionsLoading && !permissionsError && (
-                    <FormControl
-                      component="fieldset"
-                      error={
-                        field.state.meta.isTouched && !field.state.meta.isValid
-                      }
-                      fullWidth
-                    >
-                      <Box
-                        sx={{
-                          maxHeight: '400px',
-                          overflowY: 'auto',
-                          border: `1px solid ${theme.palette.divider}`,
-                          borderRadius: 1,
-                          p: 2,
-                        }}
-                      >
-                        <Stack spacing={3}>
-                          {permissionCategories.map((category) => (
-                            <Box
-                              key={category.id}
-                              sx={{
-                                border: `1px solid ${theme.palette.divider}`,
-                                borderRadius: 2,
-                                overflow: 'hidden',
-                              }}
-                            >
-                              {/* Category Header */}
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 1,
-                                  p: 1.5,
-                                  bgcolor: 'background.default',
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    bgcolor: 'action.hover',
-                                  },
-                                  transition: 'background-color 0.2s',
-                                }}
-                                onClick={() => toggleCategory(category.id)}
-                              >
-                                <IconButton
-                                  size="small"
-                                  sx={{
-                                    transition: 'transform 0.2s',
-                                    transform: expandedCategories.has(
-                                      category.id,
-                                    )
-                                      ? 'rotate(90deg)'
-                                      : 'rotate(0deg)',
-                                  }}
-                                  onClick={(e: React.MouseEvent) => {
-                                    e.stopPropagation()
-                                    toggleCategory(category.id)
-                                  }}
-                                >
-                                  {expandedCategories.has(category.id) ? (
-                                    <ExpandMoreIcon />
-                                  ) : (
-                                    <ChevronRightIcon />
-                                  )}
-                                </IconButton>
-                                <FormControlLabel
-                                  control={
-                                    <Checkbox
-                                      checked={areAllPermissionsSelected(
-                                        category,
-                                        field.state.value,
-                                      )}
-                                      indeterminate={areSomePermissionsSelected(
-                                        category,
-                                        field.state.value,
-                                      )}
-                                      onChange={(e) => {
-                                        e.stopPropagation()
-                                        toggleCategoryPermissions(
-                                          category,
-                                          field.state.value,
-                                          field.handleChange,
-                                        )
-                                      }}
-                                    />
-                                  }
-                                  label={
-                                    <Typography
-                                      sx={{ fontWeight: 600, fontSize: '1rem' }}
-                                    >
-                                      {category.name}
-                                    </Typography>
-                                  }
-                                  sx={{ m: 0, flex: 1 }}
-                                  onClick={(e: React.MouseEvent) =>
-                                    e.stopPropagation()
-                                  }
-                                />
-                              </Box>
-
-                              {/* Category Content */}
-                              {expandedCategories.has(category.id) && (
-                                <>
-                                  <Divider />
-                                  <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
-                                    {category.permissions &&
-                                      category.permissions.length > 0 && (
-                                        <Box sx={{ mb: 2 }}>
-                                          <FormGroup>
-                                            {category.permissions.map(
-                                              (permission) => (
-                                                <Box
-                                                  key={permission.id}
-                                                  sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'flex-start',
-                                                    py: 1.5,
-                                                    px: 1.5,
-                                                    mb: 1,
-                                                    '&:hover': {
-                                                      bgcolor: 'action.hover',
-                                                    },
-                                                    borderRadius: 1,
-                                                    border: `1px solid ${theme.palette.divider}`,
-                                                  }}
-                                                >
-                                              <Checkbox
-                                                checked={field.state.value.includes(
-                                                  permission.name,
-                                                )}
-                                                onChange={(e) => {
-                                                  const newValue = e.target
-                                                    .checked
-                                                    ? [
-                                                        ...field.state.value,
-                                                        permission.name,
-                                                      ]
-                                                    : field.state.value.filter(
-                                                        (p) =>
-                                                          p !== permission.name,
-                                                      )
-                                                  field.handleChange(newValue)
-                                                }}
-                                                sx={{ mt: 0.5 }}
-                                              />
-                                              <Box sx={{ flex: 1, ml: 1 }}>
-                                                <Typography
-                                                  variant="body2"
-                                                  sx={{ fontWeight: 500 }}
-                                                >
-                                                  {permission.label}
-                                                </Typography>
-                                                <Typography
-                                                  variant="caption"
-                                                  color="text.secondary"
-                                                  sx={{
-                                                    display: 'block',
-                                                    mt: 0.5,
-                                                  }}
-                                                >
-                                                  {permission.description}
-                                                </Typography>
-                                              </Box>
-                                            </Box>
-                                          ),
-                                        )}
-                                      </FormGroup>
-                                    </Box>
-                                  )}
-
-                                  {/* Divider between direct permissions and subcategories */}
-                                  {category.permissions &&
-                                    category.permissions.length > 0 &&
-                                    category.subCategories &&
-                                    category.subCategories.length > 0 && (
-                                      <Divider sx={{ my: 2 }} />
-                                    )}
-
-                                  {/* Sub Categories */}
-                                  {category.subCategories?.map(
-                                    (subCategory, idx) => (
-                                      <Box key={subCategory.id}>
-                                        {idx > 0 && <Divider sx={{ my: 2 }} />}
-                                        <Box
-                                          sx={{
-                                            p: 1.5,
-                                            bgcolor: 'action.hover',
-                                            borderRadius: 1,
-                                            mb: 1,
-                                          }}
-                                        >
-                                          <Typography
-                                            variant="body2"
-                                            sx={{ fontWeight: 600 }}
-                                          >
-                                            {subCategory.name}
-                                          </Typography>
-                                        </Box>
-                                        {subCategory.permissions && (
-                                          <FormGroup>
-                                            {subCategory.permissions.map(
-                                              (permission) => (
-                                                <Box
-                                                  key={permission.id}
-                                                  sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'flex-start',
-                                                    py: 1.5,
-                                                    px: 1.5,
-                                                    mb: 1,
-                                                    '&:hover': {
-                                                      bgcolor: 'action.hover',
-                                                    },
-                                                    borderRadius: 1,
-                                                    border: `1px solid ${theme.palette.divider}`,
-                                                  }}
-                                                >
-                                                  <Checkbox
-                                                    checked={field.state.value.includes(
-                                                      permission.name,
-                                                    )}
-                                                    onChange={(e) => {
-                                                      const newValue = e.target
-                                                        .checked
-                                                        ? [
-                                                            ...field.state.value,
-                                                            permission.name,
-                                                          ]
-                                                        : field.state.value.filter(
-                                                            (p) =>
-                                                              p !==
-                                                              permission.name,
-                                                          )
-                                                      field.handleChange(
-                                                        newValue,
-                                                      )
-                                                    }}
-                                                    sx={{ mt: 0.5 }}
-                                                  />
-                                                  <Box sx={{ flex: 1, ml: 1 }}>
-                                                    <Typography
-                                                      variant="body2"
-                                                      sx={{ fontWeight: 500 }}
-                                                    >
-                                                      {permission.label}
-                                                    </Typography>
-                                                    <Typography
-                                                      variant="caption"
-                                                      color="text.secondary"
-                                                      sx={{
-                                                        display: 'block',
-                                                        mt: 0.5,
-                                                      }}
-                                                    >
-                                                      {permission.description}
-                                                    </Typography>
-                                                  </Box>
-                                                </Box>
-                                              ),
-                                            )}
-                                          </FormGroup>
-                                        )}
-                                      </Box>
-                                    ),
-                                  )}
-                                </Box>
-                              </>
-                            )}
-                            </Box>
-                          ))}
-                        </Stack>
-                      </Box>
-                      {field.state.meta.isTouched &&
-                        !field.state.meta.isValid && (
-                          <Typography variant="caption" color="error">
-                            {field.state.meta.errors.join(', ')}
-                          </Typography>
-                        )}
-                    </FormControl>
-                  )}
-                </Box>
+                <PermissionsField
+                  field={field}
+                  permissionCategories={permissionCategories}
+                  expandedCategories={expandedCategories}
+                  onToggleCategory={toggleCategory}
+                  onPermissionToggle={(permissionName, checked, currentValue) =>
+                    field.handleChange(
+                      handlePermissionToggle(
+                        permissionName,
+                        checked,
+                        currentValue,
+                      ),
+                    )
+                  }
+                  onToggleAllCategory={(category, currentValue) =>
+                    field.handleChange(
+                      handleToggleAllCategory(category, currentValue),
+                    )
+                  }
+                  areAllPermissionsSelected={areAllPermissionsSelected}
+                  areSomePermissionsSelected={areSomePermissionsSelected}
+                  isLoading={permissionsLoading}
+                  hasError={Boolean(permissionsError)}
+                />
               )}
             </form.Field>
           </Stack>
         </form>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, gap: 1 }}>
-        <Button onClick={handleClose} disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button
-          onClick={() => form.handleSubmit()}
-          variant="contained"
-          disabled={isSubmitting}
-        >
-          {getButtonText()}
-        </Button>
-      </DialogActions>
+      <RoleDialogActions
+        editMode={editMode}
+        isSubmitting={isSubmitting}
+        onClose={handleClose}
+        onSubmit={() => form.handleSubmit()}
+      />
     </Dialog>
   )
 }
