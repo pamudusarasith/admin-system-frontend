@@ -10,16 +10,12 @@ export { getUsers, createUser, getUserProfile, updateProfile } from './users'
 export type { User } from './users'
 
 // Role exports
-export {
-  getRoles,
-  getRoleById,
-  createRole,
-  updateRole,
-  deleteRole,
-  assignRoleToUser,
-  removeRoleFromUser,
-} from './roles'
+export { getRoles, createRole, updateRole, deleteRole } from './roles'
 export type { Role } from './roles'
+
+// Permission exports
+export { getPermissions } from './permissions'
+export type { Permission, PermissionCategory } from './permissions'
 
 // Division exports
 export {

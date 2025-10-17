@@ -16,7 +16,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { Edit } from '@mui/icons-material'
 import type { UpdateUserProfilePayload } from '@/schemas'
-import { EditProfileForm, SidebarLayout, useSnackbar  } from '@/components'
+import { EditProfileForm, SidebarLayout, useSnackbar } from '@/components'
 
 import { getUserProfile, updateProfile } from '@/api'
 

@@ -17,8 +17,8 @@ export type {
 } from './letter'
 
 // Role schemas
-export { roleFormDataSchema } from './role'
-export type { RoleFormData } from './role'
+export { roleFormDataSchema, roleSearchParamsSchema } from './role'
+export type { RoleFormData, RoleSearchParams } from './role'
 
 // User schemas
 export { createUserSchema, updateUserProfileSchema } from './users'
