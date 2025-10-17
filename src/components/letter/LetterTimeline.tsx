@@ -22,7 +22,7 @@ import {
   FiberNew as FiberNewIcon,
   NoteAlt as NoteAltIcon,
   Person as PersonIcon,
-  DomainVerification as DomainVerificationIcon
+  DomainVerification as DomainVerificationIcon,
   KeyboardReturn as ReturnIcon,
 } from '@mui/icons-material'
 import mime from 'mime'
@@ -229,11 +229,10 @@ function ChangeStatusEvent({
       ) : null
     case 'ASSIGNED_TO_OFFICER':
       return details.user ? (
-        <AcceptedByOfficerStatusEvent user={details.user} />
+        <AcceptedByOfficerStatusEvent  />
       ) : null
     case 'CLOSED':
-      return <MarkAsCompleted /> 
-      return <AcceptedByOfficerStatusEvent />
+      return <MarkAsCompleted />     
     case 'RETURNED_FROM_DIVISION':
       return <ReturnedFromDivisionStatusEvent details={details} />
     default:
