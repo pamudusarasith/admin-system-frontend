@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Box, Button, Container, Typography } from '@mui/material'
 import type { AxiosError } from 'axios'
@@ -40,11 +40,30 @@ function RolesPage() {
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null)
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false)
   const [roleToView, setRoleToView] = useState<Role | null>(null)
+  const [searchInput, setSearchInput] = useState(searchParams.query ?? '')
 
   // Get values from search params with defaults
   const query = searchParams.query ?? ''
   const page = searchParams.page ?? 0 // 0-indexed
   const pageSize = searchParams.pageSize ?? 10
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== query) {
+        navigate({
+          to: '/roles',
+          search: {
+            ...searchParams,
+            query: searchInput || undefined,
+            page: undefined, // Reset to first page
+          },
+        })
+      }
+    }, 500) // 500ms debounce delay
+
+    return () => clearTimeout(timer)
+  }, [searchInput, query, navigate, searchParams])
 
   // TanStack Query for fetching roles
   const {
@@ -180,14 +199,7 @@ function RolesPage() {
   }
 
   const handleSearch = (value: string) => {
-    navigate({
-      to: '/roles',
-      search: {
-        ...searchParams,
-        query: value || undefined,
-        page: undefined, // Reset to first page (0), don't show in URL
-      },
-    })
+    setSearchInput(value)
   }
 
   // Show error state if there's an error
@@ -239,13 +251,8 @@ function RolesPage() {
 
         {/* Search and Filter Section */}
         <RolesSearchFilter
-          searchTerm={query}
-          onSearchChange={(value) =>
-            navigate({
-              to: '/roles',
-              search: { ...searchParams, query: value || undefined },
-            })
-          }
+          searchTerm={searchInput}
+          onSearchChange={setSearchInput}
           onSearch={handleSearch}
           filteredRoles={filteredRoles}
         />
