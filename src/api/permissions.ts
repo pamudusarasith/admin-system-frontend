@@ -11,7 +11,7 @@ export interface Permission {
 export interface PermissionCategory {
   id: number
   name: string
-  permissions: Array<Permission>
+  permissions?: Array<Permission>
   subCategories?: Array<PermissionCategory>
 }
 

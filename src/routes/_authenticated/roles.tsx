@@ -7,10 +7,10 @@ import type { ApiResponse, Role } from '@/api'
 import { deleteRole, getRoles } from '@/api'
 import { roleSearchParamsSchema } from '@/schemas'
 import {
-  AddRoleDialog,
   ConfirmationDialog,
   PaginationControls,
   RoleActionMenu,
+  RoleDialog,
   RolesGrid,
   RolesHeader,
   RolesSearchFilter,
@@ -34,7 +34,6 @@ function RolesPage() {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [menuRole, setMenuRole] = useState<Role | null>(null)
-  const [editMode, setEditMode] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null)
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false)
@@ -116,13 +115,11 @@ function RolesPage() {
 
   const handleAddRole = () => {
     setSelectedRole(null)
-    setEditMode(false)
     setOpenDialog(true)
   }
 
   const handleEditRole = (role: Role) => {
     setSelectedRole(role)
-    setEditMode(true)
     setOpenDialog(true)
     handleMenuClose()
   }
@@ -154,7 +151,6 @@ function RolesPage() {
   const handleCloseDialog = () => {
     setOpenDialog(false)
     setSelectedRole(null)
-    setEditMode(false)
   }
 
   const handleViewDetails = (role: Role) => {
@@ -286,11 +282,10 @@ function RolesPage() {
         />
 
         {/* Add/Edit Role Dialog */}
-        <AddRoleDialog
+        <RoleDialog
           open={openDialog}
           onClose={handleCloseDialog}
-          editMode={editMode}
-          initialData={
+          role={
             selectedRole
               ? {
                   id: selectedRole.id,
@@ -298,7 +293,7 @@ function RolesPage() {
                   description: selectedRole.description,
                   permissions: selectedRole.permissions,
                 }
-              : undefined
+              : null
           }
           onSuccess={handleRoleSuccess}
         />
