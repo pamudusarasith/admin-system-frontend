@@ -182,11 +182,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    window.addEventListener('storage', handleStorageChange)
-    window.addEventListener('AccessTokenChange', updateAuthState)
+    globalThis.addEventListener('storage', handleStorageChange)
+    globalThis.addEventListener('AccessTokenChange', updateAuthState)
     return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('AccessTokenChange', updateAuthState)
+      globalThis.removeEventListener('storage', handleStorageChange)
+      globalThis.removeEventListener('AccessTokenChange', updateAuthState)
     }
   }, []) // Remove dependency on updateAuthState
 
