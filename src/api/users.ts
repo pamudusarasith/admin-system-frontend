@@ -2,7 +2,6 @@ import { client } from './client'
 import type { ApiResponse } from './client'
 import type { CreateUserPayload, UpdateUserProfilePayload } from '@/schemas'
 
-// Define the User interface based on the API response
 export interface User {
   id: number
   username: string
@@ -25,13 +24,8 @@ interface GetUsersParams {
 export async function getUsers(
   params: GetUsersParams,
 ): Promise<ApiResponse<Array<User>>> {
-  try {
-    const response = await client.get('/users', { params })
-    return response.data
-  } catch (error) {
-    console.error('Failed to fetch users:', error)
-    throw error
-  }
+  const response = await client.get('/users', { params })
+  return response.data
 }
 
 export const createUser = async (data: CreateUserPayload) => {
@@ -39,14 +33,9 @@ export const createUser = async (data: CreateUserPayload) => {
   return res.data
 }
 
-export async function getUserProfile(): Promise<User> {
-  try {
-    const response = await client.get('/profile')
-    return response.data.data
-  } catch (error) {
-    console.error('Failed to fetch user profile:', error)
-    throw error
-  }
+export async function getUserProfile(): Promise<ApiResponse<User>> {
+  const response = await client.get('/profile')
+  return response.data
 }
 
 export async function updateProfile(
