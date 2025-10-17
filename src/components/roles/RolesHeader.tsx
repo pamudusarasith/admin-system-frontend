@@ -1,5 +1,6 @@
 import { Box, Typography, useTheme } from '@mui/material'
 import { AddButton } from '@/components'
+import { Permission as P, useAuth } from '@/core'
 
 interface RolesHeaderProps {
   readonly onAddRole: () => void
@@ -7,6 +8,10 @@ interface RolesHeaderProps {
 
 export function RolesHeader({ onAddRole }: RolesHeaderProps) {
   const theme = useTheme()
+  const { hasAuthority } = useAuth()
+
+  // Check if user can create roles
+  const canCreate = hasAuthority(P.roleCreate)
 
   return (
     <Box
@@ -43,13 +48,15 @@ export function RolesHeader({ onAddRole }: RolesHeaderProps) {
         </Typography>
       </Box>
 
-      <Box sx={{ alignSelf: { xs: 'flex-start', md: 'flex-start' } }}>
-        <AddButton
-          label="Add Role"
-          tooltip="Add a new user role"
-          onClick={onAddRole}
-        />
-      </Box>
+      {canCreate && (
+        <Box sx={{ alignSelf: { xs: 'flex-start', md: 'flex-start' } }}>
+          <AddButton
+            label="Add Role"
+            tooltip="Add a new user role"
+            onClick={onAddRole}
+          />
+        </Box>
+      )}
     </Box>
   )
 }

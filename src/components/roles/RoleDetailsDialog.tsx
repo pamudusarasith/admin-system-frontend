@@ -96,9 +96,7 @@ export function RoleDetailsDialog({
     return assigned
   }
 
-  const hasAnyAssignedPermissions = (
-    category: PermissionCategory,
-  ): boolean => {
+  const hasAnyAssignedPermissions = (category: PermissionCategory): boolean => {
     const directPerms = getAssignedPermissionsForCategory(category)
     if (directPerms.length > 0) return true
 
@@ -136,9 +134,7 @@ export function RoleDetailsDialog({
         >
           <Box sx={{ flex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <SecurityIcon
-                sx={{ color: 'primary.main', fontSize: 28 }}
-              />
+              <SecurityIcon sx={{ color: 'primary.main', fontSize: 28 }} />
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 {role.name}
               </Typography>
@@ -159,20 +155,12 @@ export function RoleDetailsDialog({
               )}
             </Box>
             {role.description && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mt: 1 }}
-              >
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                 {role.description}
               </Typography>
             )}
           </Box>
-          <IconButton
-            onClick={onClose}
-            size="small"
-            sx={{ ml: 1 }}
-          >
+          <IconButton onClick={onClose} size="small" sx={{ ml: 1 }}>
             <CloseIcon />
           </IconButton>
         </Box>
@@ -204,8 +192,7 @@ export function RoleDetailsDialog({
               const directPerms = getAssignedPermissionsForCategory(category)
               const subsWithPerms =
                 category.subCategories?.filter(
-                  (sub) =>
-                    getAssignedPermissionsForSubCategory(sub).length > 0,
+                  (sub) => getAssignedPermissionsForSubCategory(sub).length > 0,
                 ) ?? []
 
               return (
@@ -256,7 +243,10 @@ export function RoleDetailsDialog({
                       <Box sx={{ p: 2 }}>
                         {/* Direct Permissions */}
                         {directPerms.length > 0 && (
-                          <Stack spacing={1} sx={{ mb: subsWithPerms.length > 0 ? 2 : 0 }}>
+                          <Stack
+                            spacing={1}
+                            sx={{ mb: subsWithPerms.length > 0 ? 2 : 0 }}
+                          >
                             {directPerms.map((perm) => (
                               <Box
                                 key={perm.id}
@@ -306,7 +296,10 @@ export function RoleDetailsDialog({
                               >
                                 <Typography
                                   variant="caption"
-                                  sx={{ fontWeight: 600, textTransform: 'uppercase' }}
+                                  sx={{
+                                    fontWeight: 600,
+                                    textTransform: 'uppercase',
+                                  }}
                                 >
                                   {subCategory.name}
                                 </Typography>

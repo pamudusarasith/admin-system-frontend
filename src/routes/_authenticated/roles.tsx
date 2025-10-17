@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Box, Button, Container, Typography } from '@mui/material'
@@ -20,8 +20,14 @@ import {
   RolesHeader,
   RolesSearchFilter,
 } from '@/components/roles'
+import { Permission as P } from '@/core'
 
 export const Route = createFileRoute('/_authenticated/roles')({
+  beforeLoad: ({ context }) => {
+    if (!context.auth.hasAuthority(P.roleRead)) {
+      throw redirect({ to: '/403' })
+    }
+  },
   component: RolesPage,
   validateSearch: roleSearchParamsSchema,
 })

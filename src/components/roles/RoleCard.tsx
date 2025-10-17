@@ -16,6 +16,7 @@ import {
   Person as PersonIcon,
 } from '@mui/icons-material'
 import type { Role } from '@/api'
+import { Permission as P, useAuth } from '@/core'
 
 interface RoleCardProps {
   role: Role
@@ -29,6 +30,16 @@ export function RoleCard({
   onMenuOpen,
 }: Readonly<RoleCardProps>) {
   const theme = useTheme()
+  const { hasAuthority } = useAuth()
+
+  // Check permissions
+  const canRead = hasAuthority(P.roleRead)
+  const canUpdate = hasAuthority(P.roleUpdate)
+  const canDelete = hasAuthority(P.roleDelete)
+  const hasAnyPermission = canRead || canUpdate || canDelete
+
+  // If user has no permissions, don't render the card
+  if (!hasAnyPermission) return null
 
   return (
     <Card
@@ -142,35 +153,39 @@ export function RoleCard({
       </CardContent>
 
       <CardActions sx={{ px: 3, pb: 3, pt: 0 }}>
-        <Button
-          variant="outlined"
-          size="small"
-          fullWidth
-          onClick={() => onViewDetails(role)}
-          sx={{
-            borderColor: theme.palette.primary.main,
-            color: theme.palette.primary.main,
-            backgroundColor: theme.palette.action.hover,
-            '&:hover': {
+        {canRead && (
+          <Button
+            variant="outlined"
+            size="small"
+            fullWidth
+            onClick={() => onViewDetails(role)}
+            sx={{
               borderColor: theme.palette.primary.main,
-              bgcolor: `${theme.palette.primary.main}10`,
-            },
-          }}
-        >
-          View Details
-        </Button>
-        <IconButton
-          onClick={(e) => onMenuOpen(e, role)}
-          sx={{
-            color: theme.palette.text.secondary,
-            '&:hover': {
-              bgcolor: `${theme.palette.primary.main}10`,
               color: theme.palette.primary.main,
-            },
-          }}
-        >
-          <MoreVertIcon />
-        </IconButton>
+              backgroundColor: theme.palette.action.hover,
+              '&:hover': {
+                borderColor: theme.palette.primary.main,
+                bgcolor: `${theme.palette.primary.main}10`,
+              },
+            }}
+          >
+            View Details
+          </Button>
+        )}
+        {(canUpdate || canDelete) && (
+          <IconButton
+            onClick={(e) => onMenuOpen(e, role)}
+            sx={{
+              color: theme.palette.text.secondary,
+              '&:hover': {
+                bgcolor: `${theme.palette.primary.main}10`,
+                color: theme.palette.primary.main,
+              },
+            }}
+          >
+            <MoreVertIcon />
+          </IconButton>
+        )}
       </CardActions>
     </Card>
   )
