@@ -173,14 +173,29 @@ export function RoleDialog({
   }
 
   // Handle individual permission toggle
+  const addPermission = (
+    permissionName: string,
+    currentValue: Array<string>,
+  ) => {
+    return [...currentValue, permissionName]
+  }
+
+  const removePermission = (
+    permissionName: string,
+    currentValue: Array<string>,
+  ) => {
+    return currentValue.filter((p) => p !== permissionName)
+  }
+
   const handlePermissionToggle = (
     permissionName: string,
     checked: boolean,
     currentValue: Array<string>,
   ) => {
-    return checked
-      ? [...currentValue, permissionName]
-      : currentValue.filter((p) => p !== permissionName)
+    if (checked) {
+      return addPermission(permissionName, currentValue)
+    }
+    return removePermission(permissionName, currentValue)
   }
 
   return (
@@ -210,7 +225,9 @@ export function RoleDialog({
                   }
                   helperText={
                     field.state.meta.isTouched
-                      ? field.state.meta.errors.join(', ')
+                      ? field.state.meta.errors
+                          .map((e) => e?.message)
+                          .join(', ')
                       : ''
                   }
                 />
@@ -228,6 +245,16 @@ export function RoleDialog({
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
+                  error={
+                    field.state.meta.isTouched && !field.state.meta.isValid
+                  }
+                  helperText={
+                    field.state.meta.isTouched
+                      ? field.state.meta.errors
+                          .map((e) => e?.message)
+                          .join(', ')
+                      : ''
+                  }
                 />
               )}
             </form.Field>

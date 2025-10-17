@@ -125,6 +125,16 @@ function RolesPage() {
   }
 
   const handleDeleteRole = (role: Role) => {
+    // Check if role has users assigned
+    if (role.userCount && role.userCount > 0) {
+      showSnackbar({
+        message: `Cannot delete role "${role.name}". It is currently assigned to ${role.userCount} user${role.userCount > 1 ? 's' : ''}.`,
+        severity: 'error',
+      })
+      handleMenuClose()
+      return
+    }
+
     setRoleToDelete(role)
     setDeleteDialogOpen(true)
     handleMenuClose()
