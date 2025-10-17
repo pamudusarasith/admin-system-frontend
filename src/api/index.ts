@@ -38,6 +38,7 @@ export {
   addNote,
   assignDivision,
   assignUser,
+  returnFromDivision,
   acceptLetter,
 } from './letters'
 export type {

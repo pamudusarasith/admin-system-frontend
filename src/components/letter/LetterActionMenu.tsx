@@ -9,6 +9,7 @@ import {
   NoteAdd as NoteAddIcon,
   Print as PrintIcon,
   Restore as RestoreIcon,
+  KeyboardReturn as ReturnIcon,
 } from '@mui/icons-material'
 import type { Letter } from '@/api'
 import { Permission as P, useAuth } from '@/core'
@@ -23,6 +24,7 @@ interface LetterActionMenuProps {
   onAssignUser: () => void
   onAcceptLetter: () => void
   onMarkAsComplete: () => void
+  onReturnFromDivision: () => void
 }
 
 export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
@@ -35,6 +37,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   onAssignUser,
   onAcceptLetter,
   onMarkAsComplete,
+  onReturnFromDivision,
 }) => {
   const { user, hasAuthority, hasAnyAuthority } = useAuth()
 
@@ -56,6 +59,11 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
     letter.assignedDivision.id === user?.divisionId &&
     !letter.assignedUser &&
     hasAuthority(P.letterAssignUser)
+  const canReturnFromDivision =
+    letter.assignedDivision &&
+    letter.assignedDivision.id === user?.divisionId &&
+    !letter.assignedUser &&
+    hasAuthority(P.letterReturnFromDivision)
   const canAcceptLetter =
     letter.status !== 'CLOSED' &&
     letter.assignedDivision &&
@@ -133,6 +141,17 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         >
           <AssignmentIndIcon sx={{ mr: 2 }} />
           Assign To User
+        </MenuItem>
+      )}
+      {canReturnFromDivision && (
+        <MenuItem
+          onClick={() => {
+            onReturnFromDivision()
+            onClose()
+          }}
+        >
+          <ReturnIcon sx={{ mr: 2 }} />
+          Return from Division
         </MenuItem>
       )}
       {canAcceptLetter && (
