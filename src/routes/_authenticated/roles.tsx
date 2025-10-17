@@ -9,15 +9,17 @@ import { roleSearchParamsSchema } from '@/schemas'
 import {
   ConfirmationDialog,
   PaginationControls,
+  SidebarLayout,
+  useSnackbar,
+} from '@/components'
+import {
   RoleActionMenu,
+  RoleDetailsDialog,
   RoleDialog,
   RolesGrid,
   RolesHeader,
   RolesSearchFilter,
-  SidebarLayout,
-  ViewRoleDetails,
-  useSnackbar,
-} from '@/components'
+} from '@/components/roles'
 
 export const Route = createFileRoute('/_authenticated/roles')({
   component: RolesPage,
@@ -327,7 +329,7 @@ function RolesPage() {
         />
 
         {/* View Role Details Dialog */}
-        <ViewRoleDetails
+        <RoleDetailsDialog
           open={viewDetailsOpen}
           onClose={handleCloseViewDetails}
           role={roleToView}
