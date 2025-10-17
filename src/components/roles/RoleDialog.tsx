@@ -1,5 +1,12 @@
 import { useState } from 'react'
-import { Dialog, DialogContent, Stack, TextField } from '@mui/material'
+import {
+  Dialog,
+  DialogContent,
+  Stack,
+  TextField,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { PermissionsField } from './PermissionsField'
@@ -27,6 +34,8 @@ export function RoleDialog({
   role,
   onSuccess,
 }: RoleDialogProps) {
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const { showSnackbar } = useSnackbar()
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(
     new Set(),
@@ -199,7 +208,13 @@ export function RoleDialog({
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      fullScreen={fullScreen}
+    >
       <RoleDialogHeader editMode={editMode} onClose={handleClose} />
 
       <DialogContent>

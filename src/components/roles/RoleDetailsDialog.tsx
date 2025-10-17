@@ -8,6 +8,7 @@ import {
   IconButton,
   Stack,
   Typography,
+  useMediaQuery,
   useTheme,
 } from '@mui/material'
 import {
@@ -34,6 +35,7 @@ export function RoleDetailsDialog({
   role,
 }: RoleDetailsDialogProps) {
   const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(
     new Set(),
   )
@@ -117,9 +119,12 @@ export function RoleDetailsDialog({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
+      fullScreen={fullScreen}
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 2,
+          },
         },
       }}
     >
