@@ -223,3 +223,18 @@ export async function acceptLetter(
     throw error
   }
 }
+
+export async function markAsComplete(
+  letterId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    // Use the same endpoint pattern as acceptLetter but with action 'markComplete'
+    const response = await client.patch(`/letters/${letterId}`, undefined, {
+      params: { action: 'markComplete' },
+    })
+    return response.data
+  } catch (error) {
+    console.error(`Failed to mark letter with ID ${letterId} as complete:`, error)
+    throw error
+  }
+}

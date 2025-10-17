@@ -45,4 +45,10 @@ export enum Permission {
   letterUnassignedMarkComplete = 'letter:unassigned:markcomplete',
   letterDivisionMarkComplete = 'letter:division:markcomplete',
   letterOwnMarkComplete = 'letter:own:markcomplete',
+
+  // Reopen letters
+  letterAllReopen = 'letter:all:reopen',
+  letterUnassignedReopen = 'letter:unassigned:reopen',
+  letterDivisionReopen = 'letter:division:reopen',
+  letterOwnReopen = 'letter:own:reopen',
 }

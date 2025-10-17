@@ -43,6 +43,7 @@ export { LetterDialogs } from './letter/LetterDialogs'
 export { LetterHeader } from './letter/LetterHeader'
 export { LetterTimeline } from './letter/LetterTimeline'
 export { LetterSearchBar } from './letter/LetterSearchBar'
+export { MarkAsCompleteDialog } from './letter/MarkAsCompleteDialog'
 
 // ============================================
 // Common/Utility Components (from ./common)

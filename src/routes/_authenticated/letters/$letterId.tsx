@@ -9,6 +9,7 @@ import {
   AddNoteDialog,
   AssignDivisionDialog,
   AssignUserDialog,
+  MarkAsCompleteDialog,
   ConfirmationDialog,
   ErrorMessage,
   LetterActionMenu,
@@ -37,6 +38,7 @@ function LetterThreadView() {
     useState(false)
   const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false)
   const [acceptLetterDialogOpen, setAcceptLetterDialogOpen] = useState(false)
+  const [markAsCompleteDialogOpen, setMarkAsCompleteDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const { letterId } = Route.useParams()
@@ -166,6 +168,7 @@ function LetterThreadView() {
           onAssignDivision={() => setAssignDivisionDialogOpen(true)}
           onAssignUser={() => setAssignUserDialogOpen(true)}
           onAcceptLetter={() => setAcceptLetterDialogOpen(true)}
+          onMarkAsComplete={() => setMarkAsCompleteDialogOpen(true)}
         />
 
         <LetterDialogs
@@ -192,6 +195,12 @@ function LetterThreadView() {
           letter={letter}
           open={assignUserDialogOpen}
           onClose={() => setAssignUserDialogOpen(false)}
+        />
+
+        <MarkAsCompleteDialog
+          letter={letter}
+          open={markAsCompleteDialogOpen}
+          onClose={() => setMarkAsCompleteDialogOpen(false)}
         />
 
         <ConfirmationDialog

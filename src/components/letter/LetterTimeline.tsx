@@ -22,6 +22,7 @@ import {
   FiberNew as FiberNewIcon,
   NoteAlt as NoteAltIcon,
   Person as PersonIcon,
+  DomainVerification as DomainVerificationIcon
 } from '@mui/icons-material'
 import mime from 'mime'
 import { alpha } from '@mui/material/styles'
@@ -229,6 +230,8 @@ function ChangeStatusEvent({
       return details.user ? (
         <AcceptedByOfficerStatusEvent user={details.user} />
       ) : null
+    case 'CLOSED':
+      return <MarkAsCompleted /> 
     default:
       return (
         <GenericStatusEvent
@@ -489,6 +492,27 @@ function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
           ))}
         </Stack>
       )}
+    </TimelineCard>
+  )
+}
+
+function MarkAsCompleted() {
+  return (
+    <TimelineCard
+      icon={<DomainVerificationIcon sx={{ fontSize: 16, color: 'success.main' }} />}
+      title="Marked as completed"
+      borderColor={(t) => `${t.palette.success.main}40`}
+      headerColor={(t) => t.palette.success.main}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          lineHeight: 1.6,
+          fontWeight: 500,
+        }}
+      >
+        Letter marked as completed
+      </Typography>
     </TimelineCard>
   )
 }
