@@ -1,12 +1,10 @@
 import { Box } from '@mui/material'
-import type { Role } from '@/api'
 import { SearchBar } from '@/components'
 
 interface RolesSearchFilterProps {
   searchTerm: string
   onSearchChange: (value: string) => void
   onSearch: (value: string) => void
-  filteredRoles: Array<Role>
 }
 
 export function RolesSearchFilter({
