@@ -183,26 +183,15 @@ export async function sendReply(
   attachments?: Array<File>,
 ): Promise<ApiResponse<any>> {
   try {
-    if (attachments && attachments.length > 0) {
-      const formData = new FormData()
-      formData.append('content', content)
-      attachments.forEach((file) => {
-        formData.append('attachments', file)
-      })
-      const response = await client.post(
-        `/letters/${letterId}/reply`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      )
-      return response.data
-    }
-
-    const response = await client.post(`/letters/${letterId}/reply`, {
-      content,
+    const formData = new FormData()
+    formData.append('content', content)
+    attachments?.forEach((file) => {
+      formData.append('attachments', file)
+    })
+    const response = await client.post(`/letters/${letterId}/reply`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     })
     return response.data
   } catch (error) {
