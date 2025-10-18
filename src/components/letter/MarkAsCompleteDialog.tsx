@@ -48,8 +48,7 @@ export const MarkAsCompleteDialog: React.FC<MarkAsCompleteDialogProps> = ({
       <DialogTitle>Mark Letter as Completed</DialogTitle>
       <DialogContent>
         <Typography>
-          Are you sure you want to mark this letter as completed? This action will
-          close the letter and cannot be undone.
+          Are you sure you want to mark this letter as completed? You may be able to reopen it later if permitted.
         </Typography>
       </DialogContent>
       <DialogActions>
