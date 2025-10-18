@@ -39,7 +39,7 @@ export const MarkAsCompleteDialog: React.FC<MarkAsCompleteDialogProps> = ({
     },
     onError: (e: AxiosError<ApiResponse<any>>) => {
       const message =
-        e.response?.data?.message?.trim() || 'Failed to mark as complete.'
+        e.response?.data.message?.trim() || 'Failed to mark as complete.'
       showSnackbar({ message, severity: 'error' })
     },
   })

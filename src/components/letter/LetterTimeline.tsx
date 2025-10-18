@@ -86,7 +86,13 @@ export function LetterTimeline({
               break
             case 'ADD_ATTACHMENT':
             case 'REMOVE_ATTACHMENT':
+              break
             case 'REPLY':
+              element = (
+                <SendReplyEvent
+                  details={event.eventDetails as AddNoteEventDetails}
+                />
+              )
               break
             case 'CHANGE_STATUS':
               element = (
@@ -232,7 +238,7 @@ function ChangeStatusEvent({
         <AssignedToOfficerStatusEvent user={details.user} />
       ) : null
     case 'ASSIGNED_TO_OFFICER':
-      return details.user ? <AcceptedByOfficerStatusEvent /> : null
+      return <AcceptedByOfficerStatusEvent />
     case 'CLOSED':
       return <MarkAsCompleted />
     case 'RETURNED_FROM_DIVISION':
@@ -247,6 +253,90 @@ function ChangeStatusEvent({
         />
       )
   }
+}
+
+function SendReplyEvent({ details }: Readonly<AddNoteEventProps>) {
+  return (
+    <TimelineCard
+      icon={
+        <NoteAltIcon sx={{ fontSize: 16, color: (t) => t.palette.pink.main }} />
+      }
+      title="Sent a reply"
+      borderColor={(t) => `${t.palette.pink.main}40`}
+      headerColor={(t) => t.palette.pink.main}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.primary',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          lineHeight: 1.6,
+        }}
+      >
+        {details.content}
+      </Typography>
+
+      {details.attachments && details.attachments.length > 0 && (
+        <Stack spacing={0.5} sx={{ mt: 2 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 600,
+              color: 'text.secondary',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              fontSize: 10,
+            }}
+          >
+            Attachments ({details.attachments.length})
+          </Typography>
+          {details.attachments.map((attachment) => (
+            <Link
+              key={attachment.id}
+              href={attachment.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                p: 1,
+                borderRadius: 1,
+                backgroundColor: (t) => t.palette.action.hover,
+                transition: 'all 0.2s',
+                '&:hover': {
+                  backgroundColor: (t) => t.palette.action.selected,
+                },
+              }}
+            >
+              <AttachFileIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.primary',
+                  fontWeight: 500,
+                }}
+              >
+                {attachment.fileName}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                  ml: 'auto',
+                }}
+              >
+                {mime.getExtension(attachment.fileType)?.toUpperCase() ||
+                  'FILE'}
+              </Typography>
+            </Link>
+          ))}
+        </Stack>
+      )}
+    </TimelineCard>
+  )
 }
 
 interface GenericStatusEventProps {
