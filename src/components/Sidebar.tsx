@@ -62,7 +62,7 @@ const menuItems: Array<MenuItem> = [
       P.letterAllRead,
       P.letterUnassignedRead,
       P.letterDivisionRead,
-      P.letterOwnRead,
+      P.letterOwnManage,
     ],
     children: [
       {
@@ -89,7 +89,7 @@ const menuItems: Array<MenuItem> = [
         id: 'my-letters',
         label: 'My Assigned Letters',
         icon: <MarkEmailUnreadIcon />,
-        authorities: [P.letterAllRead, P.letterOwnRead],
+        authorities: [P.letterAllRead, P.letterOwnManage],
         path: { to: '/letters', search: { status: 'ASSIGNED_TO_OFFICER' } },
       },
     ],

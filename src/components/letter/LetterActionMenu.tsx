@@ -49,7 +49,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
       P.letterAllUpdate,
       P.letterUnassignedUpdate,
       P.letterDivisionUpdate,
-      P.letterOwnUpdate,
+      P.letterOwnManage,
     ])
   const canAssignDivision =
     !letter.assignedDivision &&
@@ -78,7 +78,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
       P.letterAllUpdatePriority,
       P.letterUnassignedUpdatePriority,
       P.letterDivisionUpdatePriority,
-      P.letterOwnUpdatePriority,
+      P.letterOwnManage,
     ])
   const canAddNote =
     letter.status !== 'CLOSED' &&
@@ -86,7 +86,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
       P.letterAllAddNote,
       P.letterUnassignedAddNote,
       P.letterDivisionAddNote,
-      P.letterOwnAddNote,
+      P.letterOwnManage,
     ])
   const canAddAttachment =
     letter.status !== 'CLOSED' &&
@@ -94,7 +94,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
       P.letterAllAddAttachments,
       P.letterUnassignedAddAttachments,
       P.letterDivisionAddAttachments,
-      P.letterOwnAddAttachments,
+      P.letterOwnManage,
     ])
   const canMarkCompleted =
     letter.status !== 'CLOSED' &&
@@ -102,7 +102,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
       P.letterAllMarkComplete,
       P.letterUnassignedMarkComplete,
       P.letterDivisionMarkComplete,
-      P.letterOwnMarkComplete,
+      P.letterOwnManage,
     ])
 
   const canReopen =
@@ -111,7 +111,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
       P.letterAllReopen,
       P.letterUnassignedReopen,
       P.letterDivisionReopen,
-      P.letterOwnReopen,
+      P.letterOwnManage,
     ])
 
   return (

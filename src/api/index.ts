@@ -35,6 +35,7 @@ export {
   assignDivision,
   assignUser,
   returnFromDivision,
+  returnFromUser,
   acceptLetter,
 } from './letters'
 export type {

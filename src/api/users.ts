@@ -20,6 +20,7 @@ interface GetUsersParams {
   divisionId?: number
   page?: number
   pageSize?: number
+  assignableOnly?: boolean
 }
 
 export async function getUsers(

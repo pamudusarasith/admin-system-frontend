@@ -41,7 +41,7 @@ export const Route = createFileRoute('/_authenticated/letters/')({
         P.letterAllRead,
         P.letterUnassignedRead,
         P.letterDivisionRead,
-        P.letterOwnRead,
+        P.letterOwnManage,
       ])
     ) {
       throw redirect({ to: '/403' })

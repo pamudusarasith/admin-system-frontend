@@ -4,7 +4,12 @@ import { Container, TextField, useTheme } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import type { ApiResponse } from '@/api'
-import { acceptLetter, getLetterById, returnFromDivision } from '@/api'
+import {
+  acceptLetter,
+  getLetterById,
+  returnFromDivision,
+  returnFromUser,
+} from '@/api'
 import {
   AddNoteDialog,
   AssignDivisionDialog,
@@ -43,6 +48,8 @@ function LetterThreadView() {
     useState(false)
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false)
   const [returnFromDivisionDialogOpen, setReturnFromDivisionDialogOpen] =
+    useState(false)
+  const [returnFromUserDialogOpen, setReturnFromUserDialogOpen] =
     useState(false)
   const [returnReason, setReturnReason] = useState('')
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -88,6 +95,25 @@ function LetterThreadView() {
       const message =
         e.response?.data.message?.trim() ||
         'Failed to return letter from division. Please try again.'
+      showSnackbar({ message, severity: 'error' })
+    },
+  })
+
+  const returnFromUserMutation = useMutation({
+    mutationFn: (reason: string) => returnFromUser(Number(letterId), reason),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['letter', Number(letterId)] })
+      queryClient.invalidateQueries({ queryKey: ['letters'] })
+      const message =
+        response.message?.trim() || 'Letter returned from user successfully.'
+      setReturnFromUserDialogOpen(false)
+      setReturnReason('')
+      showSnackbar({ message, severity: 'success' })
+    },
+    onError: (e: AxiosError<ApiResponse<any>>) => {
+      const message =
+        e.response?.data.message?.trim() ||
+        'Failed to return letter from user. Please try again.'
       showSnackbar({ message, severity: 'error' })
     },
   })
@@ -198,6 +224,7 @@ function LetterThreadView() {
           onMarkAsComplete={() => setMarkAsCompleteDialogOpen(true)}
           onReopen={() => setReopenDialogOpen(true)}
           onReturnFromDivision={() => setReturnFromDivisionDialogOpen(true)}
+          onReturnFromUser={() => setReturnFromUserDialogOpen(true)}
         />
 
         <LetterDialogs
@@ -266,6 +293,38 @@ function LetterThreadView() {
           variant="warning"
           danger
           loading={returnFromDivisionMutation.isPending}
+        >
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            placeholder="Enter the reason for returning this letter (optional)..."
+            value={returnReason}
+            onChange={(e) => setReturnReason(e.target.value)}
+            sx={{
+              mt: 1,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              },
+            }}
+          />
+        </ConfirmationDialog>
+        <ConfirmationDialog
+          open={returnFromUserDialogOpen}
+          onClose={() => {
+            setReturnFromUserDialogOpen(false)
+            setReturnReason('')
+          }}
+          onConfirm={() => {
+            returnFromUserMutation.mutate(returnReason.trim())
+          }}
+          title="Return from User"
+          message={`You are about to return "${letter.subject}" from your user. You may optionally provide a reason for returning this letter:`}
+          confirmText="Return Letter"
+          cancelText="Cancel"
+          variant="warning"
+          danger
+          loading={returnFromUserMutation.isPending}
         >
           <TextField
             fullWidth

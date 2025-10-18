@@ -97,6 +97,7 @@ export const AssignUserDialog: React.FC<AssignUserDialogProps> = ({
         divisionId,
         page: pageParam,
         pageSize: PAGE_SIZE,
+        assignableOnly: true,
       }),
     getNextPageParam: (lastPage) => {
       const pagination = lastPage.pagination
