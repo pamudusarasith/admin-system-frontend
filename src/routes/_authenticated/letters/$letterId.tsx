@@ -9,8 +9,6 @@ import {
   AddNoteDialog,
   AssignDivisionDialog,
   AssignUserDialog,
-  MarkAsCompleteDialog,
-  ReOpenDialog,
   ConfirmationDialog,
   ErrorMessage,
   LetterActionMenu,
@@ -19,6 +17,8 @@ import {
   LetterHeader,
   LetterTimeline,
   LoadingSpinner,
+  MarkAsCompleteDialog,
+  ReOpenDialog,
   SidebarLayout,
   useSnackbar,
 } from '@/components'
@@ -39,7 +39,8 @@ function LetterThreadView() {
     useState(false)
   const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false)
   const [acceptLetterDialogOpen, setAcceptLetterDialogOpen] = useState(false)
-  const [markAsCompleteDialogOpen, setMarkAsCompleteDialogOpen] = useState(false)
+  const [markAsCompleteDialogOpen, setMarkAsCompleteDialogOpen] =
+    useState(false)
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false)
   const [returnFromDivisionDialogOpen, setReturnFromDivisionDialogOpen] =
     useState(false)

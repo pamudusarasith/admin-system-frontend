@@ -254,7 +254,10 @@ export async function markAsComplete(
     })
     return response.data
   } catch (error) {
-    console.error(`Failed to mark letter with ID ${letterId} as complete:`, error)
+    console.error(
+      `Failed to mark letter with ID ${letterId} as complete:`,
+      error,
+    )
     throw error
   }
 }

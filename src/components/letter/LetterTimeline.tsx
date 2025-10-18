@@ -19,12 +19,12 @@ import {
 import {
   Apartment as ApartmentIcon,
   AttachFile as AttachFileIcon,
+  DomainVerification as DomainVerificationIcon,
   FiberNew as FiberNewIcon,
   NoteAlt as NoteAltIcon,
   Person as PersonIcon,
-  DomainVerification as DomainVerificationIcon,
-  KeyboardReturn as ReturnIcon,
   Restore as RestoreIcon,
+  KeyboardReturn as ReturnIcon,
 } from '@mui/icons-material'
 import mime from 'mime'
 import { alpha } from '@mui/material/styles'
@@ -217,7 +217,7 @@ function ChangeStatusEvent({
   details,
   getStatusColor,
 }: Readonly<ChangeStatusEventProps>) {
-  if(details.previousStatus && details.previousStatus === 'CLOSED'){
+  if (details.previousStatus && details.previousStatus === 'CLOSED') {
     return <Reopen />
   }
   switch (details.newStatus) {
@@ -631,7 +631,11 @@ function MarkAsCompleted() {
 function Reopen() {
   return (
     <TimelineCard
-      icon={<RestoreIcon sx={{ fontSize: 16, color: (t) => t.palette.purple.main }} />}
+      icon={
+        <RestoreIcon
+          sx={{ fontSize: 16, color: (t) => t.palette.purple.main }}
+        />
+      }
       title="Letter Reopened"
       borderColor={(t) => `${t.palette.purple.main}40`}
       headerColor={(t) => t.palette.purple.main}

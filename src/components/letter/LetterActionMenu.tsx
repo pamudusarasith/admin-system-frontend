@@ -14,7 +14,6 @@ import {
 import type { Letter } from '@/api'
 import { Permission as P, useAuth } from '@/core'
 
-
 interface LetterActionMenuProps {
   anchorEl: HTMLElement | null
   open: boolean
@@ -44,14 +43,14 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
 }) => {
   const { user, hasAuthority, hasAnyAuthority } = useAuth()
 
-  const canEdit = 
-  letter.status !== 'CLOSED' &&
-  hasAnyAuthority([
-    P.letterAllUpdate,
-    P.letterUnassignedUpdate,
-    P.letterDivisionUpdate,
-    P.letterOwnUpdate,
-  ])
+  const canEdit =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllUpdate,
+      P.letterUnassignedUpdate,
+      P.letterDivisionUpdate,
+      P.letterOwnUpdate,
+    ])
   const canAssignDivision =
     !letter.assignedDivision &&
     letter.status !== 'CLOSED' &&
@@ -73,48 +72,47 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
     letter.assignedUser &&
     letter.assignedUser.id === user?.id &&
     letter.status === 'PENDING_ACCEPTANCE'
-  const canChangePriority = 
-  letter.status !== 'CLOSED' &&
-  hasAnyAuthority([
-    P.letterAllUpdatePriority,
-    P.letterUnassignedUpdatePriority,
-    P.letterDivisionUpdatePriority,
-    P.letterOwnUpdatePriority,
-  ])
-  const canAddNote = 
-  letter.status !== 'CLOSED' &&
-  hasAnyAuthority([
-    P.letterAllAddNote,
-    P.letterUnassignedAddNote,
-    P.letterDivisionAddNote,
-    P.letterOwnAddNote,
-  ])
-  const canAddAttachment = 
-  letter.status !== 'CLOSED' &&
-  hasAnyAuthority([
-    P.letterAllAddAttachments,
-    P.letterUnassignedAddAttachments,
-    P.letterDivisionAddAttachments,
-    P.letterOwnAddAttachments,
-  ])
-  const canMarkCompleted = 
-  letter.status !== 'CLOSED' &&
-  hasAnyAuthority([
-    P.letterAllMarkComplete,
-    P.letterUnassignedMarkComplete,
-    P.letterDivisionMarkComplete,
-    P.letterOwnMarkComplete,
-  ])
+  const canChangePriority =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllUpdatePriority,
+      P.letterUnassignedUpdatePriority,
+      P.letterDivisionUpdatePriority,
+      P.letterOwnUpdatePriority,
+    ])
+  const canAddNote =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllAddNote,
+      P.letterUnassignedAddNote,
+      P.letterDivisionAddNote,
+      P.letterOwnAddNote,
+    ])
+  const canAddAttachment =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllAddAttachments,
+      P.letterUnassignedAddAttachments,
+      P.letterDivisionAddAttachments,
+      P.letterOwnAddAttachments,
+    ])
+  const canMarkCompleted =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllMarkComplete,
+      P.letterUnassignedMarkComplete,
+      P.letterDivisionMarkComplete,
+      P.letterOwnMarkComplete,
+    ])
 
-  const canReopen = 
-  letter.status === 'CLOSED' &&
-  hasAnyAuthority([
-    P.letterAllReopen,
-    P.letterUnassignedReopen,
-    P.letterDivisionReopen,
-    P.letterOwnReopen,
-  ])
-
+  const canReopen =
+    letter.status === 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllReopen,
+      P.letterUnassignedReopen,
+      P.letterDivisionReopen,
+      P.letterOwnReopen,
+    ])
 
   return (
     <Menu anchorEl={anchorEl} open={open} onClose={onClose}>
@@ -193,11 +191,12 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         </MenuItem>
       )}
       {canReopen && (
-        <MenuItem 
-        onClick={() => {
+        <MenuItem
+          onClick={() => {
             onReopen()
             onClose()
-          }}>
+          }}
+        >
           <RestoreIcon sx={{ mr: 2 }} />
           Reopen
         </MenuItem>
@@ -208,7 +207,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
       </MenuItem>
       <Divider />
       {canMarkCompleted && (
-         <MenuItem
+        <MenuItem
           onClick={() => {
             onMarkAsComplete()
             onClose()
