@@ -17,6 +17,8 @@ import {
   LetterHeader,
   LetterTimeline,
   LoadingSpinner,
+  MarkAsCompleteDialog,
+  ReOpenDialog,
   SidebarLayout,
   useSnackbar,
 } from '@/components'
@@ -37,6 +39,9 @@ function LetterThreadView() {
     useState(false)
   const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false)
   const [acceptLetterDialogOpen, setAcceptLetterDialogOpen] = useState(false)
+  const [markAsCompleteDialogOpen, setMarkAsCompleteDialogOpen] =
+    useState(false)
+  const [reopenDialogOpen, setReopenDialogOpen] = useState(false)
   const [returnFromDivisionDialogOpen, setReturnFromDivisionDialogOpen] =
     useState(false)
   const [returnReason, setReturnReason] = useState('')
@@ -190,6 +195,8 @@ function LetterThreadView() {
           onAssignDivision={() => setAssignDivisionDialogOpen(true)}
           onAssignUser={() => setAssignUserDialogOpen(true)}
           onAcceptLetter={() => setAcceptLetterDialogOpen(true)}
+          onMarkAsComplete={() => setMarkAsCompleteDialogOpen(true)}
+          onReopen={() => setReopenDialogOpen(true)}
           onReturnFromDivision={() => setReturnFromDivisionDialogOpen(true)}
         />
 
@@ -217,6 +224,18 @@ function LetterThreadView() {
           letter={letter}
           open={assignUserDialogOpen}
           onClose={() => setAssignUserDialogOpen(false)}
+        />
+
+        <MarkAsCompleteDialog
+          letter={letter}
+          open={markAsCompleteDialogOpen}
+          onClose={() => setMarkAsCompleteDialogOpen(false)}
+        />
+
+        <ReOpenDialog
+          letter={letter}
+          open={reopenDialogOpen}
+          onClose={() => setReopenDialogOpen(false)}
         />
 
         <ConfirmationDialog

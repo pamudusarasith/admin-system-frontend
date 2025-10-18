@@ -19,9 +19,11 @@ import {
 import {
   Apartment as ApartmentIcon,
   AttachFile as AttachFileIcon,
+  DomainVerification as DomainVerificationIcon,
   FiberNew as FiberNewIcon,
   NoteAlt as NoteAltIcon,
   Person as PersonIcon,
+  Restore as RestoreIcon,
   KeyboardReturn as ReturnIcon,
 } from '@mui/icons-material'
 import mime from 'mime'
@@ -215,6 +217,9 @@ function ChangeStatusEvent({
   details,
   getStatusColor,
 }: Readonly<ChangeStatusEventProps>) {
+  if (details.previousStatus && details.previousStatus === 'CLOSED') {
+    return <Reopen />
+  }
   switch (details.newStatus) {
     case 'NEW':
       return <NewStatusEvent />
@@ -227,7 +232,9 @@ function ChangeStatusEvent({
         <AssignedToOfficerStatusEvent user={details.user} />
       ) : null
     case 'ASSIGNED_TO_OFFICER':
-      return <AcceptedByOfficerStatusEvent />
+      return details.user ? <AcceptedByOfficerStatusEvent /> : null
+    case 'CLOSED':
+      return <MarkAsCompleted />
     case 'RETURNED_FROM_DIVISION':
       return <ReturnedFromDivisionStatusEvent details={details} />
     default:
@@ -594,6 +601,54 @@ function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
           ))}
         </Stack>
       )}
+    </TimelineCard>
+  )
+}
+
+function MarkAsCompleted() {
+  return (
+    <TimelineCard
+      icon={
+        <DomainVerificationIcon sx={{ fontSize: 16, color: 'error.main' }} />
+      }
+      title="Marked as completed"
+      borderColor={(t) => `${t.palette.error.main}40`}
+      headerColor={(t) => t.palette.error.main}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          lineHeight: 1.6,
+          fontWeight: 500,
+        }}
+      >
+        Letter marked as completed
+      </Typography>
+    </TimelineCard>
+  )
+}
+
+function Reopen() {
+  return (
+    <TimelineCard
+      icon={
+        <RestoreIcon
+          sx={{ fontSize: 16, color: (t) => t.palette.purple.main }}
+        />
+      }
+      title="Letter Reopened"
+      borderColor={(t) => `${t.palette.purple.main}40`}
+      headerColor={(t) => t.palette.purple.main}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          lineHeight: 1.6,
+          fontWeight: 500,
+        }}
+      >
+        Letter reopened
+      </Typography>
     </TimelineCard>
   )
 }
