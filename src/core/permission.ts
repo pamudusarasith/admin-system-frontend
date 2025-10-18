@@ -22,6 +22,7 @@ export enum Permission {
   letterAssignDivision = 'letter:assign:division',
   letterAssignUser = 'letter:assign:user',
   letterReturnFromDivision = 'letter:return:from:division',
+  letterReturnFromUser = 'letter:return:from:user',
 
   // Change letter priority
   letterAllUpdatePriority = 'letter:all:update:priority',

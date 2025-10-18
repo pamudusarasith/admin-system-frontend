@@ -32,6 +32,12 @@ export interface ChangeStatusEventDetails {
   reason?: string
 }
 
+export interface ChangeStatusEventDetails {
+  newStatus: string
+  user?: User
+  reason?: string
+}
+
 export interface AddNoteEventDetails {
   content: string
   attachments?: Array<Attachment>
@@ -219,6 +225,24 @@ export async function returnFromDivision(
   } catch (error) {
     console.error(
       `Failed to return letter with ID ${letterId} from division:`,
+      error,
+    )
+    throw error
+  }
+}
+
+export async function returnFromUser(
+  letterId: number,
+  reason: string,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.delete(`/letters/${letterId}/user`, {
+      params: { reason },
+    })
+    return response.data
+  } catch (error) {
+    console.error(
+      `Failed to return letter with ID ${letterId} from user:`,
       error,
     )
     throw error

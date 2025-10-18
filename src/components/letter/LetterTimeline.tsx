@@ -230,6 +230,8 @@ function ChangeStatusEvent({
       return <AcceptedByOfficerStatusEvent />
     case 'RETURNED_FROM_DIVISION':
       return <ReturnedFromDivisionStatusEvent details={details} />
+    case 'RETURNED_FROM_OFFICER':
+      return <ReturnedFromUserStatusEvent details={details} />
     default:
       return (
         <GenericStatusEvent
@@ -506,6 +508,77 @@ function ReturnedFromDivisionStatusEvent({
           }}
         >
           Letter returned from division
+        </Typography>
+      )}
+    </TimelineCard>
+  )
+}
+
+interface ReturnedFromUserStatusEventProps {
+  details: ChangeStatusEventDetails
+}
+
+function ReturnedFromUserStatusEvent({
+  details,
+}: Readonly<ReturnedFromUserStatusEventProps>) {
+  return (
+    <TimelineCard
+      icon={<ReturnIcon sx={{ fontSize: 16, color: 'error.main' }} />}
+      title="Returned from officer"
+      borderColor={(t) => `${t.palette.error.main}40`}
+      headerColor={(t) => t.palette.error.main}
+    >
+      {details.user && (
+        <Box sx={{ mb: details.reason ? 2 : 0 }}>
+          <UserDetails user={details.user} />
+        </Box>
+      )}
+      {details.reason && (
+        <Box
+          sx={{
+            mt: 1.5,
+            p: 1.5,
+            borderRadius: 1.5,
+            backgroundColor: (t) => alpha(t.palette.error.main, 0.08),
+            borderLeft: (t) => `3px solid ${t.palette.error.main}`,
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 600,
+              color: 'text.secondary',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              fontSize: 10,
+              display: 'block',
+              mb: 0.75,
+            }}
+          >
+            Reason
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.primary',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              lineHeight: 1.6,
+            }}
+          >
+            {details.reason}
+          </Typography>
+        </Box>
+      )}
+      {!details.user && !details.reason && (
+        <Typography
+          variant="body2"
+          sx={{
+            lineHeight: 1.6,
+            fontWeight: 500,
+          }}
+        >
+          Letter returned from officer
         </Typography>
       )}
     </TimelineCard>
