@@ -96,22 +96,10 @@ const menuItems: Array<MenuItem> = [
   },
   {
     id: 'divisions',
-    label: 'Division Management',
+    label: 'Divisions',
     icon: <BusinessIcon />,
-    children: [
-      {
-        id: 'all-divisions',
-        label: 'All Divisions',
-        icon: <BusinessIcon />,
-        path: { to: '/divisions' },
-      },
-      {
-        id: 'division-workload',
-        label: 'Division Workload',
-        icon: <AssignmentIcon />,
-        path: { to: '/divisions/workload' },
-      },
-    ],
+    authorities: [P.divisionRead],
+    path: { to: '/divisions' },
   },
   {
     id: 'users',
@@ -122,12 +110,14 @@ const menuItems: Array<MenuItem> = [
         id: 'users-list',
         label: 'All Users',
         icon: <PeopleIcon />,
+        authorities: [P.userRead],
         path: { to: '/users' },
       },
       {
         id: 'users-roles',
         label: 'Roles & Permissions',
         icon: <SettingsIcon />,
+        authorities: [P.roleRead],
         path: { to: '/roles' },
       },
     ],

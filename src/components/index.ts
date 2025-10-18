@@ -20,7 +20,6 @@ export { AddButton } from './AddButton'
 export { AddCabinetPaperDialog } from './AddCabinetPaperDialog'
 export { DivisionDialog } from './DivisionDialog'
 export { AddRoleDialog } from './AddRoleDialog'
-export { DeleteConfirmationBox } from './DeleteConfirmationBox'
 
 // ============================================
 // Form Components
@@ -42,7 +41,19 @@ export { LetterDetailsGrid } from './letter/LetterDetailsGrid'
 export { LetterDialogs } from './letter/LetterDialogs'
 export { LetterHeader } from './letter/LetterHeader'
 export { LetterTimeline } from './letter/LetterTimeline'
+export { ReOpenDialog } from './letter/ReOpenDialog'
 export { LetterSearchBar } from './letter/LetterSearchBar'
+export { MarkAsCompleteDialog } from './letter/MarkAsCompleteDialog'
+
+// ============================================
+// Role Components (from ./roles)
+// ============================================
+export { RoleCard } from './roles/RoleCard'
+export { RoleActionMenu } from './roles/RoleActionMenu'
+export { RolesHeader } from './roles/RolesHeader'
+export { RolesSearchFilter } from './roles/RolesSearchFilter'
+export { RolesGrid } from './roles/RolesGrid'
+export { RoleDialog } from './roles/RoleDialog'
 
 // ============================================
 // Common/Utility Components (from ./common)

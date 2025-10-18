@@ -8,6 +8,7 @@ import {
   Flag as FlagIcon,
   NoteAdd as NoteAddIcon,
   Print as PrintIcon,
+  Restore as RestoreIcon,
   KeyboardReturn as ReturnIcon,
 } from '@mui/icons-material'
 import type { Letter } from '@/api'
@@ -22,6 +23,8 @@ interface LetterActionMenuProps {
   onAssignDivision: () => void
   onAssignUser: () => void
   onAcceptLetter: () => void
+  onMarkAsComplete: () => void
+  onReopen: () => void
   onReturnFromDivision: () => void
 }
 
@@ -34,19 +37,26 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   onAssignDivision,
   onAssignUser,
   onAcceptLetter,
+  onMarkAsComplete,
+  onReopen,
   onReturnFromDivision,
 }) => {
   const { user, hasAuthority, hasAnyAuthority } = useAuth()
 
-  const canEdit = hasAnyAuthority([
-    P.letterAllUpdate,
-    P.letterUnassignedUpdate,
-    P.letterDivisionUpdate,
-    P.letterOwnManage,
-  ])
+  const canEdit =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllUpdate,
+      P.letterUnassignedUpdate,
+      P.letterDivisionUpdate,
+      P.letterOwnManage,
+    ])
   const canAssignDivision =
-    !letter.assignedDivision && hasAuthority(P.letterAssignDivision)
+    !letter.assignedDivision &&
+    letter.status !== 'CLOSED' &&
+    hasAuthority(P.letterAssignDivision)
   const canAssignUser =
+    letter.status !== 'CLOSED' &&
     letter.assignedDivision &&
     letter.assignedDivision.id === user?.divisionId &&
     !letter.assignedUser &&
@@ -57,34 +67,52 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
     !letter.assignedUser &&
     hasAuthority(P.letterReturnFromDivision)
   const canAcceptLetter =
+    letter.status !== 'CLOSED' &&
     letter.assignedDivision &&
     letter.assignedUser &&
     letter.assignedUser.id === user?.id &&
     letter.status === 'PENDING_ACCEPTANCE'
-  const canChangePriority = hasAnyAuthority([
-    P.letterAllUpdatePriority,
-    P.letterUnassignedUpdatePriority,
-    P.letterDivisionUpdatePriority,
-    P.letterOwnManage,
-  ])
-  const canAddNote = hasAnyAuthority([
-    P.letterAllAddNote,
-    P.letterUnassignedAddNote,
-    P.letterDivisionAddNote,
-    P.letterOwnManage,
-  ])
-  const canAddAttachment = hasAnyAuthority([
-    P.letterAllAddAttachments,
-    P.letterUnassignedAddAttachments,
-    P.letterDivisionAddAttachments,
-    P.letterOwnManage,
-  ])
-  const canMarkCompleted = hasAnyAuthority([
-    P.letterAllMarkComplete,
-    P.letterUnassignedMarkComplete,
-    P.letterDivisionMarkComplete,
-    P.letterOwnManage,
-  ])
+  const canChangePriority =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllUpdatePriority,
+      P.letterUnassignedUpdatePriority,
+      P.letterDivisionUpdatePriority,
+      P.letterOwnManage,
+    ])
+  const canAddNote =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllAddNote,
+      P.letterUnassignedAddNote,
+      P.letterDivisionAddNote,
+      P.letterOwnManage,
+    ])
+  const canAddAttachment =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllAddAttachments,
+      P.letterUnassignedAddAttachments,
+      P.letterDivisionAddAttachments,
+      P.letterOwnManage,
+    ])
+  const canMarkCompleted =
+    letter.status !== 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllMarkComplete,
+      P.letterUnassignedMarkComplete,
+      P.letterDivisionMarkComplete,
+      P.letterOwnManage,
+    ])
+
+  const canReopen =
+    letter.status === 'CLOSED' &&
+    hasAnyAuthority([
+      P.letterAllReopen,
+      P.letterUnassignedReopen,
+      P.letterDivisionReopen,
+      P.letterOwnManage,
+    ])
 
   return (
     <Menu anchorEl={anchorEl} open={open} onClose={onClose}>
@@ -162,13 +190,29 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
           Add Attachment
         </MenuItem>
       )}
+      {canReopen && (
+        <MenuItem
+          onClick={() => {
+            onReopen()
+            onClose()
+          }}
+        >
+          <RestoreIcon sx={{ mr: 2 }} />
+          Reopen
+        </MenuItem>
+      )}
       <MenuItem onClick={onClose}>
         <PrintIcon sx={{ mr: 2 }} />
         Print
       </MenuItem>
       <Divider />
       {canMarkCompleted && (
-        <MenuItem onClick={onClose}>
+        <MenuItem
+          onClick={() => {
+            onMarkAsComplete()
+            onClose()
+          }}
+        >
           <CheckIcon sx={{ mr: 2 }} />
           Mark as Completed
         </MenuItem>

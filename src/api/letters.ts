@@ -27,6 +27,7 @@ export interface Attachment {
 
 export interface ChangeStatusEventDetails {
   newStatus: string
+  previousStatus?: string
   division?: Division
   user?: User
   reason?: string
@@ -263,6 +264,38 @@ export async function acceptLetter(
     return response.data
   } catch (error) {
     console.error(`Failed to accept letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
+
+export async function markAsComplete(
+  letterId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    // Use the same endpoint pattern as acceptLetter but with action 'markComplete'
+    const response = await client.patch(`/letters/${letterId}`, undefined, {
+      params: { action: 'markComplete' },
+    })
+    return response.data
+  } catch (error) {
+    console.error(
+      `Failed to mark letter with ID ${letterId} as complete:`,
+      error,
+    )
+    throw error
+  }
+}
+
+export async function reopenLetter(
+  letterId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.patch(`/letters/${letterId}`, undefined, {
+      params: { action: 'reopen' },
+    })
+    return response.data
+  } catch (error) {
+    console.error(`Failed to reopen letter with ID ${letterId}:`, error)
     throw error
   }
 }

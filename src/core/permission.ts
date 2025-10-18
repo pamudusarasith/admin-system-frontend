@@ -10,6 +10,7 @@ export enum Permission {
 
   // Create letter
   letterCreate = 'letter:create',
+  letterOwnManage = 'letter:own:manage',
 
   // Update letter details
   letterAllUpdate = 'letter:all:update',
@@ -41,4 +42,27 @@ export enum Permission {
   letterAllMarkComplete = 'letter:all:markcomplete',
   letterUnassignedMarkComplete = 'letter:unassigned:markcomplete',
   letterDivisionMarkComplete = 'letter:division:markcomplete',
+
+  // Reopen letters
+  letterAllReopen = 'letter:all:reopen',
+  letterUnassignedReopen = 'letter:unassigned:reopen',
+  letterDivisionReopen = 'letter:division:reopen',
+
+  // Role management
+  roleRead = 'role:read',
+  roleCreate = 'role:create',
+  roleUpdate = 'role:update',
+  roleDelete = 'role:delete',
+
+  // User management
+  userRead = 'user:read',
+  userCreate = 'user:create',
+  userUpdate = 'user:update',
+  userDelete = 'user:delete',
+
+  // Division management
+  divisionRead = 'division:read',
+  divisionCreate = 'division:create',
+  divisionUpdate = 'division:update',
+  divisionDelete = 'division:delete',
 }
