@@ -217,6 +217,9 @@ function ChangeStatusEvent({
   details,
   getStatusColor,
 }: Readonly<ChangeStatusEventProps>) {
+  if(details.previousStatus && details.previousStatus === 'CLOSED'){
+    return <Reopen />
+  }
   switch (details.newStatus) {
     case 'NEW':
       return <NewStatusEvent />
@@ -232,8 +235,6 @@ function ChangeStatusEvent({
       return details.user ? <AcceptedByOfficerStatusEvent /> : null
     case 'CLOSED':
       return <MarkAsCompleted />
-    case 'REOPENED':
-      return <Reopen />
     case 'RETURNED_FROM_DIVISION':
       return <ReturnedFromDivisionStatusEvent details={details} />
     default:

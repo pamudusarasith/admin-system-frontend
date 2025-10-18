@@ -27,6 +27,7 @@ export interface Attachment {
 
 export interface ChangeStatusEventDetails {
   newStatus: string
+  previousStatus?: string
   division?: Division
   user?: User
   reason?: string
