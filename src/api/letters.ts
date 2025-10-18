@@ -177,6 +177,40 @@ export async function addNote(
   }
 }
 
+export async function sendReply(
+  letterId: number,
+  content: string,
+  attachments?: Array<File>,
+): Promise<ApiResponse<any>> {
+  try {
+    if (attachments && attachments.length > 0) {
+      const formData = new FormData()
+      formData.append('content', content)
+      attachments.forEach((file) => {
+        formData.append('attachments', file)
+      })
+      const response = await client.post(
+        `/letters/${letterId}/reply`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )
+      return response.data
+    }
+
+    const response = await client.post(`/letters/${letterId}/reply`, {
+      content,
+    })
+    return response.data
+  } catch (error) {
+    console.error(`Failed to send reply for letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
+
 export async function assignDivision(
   letterId: number,
   divisionId: number,

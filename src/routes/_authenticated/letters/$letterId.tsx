@@ -7,13 +7,13 @@ import type { ApiResponse } from '@/api'
 import { acceptLetter, getLetterById, returnFromDivision } from '@/api'
 import {
   AddNoteDialog,
+  AddReplyDialog,
   AssignDivisionDialog,
   AssignUserDialog,
   ConfirmationDialog,
   ErrorMessage,
   LetterActionMenu,
   LetterDetailsGrid,
-  LetterDialogs,
   LetterHeader,
   LetterTimeline,
   LoadingSpinner,
@@ -33,7 +33,6 @@ function LetterThreadView() {
   const { showSnackbar } = useSnackbar()
 
   const [replyDialogOpen, setReplyDialogOpen] = useState(false)
-  const [replyContent, setReplyContent] = useState('')
   const [addNoteDialogOpen, setAddNoteDialogOpen] = useState(false)
   const [assignDivisionDialogOpen, setAssignDivisionDialogOpen] =
     useState(false)
@@ -125,11 +124,7 @@ function LetterThreadView() {
   const getStatusColor = (status: string) =>
     statusColorCache[status] || theme.palette.grey[500]
 
-  const handleSendReply = () => {
-    console.log('Send reply:', replyContent)
-    setReplyDialogOpen(false)
-    setReplyContent('')
-  }
+  // replies are handled by AddReplyDialog component
 
   if (result.isLoading) {
     return <LoadingSpinner />
@@ -200,12 +195,10 @@ function LetterThreadView() {
           onReturnFromDivision={() => setReturnFromDivisionDialogOpen(true)}
         />
 
-        <LetterDialogs
-          replyDialogOpen={replyDialogOpen}
-          replyContent={replyContent}
-          onReplyDialogClose={() => setReplyDialogOpen(false)}
-          onReplyContentChange={setReplyContent}
-          onSendReply={handleSendReply}
+        <AddReplyDialog
+          letterId={Number(letterId)}
+          open={replyDialogOpen}
+          onClose={() => setReplyDialogOpen(false)}
         />
 
         <AddNoteDialog

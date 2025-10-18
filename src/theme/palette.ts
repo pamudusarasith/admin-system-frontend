@@ -110,6 +110,24 @@ const purpleViolet = {
   A700: '#aa00ff',
 }
 
+// Pink (Material Pink shades)
+const pinkShades = {
+  50: '#fce4ec',
+  100: '#f8bbd0',
+  200: '#f48fb1',
+  300: '#f06292',
+  400: '#ec407a',
+  500: '#e91e63', // Main pink
+  600: '#d81b60',
+  700: '#c2185b',
+  800: '#ad1457',
+  900: '#880e4f',
+  A100: '#ff80ab',
+  A200: '#ff4081',
+  A400: '#f50057',
+  A700: '#c51162',
+}
+
 export const lightPalette: PaletteOptions = {
   mode: 'light',
   primary: {
@@ -145,6 +163,11 @@ export const lightPalette: PaletteOptions = {
   purple: {
     ...purpleViolet,
     main: purpleViolet[500],
+    contrastText: '#ffffff',
+  },
+  pink: {
+    ...pinkShades,
+    main: pinkShades[500],
     contrastText: '#ffffff',
   },
   background: {
@@ -202,6 +225,11 @@ export const darkPalette: PaletteOptions = {
   purple: {
     ...purpleViolet,
     main: purpleViolet[400],
+    contrastText: '#000000',
+  },
+  pink: {
+    ...pinkShades,
+    main: pinkShades[400],
     contrastText: '#000000',
   },
   background: {
