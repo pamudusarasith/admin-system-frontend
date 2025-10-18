@@ -52,4 +52,21 @@ export enum Permission {
   letterUnassignedReopen = 'letter:unassigned:reopen',
   letterDivisionReopen = 'letter:division:reopen',
   letterOwnReopen = 'letter:own:reopen',
+  // Role management
+  roleRead = 'role:read',
+  roleCreate = 'role:create',
+  roleUpdate = 'role:update',
+  roleDelete = 'role:delete',
+
+  // User management
+  userRead = 'user:read',
+  userCreate = 'user:create',
+  userUpdate = 'user:update',
+  userDelete = 'user:delete',
+
+  // Division management
+  divisionRead = 'division:read',
+  divisionCreate = 'division:create',
+  divisionUpdate = 'division:update',
+  divisionDelete = 'division:delete',
 }
