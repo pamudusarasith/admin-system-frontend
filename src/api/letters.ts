@@ -155,6 +155,21 @@ export async function createLetter(
   }
 }
 
+export async function updateLetter(
+  letterId: number,
+  letterData: LetterFormData,
+): Promise<ApiResponse<any>> {
+  try {
+    // Only update the non-file details. Attachments are managed separately.
+    const { attachments, ...details } = letterData
+    const response = await client.put(`/letters/${letterId}`, details)
+    return response.data
+  } catch (error) {
+    console.error(`Failed to update letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
+
 export async function getLetterById(
   letterId: number,
 ): Promise<ApiResponse<Letter>> {

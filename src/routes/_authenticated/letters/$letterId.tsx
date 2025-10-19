@@ -12,6 +12,7 @@ import {
 } from '@/api'
 import {
   AddAttachmentDialog,
+  AddLetterDialog,
   AddNoteDialog,
   AddReplyDialog,
   AssignDivisionDialog,
@@ -56,6 +57,7 @@ function LetterThreadView() {
     useState(false)
   const [returnReason, setReturnReason] = useState('')
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
 
   const { letterId } = Route.useParams()
   const result = useQuery({
@@ -226,6 +228,7 @@ function LetterThreadView() {
           onReopen={() => setReopenDialogOpen(true)}
           onReturnFromDivision={() => setReturnFromDivisionDialogOpen(true)}
           onReturnFromUser={() => setReturnFromUserDialogOpen(true)}
+          onEdit={() => setEditDialogOpen(true)}
         />
 
         <AddReplyDialog
@@ -274,6 +277,12 @@ function LetterThreadView() {
           letter={letter}
           open={reopenDialogOpen}
           onClose={() => setReopenDialogOpen(false)}
+        />
+
+        <AddLetterDialog
+          open={editDialogOpen}
+          onClose={() => setEditDialogOpen(false)}
+          letter={letter}
         />
 
         <ConfirmationDialog

@@ -38,6 +38,7 @@ export {
   createLetter,
   getLetterById,
   addNote,
+  updateLetter,
   assignDivision,
   assignUser,
   returnFromDivision,
