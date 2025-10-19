@@ -183,6 +183,34 @@ export async function addNote(
   }
 }
 
+export async function addAttachments(
+  letterId: number,
+  attachments: Array<File>,
+): Promise<ApiResponse<any>> {
+  try {
+    const formData = new FormData()
+    attachments.forEach((file) => {
+      formData.append('attachments', file)
+    })
+    const response = await client.post(
+      `/letters/${letterId}/attachments`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    )
+    return response.data
+  } catch (error) {
+    console.error(
+      `Failed to add attachments to letter with ID ${letterId}:`,
+      error,
+    )
+    throw error
+  }
+}
+
 export async function sendReply(
   letterId: number,
   content: string,

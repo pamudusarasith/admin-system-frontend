@@ -20,12 +20,14 @@ interface LetterActionMenuProps {
   onClose: () => void
   letter: Letter
   onAddNote: () => void
+  onAddAttachment: () => void
   onAssignDivision: () => void
   onAssignUser: () => void
   onAcceptLetter: () => void
   onMarkAsComplete: () => void
   onReopen: () => void
   onReturnFromDivision: () => void
+  onReturnFromUser: () => void
 }
 
 export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
@@ -34,6 +36,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   onClose,
   letter,
   onAddNote,
+  onAddAttachment,
   onAssignDivision,
   onAssignUser,
   onAcceptLetter,
@@ -185,7 +188,12 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         </MenuItem>
       )}
       {canAddAttachment && (
-        <MenuItem onClick={onClose}>
+        <MenuItem
+          onClick={() => {
+            onAddAttachment()
+            onClose()
+          }}
+        >
           <AttachIcon sx={{ mr: 2 }} />
           Add Attachment
         </MenuItem>

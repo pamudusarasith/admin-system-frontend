@@ -85,7 +85,11 @@ export function LetterTimeline({
               )
               break
             case 'ADD_ATTACHMENT':
-            case 'REMOVE_ATTACHMENT':
+              element = (
+                <AddAttachmentEvent
+                  details={event.eventDetails as AddNoteEventDetails}
+                />
+              )
               break
             case 'REPLY':
               element = (
@@ -763,6 +767,80 @@ function AddNoteEvent({ details }: Readonly<AddNoteEventProps>) {
             </Link>
           ))}
         </Stack>
+      )}
+    </TimelineCard>
+  )
+}
+
+function AddAttachmentEvent({ details }: Readonly<AddNoteEventProps>) {
+  return (
+    <TimelineCard
+      icon={<AttachFileIcon sx={{ fontSize: 16, color: 'primary.main' }} />}
+      title="Added attachment"
+      borderColor={(t) => t.palette.divider}
+      headerColor={(t) => t.palette.primary.main}
+    >
+      {details.attachments && details.attachments.length > 0 ? (
+        <Stack spacing={0.5} sx={{ mt: 0 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 600,
+              color: 'text.secondary',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              fontSize: 10,
+            }}
+          >
+            Attachments ({details.attachments.length})
+          </Typography>
+          {details.attachments.map((attachment) => (
+            <Link
+              key={attachment.id}
+              href={attachment.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                p: 1,
+                borderRadius: 1,
+                backgroundColor: (t) => t.palette.action.hover,
+                transition: 'all 0.2s',
+                '&:hover': {
+                  backgroundColor: (t) => t.palette.action.selected,
+                },
+              }}
+            >
+              <AttachFileIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.primary',
+                  fontWeight: 500,
+                }}
+              >
+                {attachment.fileName}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                  ml: 'auto',
+                }}
+              >
+                {mime.getExtension(attachment.fileType)?.toUpperCase() ||
+                  'FILE'}
+              </Typography>
+            </Link>
+          ))}
+        </Stack>
+      ) : (
+        <Typography variant="body2" sx={{ lineHeight: 1.6, fontWeight: 500 }}>
+          Attachment added
+        </Typography>
       )}
     </TimelineCard>
   )

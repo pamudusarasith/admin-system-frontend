@@ -408,7 +408,10 @@ function NoLettersCard({ handleClearFilters }: NoLettersCardProps) {
         <InboxIcon
           sx={{
             fontSize: 64,
-            color: theme.palette.mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+            color:
+              theme.palette.mode === 'dark'
+                ? theme.palette.primary.light
+                : theme.palette.primary.main,
             mb: 2,
           }}
         />
