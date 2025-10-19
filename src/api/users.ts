@@ -1,4 +1,5 @@
 import { client } from './client'
+import type { AccountSetupPayload } from '@/schemas/users'
 import type { ApiResponse } from './client'
 import type { CreateUserPayload, UpdateUserProfilePayload } from '@/schemas'
 
@@ -48,4 +49,11 @@ export async function updateProfile(
     console.error('Failed to update profile:', error)
     throw error
   }
+}
+
+export async function accountSetup(
+  data: AccountSetupPayload,
+): Promise<ApiResponse<void>> {
+  const response = await client.post(`/account-setup`, data)
+  return response.data
 }

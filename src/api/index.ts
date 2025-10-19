@@ -6,7 +6,13 @@ export type { ErrorInfo, Pagination, ApiResponse } from './client'
 export { getCsrf, login, refreshToken, logout } from './auth'
 
 // User exports
-export { getUsers, createUser, getUserProfile, updateProfile } from './users'
+export {
+  getUsers,
+  createUser,
+  getUserProfile,
+  updateProfile,
+  accountSetup,
+} from './users'
 export type { User } from './users'
 
 // Role exports

@@ -19,3 +19,16 @@ export const updateUserProfileSchema = z.object({
 })
 
 export type UpdateUserProfilePayload = z.infer<typeof updateUserProfileSchema>
+
+export const accountSetupSchema = z.object({
+  fullName: z.string().trim().min(1, 'Full name is required'),
+  email: z.email('Invalid email format'),
+  phoneNumber: z
+    .string()
+    .length(10, 'Phone number must be exactly 10 digits')
+    .regex(/^\d{10}$/, 'Phone number must contain only digits'),
+  oldPassword: z.string(),
+  newPassword: z.string().min(6, 'New password must be at least 6 characters'),
+})
+
+export type AccountSetupPayload = z.infer<typeof accountSetupSchema>

@@ -21,8 +21,16 @@ export { roleFormDataSchema, roleSearchParamsSchema } from './role'
 export type { RoleFormData, RoleSearchParams } from './role'
 
 // User schemas
-export { createUserSchema, updateUserProfileSchema } from './users'
-export type { CreateUserPayload, UpdateUserProfilePayload } from './users'
+export {
+  createUserSchema,
+  updateUserProfileSchema,
+  accountSetupSchema,
+} from './users'
+export type {
+  CreateUserPayload,
+  UpdateUserProfilePayload,
+  AccountSetupPayload,
+} from './users'
 
 // Division schemas
 export { divisionSchema } from './division'

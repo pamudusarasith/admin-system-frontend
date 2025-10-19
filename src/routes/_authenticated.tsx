@@ -14,13 +14,17 @@ export const Route = createFileRoute('/_authenticated')({
       })
     }
 
-    // Check if account setup is required (except when already on profile page)
-    if (location.pathname !== '/profile') {
+    // Check if account setup is required (except when already on account-setup page)
+    if (location.pathname !== '/account-setup') {
       const profile = context.auth.profile
 
       if (profile?.accountSetupRequired) {
         throw redirect({
-          to: '/profile',
+          to: '/account-setup',
+          search: {
+            // Save current location for redirect after account setup
+            redirect: location.href,
+          },
           replace: true,
         })
       }
