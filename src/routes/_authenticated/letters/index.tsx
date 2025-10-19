@@ -401,10 +401,17 @@ function NoLettersCard({ handleClearFilters }: NoLettersCardProps) {
           p: 6,
           textAlign: 'center',
           borderRadius: 2,
-          backgroundColor: theme.palette.grey[50],
+          backgroundColor: theme.palette.background.paper,
+          border: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <InboxIcon sx={{ fontSize: 64, color: 'primary.light', mb: 2 }} />
+        <InboxIcon
+          sx={{
+            fontSize: 64,
+            color: theme.palette.mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+            mb: 2,
+          }}
+        />
         <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
           No letters found
         </Typography>

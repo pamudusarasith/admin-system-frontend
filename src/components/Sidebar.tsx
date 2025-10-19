@@ -139,10 +139,42 @@ const menuItems: Array<MenuItem> = [
 
 export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
   const theme = useTheme()
-  const { hasAnyAuthority } = useAuth()
+  const { user, profile, hasAnyAuthority } = useAuth()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
   const [expandedItems, setExpandedItems] = useState<Array<string>>([])
   const [selectedId, setSelectedId] = useState<string>('dashboard')
+
+  // Helper function to get user initials
+  const getUserInitials = () => {
+    if (profile?.fullName) {
+      return profile.fullName
+        .split(' ')
+        .map((name) => name.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    }
+    if (user?.fullName) {
+      return user.fullName
+        .split(' ')
+        .map((name) => name.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    }
+    return user?.username ? user.username.slice(0, 2).toUpperCase() : 'U'
+  }
+
+  // Helper function to get display name
+  const getDisplayName = () => {
+    return profile?.fullName || user?.fullName || user?.username || 'User'
+  }
+
+  // Helper function to get user role
+  const getUserRole = () => {
+    return profile?.role || 'User'
+  }
 
   useEffect(() => {
     const storedSelectedId = localStorage.getItem('selectedSidebarItem')
@@ -304,14 +336,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
               backgroundColor: theme.palette.primary.main,
             }}
           >
-            JD
+            {getUserInitials()}
           </Avatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="subtitle2" noWrap>
-              John Doe
+              {getDisplayName()}
             </Typography>
             <Typography variant="caption" color="text.secondary" noWrap>
-              Administrator
+              {getUserRole()}
             </Typography>
           </Box>
         </Box>
