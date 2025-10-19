@@ -33,6 +33,7 @@ export { default as EditUsers } from './Editusers'
 // ============================================
 export { AddLetterDialog } from './letter/AddLetterDialog'
 export { AddNoteDialog } from './letter/AddNoteDialog'
+export { AddAttachmentDialog } from './letter/AddAttachmentDialog'
 export { AddReplyDialog } from './letter/AddReplyDialog'
 export { AssignDivisionDialog } from './letter/AssignDivisionDialog'
 export { AssignUserDialog } from './letter/AssignUserDialog'

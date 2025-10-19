@@ -11,6 +11,7 @@ import {
   returnFromUser,
 } from '@/api'
 import {
+  AddAttachmentDialog,
   AddNoteDialog,
   AddReplyDialog,
   AssignDivisionDialog,
@@ -46,6 +47,7 @@ function LetterThreadView() {
   const [markAsCompleteDialogOpen, setMarkAsCompleteDialogOpen] =
     useState(false)
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false)
+  const [addAttachmentDialogOpen, setAddAttachmentDialogOpen] = useState(false)
   const [returnFromDivisionDialogOpen, setReturnFromDivisionDialogOpen] =
     useState(false)
   const [returnFromUserDialogOpen, setReturnFromUserDialogOpen] =
@@ -213,6 +215,7 @@ function LetterThreadView() {
           onClose={handleMenuClose}
           letter={letter}
           onAddNote={() => setAddNoteDialogOpen(true)}
+          onAddAttachment={() => setAddAttachmentDialogOpen(true)}
           onAssignDivision={() => setAssignDivisionDialogOpen(true)}
           onAssignUser={() => setAssignUserDialogOpen(true)}
           onAcceptLetter={() => setAcceptLetterDialogOpen(true)}
@@ -232,6 +235,12 @@ function LetterThreadView() {
           letterId={Number(letterId)}
           open={addNoteDialogOpen}
           onClose={() => setAddNoteDialogOpen(false)}
+        />
+
+        <AddAttachmentDialog
+          letterId={Number(letterId)}
+          open={addAttachmentDialogOpen}
+          onClose={() => setAddAttachmentDialogOpen(false)}
         />
 
         <AssignDivisionDialog

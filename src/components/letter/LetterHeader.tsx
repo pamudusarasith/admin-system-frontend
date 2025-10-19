@@ -33,7 +33,7 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
 }) => {
   const { user } = useAuth()
 
-  const canReply = user?.id && user.id === letter.assignedUser?.id
+  const canReply = user?.id && user.id === letter.assignedUser?.id && letter.status !== 'CLOSED'
 
   return (
     <Box sx={{ mb: 4 }}>
