@@ -31,7 +31,9 @@ import { alpha } from '@mui/material/styles'
 import type { Theme } from '@mui/material/styles'
 import type { ReactNode } from 'react'
 import type {
+ 
   AddNoteEventDetails,
+  ChangePriorityEventDetails,
   ChangeStatusEventDetails,
   Division,
   LetterEvent,
@@ -107,6 +109,12 @@ export function LetterTimeline({
               )
               break
             case 'CHANGE_PRIORITY':
+                  element = (
+                    <ChangePriority
+                      details={event.eventDetails as ChangePriorityEventDetails}
+                    />
+                  )
+              break
             case 'UPDATE_DETAILS':
             default:
               break
@@ -894,6 +902,38 @@ function Reopen() {
   )
 }
 
+interface ChangePriorityEventDetailsProps {
+  details: ChangePriorityEventDetails
+}
+
+function ChangePriority({ details }: Readonly<ChangePriorityEventDetailsProps>) {
+  console.log("details", details)
+  return (
+    <TimelineCard
+      icon={
+        <RestoreIcon
+          sx={{ fontSize: 16, color: (t) => t.palette.warning.light }}
+        />
+      }
+      title="Letter Priority Changed"
+      borderColor={(t) => `${t.palette.warning.light}40`}
+      headerColor={(t) => t.palette.warning.light}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          lineHeight: 1.6,
+          fontWeight: 500,
+        }}
+      >
+        {`Letter Priority Changed from ${details.previousPriority} to ${details.newPriority}`}
+      </Typography>
+    </TimelineCard>
+  )
+}
+
+
+
 type ThemeColor = string | ((theme: Theme) => string)
 
 interface TimelineCardProps {
@@ -1029,3 +1069,4 @@ function UserDetails({ user }: Readonly<UserDetailsProps>) {
     </Stack>
   )
 }
+

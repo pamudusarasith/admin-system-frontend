@@ -50,6 +50,7 @@ export type {
   Attachment,
   ChangeStatusEventDetails,
   AddNoteEventDetails,
+  ChangePriorityEventDetails,
   LetterEvent,
   Letter,
   GetLettersParams,

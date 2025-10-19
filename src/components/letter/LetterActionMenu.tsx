@@ -21,6 +21,7 @@ interface LetterActionMenuProps {
   letter: Letter
   onAddNote: () => void
   onAddAttachment: () => void
+  onChangePriority: () => void
   onAssignDivision: () => void
   onAssignUser: () => void
   onAcceptLetter: () => void
@@ -37,6 +38,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   letter,
   onAddNote,
   onAddAttachment,
+  onChangePriority,
   onAssignDivision,
   onAssignUser,
   onAcceptLetter,
@@ -170,7 +172,12 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         </MenuItem>
       )}
       {canChangePriority && (
-        <MenuItem onClick={onClose}>
+        <MenuItem
+          onClick={() => {
+            onChangePriority()
+            onClose()
+          }}
+        >
           <FlagIcon sx={{ mr: 2 }} />
           Change Priority
         </MenuItem>

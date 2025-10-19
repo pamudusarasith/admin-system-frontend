@@ -16,6 +16,7 @@ import {
   AddReplyDialog,
   AssignDivisionDialog,
   AssignUserDialog,
+  ChangePriorityDialog,
   ConfirmationDialog,
   ErrorMessage,
   LetterActionMenu,
@@ -47,6 +48,7 @@ function LetterThreadView() {
   const [markAsCompleteDialogOpen, setMarkAsCompleteDialogOpen] =
     useState(false)
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false)
+  const [changePriorityDialogOpen, setChangePriorityDialogOpen] = useState(false)
   const [addAttachmentDialogOpen, setAddAttachmentDialogOpen] = useState(false)
   const [returnFromDivisionDialogOpen, setReturnFromDivisionDialogOpen] =
     useState(false)
@@ -216,6 +218,7 @@ function LetterThreadView() {
           letter={letter}
           onAddNote={() => setAddNoteDialogOpen(true)}
           onAddAttachment={() => setAddAttachmentDialogOpen(true)}
+          onChangePriority={() => setChangePriorityDialogOpen(true)}
           onAssignDivision={() => setAssignDivisionDialogOpen(true)}
           onAssignUser={() => setAssignUserDialogOpen(true)}
           onAcceptLetter={() => setAcceptLetterDialogOpen(true)}
@@ -241,6 +244,12 @@ function LetterThreadView() {
           letterId={Number(letterId)}
           open={addAttachmentDialogOpen}
           onClose={() => setAddAttachmentDialogOpen(false)}
+        />
+
+        <ChangePriorityDialog
+          letter={letter}
+          open={changePriorityDialogOpen}
+          onClose={() => setChangePriorityDialogOpen(false)}
         />
 
         <AssignDivisionDialog
