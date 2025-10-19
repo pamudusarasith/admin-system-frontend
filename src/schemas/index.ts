@@ -35,3 +35,10 @@ export type {
 // Division schemas
 export { divisionSchema } from './division'
 export type { DivisionFormData } from './division'
+
+// Cabinet Paper schemas
+export {
+  cabinetPaperFormDataSchema,
+  cabinetPaperStatusEnum,
+} from './cabinet-paper'
+export type { CabinetPaperFormData, CabinetPaperStatus } from './cabinet-paper'

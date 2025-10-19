@@ -131,7 +131,7 @@ const menuItems: Array<MenuItem> = [
         id: 'all-papers',
         label: 'All Papers',
         icon: <ReceiptIcon />,
-        path: { to: '/papers' },
+        path: { to: '/cabinet-papers' },
       },
     ],
   },

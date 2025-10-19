@@ -48,6 +48,12 @@ export { LetterSearchBar } from './letter/LetterSearchBar'
 export { MarkAsCompleteDialog } from './letter/MarkAsCompleteDialog'
 
 // ============================================
+// Cabinet Paper Components (from ./cabinet-paper)
+// ============================================
+export { CabinetPaperCard } from './cabinet-paper/CabinetPaperCard'
+export { CabinetPaperSearchBar } from './cabinet-paper/CabinetPaperSearchBar'
+
+// ============================================
 // Role Components (from ./roles)
 // ============================================
 export { RoleCard } from './roles/RoleCard'

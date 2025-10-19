@@ -54,3 +54,6 @@ export type {
   Letter,
   GetLettersParams,
 } from './letters'
+
+export { getCabinetPapers } from './cabinet-papers'
+export type { CabinetPaper } from './cabinet-papers'
