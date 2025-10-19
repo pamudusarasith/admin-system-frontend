@@ -4,59 +4,27 @@ import {
   Box,
   Card,
   CardContent,
-  Chip,
   Container,
   Divider,
-  IconButton,
   LinearProgress,
-  Paper,
-  Stack,
   Typography,
   useTheme,
 } from '@mui/material'
 import {
-  ArrowDownward as ArrowDownwardIcon,
-  ArrowUpward as ArrowUpwardIcon,
-  Assignment as AssignmentIcon,
   Business as BusinessIcon,
-  CheckCircle as CheckCircleIcon,
   Email as EmailIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-  MoreVert as MoreVertIcon,
   People as PeopleIcon,
-  Security as SecurityIcon,
-  Warning as WarningIcon,
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
-import DivisionWorkloadCard from './DivisionWorkloadCard'
 import { getDivisions, getUsers } from '@/api'
+import { getLetters } from '@/api/letters'
+import type { Division } from '@/api/divisions'
+import type { Letter } from '@/api/letters'
 
 interface DashboardStats {
   title: string
   value: string | number
-  change: number
-  changeType: 'increase' | 'decrease' | 'neutral'
   icon: React.ReactNode
-  color: string
-}
-
-interface SystemActivity {
-  id: string
-  type: 'user' | 'division' | 'letter' | 'system'
-  title: string
-  description: string
-  timestamp: string
-  severity: 'info' | 'success' | 'warning' | 'error'
-  user?: string
-}
-
-interface QuickAction {
-  id: string
-  title: string
-  description: string
-  icon: React.ReactNode
-  action: () => void
   color: string
 }
 
@@ -76,172 +44,68 @@ export const AdminDashboard: React.FC = () => {
     staleTime: 5 * 60 * 1000,
   })
 
+  // Add query for letters/messages
+  const { data: lettersResponse, isLoading: lettersLoading } = useQuery({
+    queryKey: ['letters'],
+    queryFn: () => getLetters({}),
+    staleTime: 5 * 60 * 1000,
+  })
+
   const divisions = divisionsResponse?.data ?? []
   const users = usersResponse?.data ?? []
+  const letters = lettersResponse?.data ?? []
 
-  // Mock data for dashboard stats
+  // Function to get message counts by division
+  const getMessageCountsByDivision = (divisionId: number) => {
+    const divisionMessages = letters.filter(
+      (letter: Letter) => letter.assignedDivisionId === divisionId,
+    )
+
+    const total = divisionMessages.length
+    const completed = divisionMessages.filter(
+      (letter: Letter) =>
+        letter.status === 'completed' || letter.status === 'closed',
+    ).length
+    const pending = divisionMessages.filter(
+      (letter: Letter) =>
+        letter.status === 'pending' || letter.status === 'in_progress',
+    ).length
+    const overdue = divisionMessages.filter(
+      (letter: Letter) => letter.status === 'overdue',
+    ).length
+
+    return { total, completed, pending, overdue }
+  }
+
+  // Dashboard stats
   const dashboardStats: Array<DashboardStats> = [
     {
       title: 'Total Users',
       value: users.length || 0,
-      change: 12,
-      changeType: 'increase',
       icon: <PeopleIcon />,
       color: theme.palette.primary.main,
     },
     {
       title: 'Active Divisions',
       value: divisions.length || 0,
-      change: 3,
-      changeType: 'increase',
       icon: <BusinessIcon />,
       color: theme.palette.secondary.main,
     },
     {
       title: 'Pending Letters',
-      value: 47,
-      change: -8,
-      changeType: 'decrease',
+      value:
+        letters.filter((letter: Letter) => letter.status === 'pending')
+          .length || 0,
       icon: <EmailIcon />,
       color: theme.palette.warning.main,
     },
     {
-      title: 'Received Letters',
-      value: 124,
-      change: 15,
-      changeType: 'increase',
+      title: 'Total Letters',
+      value: letters.length || 0,
       icon: <EmailIcon />,
       color: theme.palette.success.main,
     },
   ]
-
-  // Mock system activities
-  const systemActivities: Array<SystemActivity> = [
-    {
-      id: '1',
-      type: 'user',
-      title: 'New User Registration',
-      description: 'John Smith registered as a new user',
-      timestamp: '2 minutes ago',
-      severity: 'info',
-      user: 'John Smith',
-    },
-    {
-      id: '2',
-      type: 'letter',
-      title: 'Letter Assignment',
-      description: 'Letter #2025-001 assigned to Finance Division',
-      timestamp: '15 minutes ago',
-      severity: 'success',
-      user: 'Admin',
-    },
-    {
-      id: '3',
-      type: 'system',
-      title: 'System Backup Completed',
-      description: 'Daily backup completed successfully',
-      timestamp: '1 hour ago',
-      severity: 'success',
-    },
-    {
-      id: '4',
-      type: 'division',
-      title: 'Division Update',
-      description: 'IT Division description updated',
-      timestamp: '2 hours ago',
-      severity: 'info',
-      user: 'Admin',
-    },
-    {
-      id: '5',
-      type: 'system',
-      title: 'High System Load',
-      description: 'System experiencing high CPU usage',
-      timestamp: '3 hours ago',
-      severity: 'warning',
-    },
-  ]
-
-  const quickActions: Array<QuickAction> = [
-    {
-      id: '1',
-      title: 'Add New User',
-      description: 'Create a new user account',
-      icon: <PeopleIcon />,
-      action: () => console.log('Navigate to add user'),
-      color: theme.palette.primary.main,
-    },
-    {
-      id: '2',
-      title: 'Manage Divisions',
-      description: 'View and manage divisions',
-      icon: <BusinessIcon />,
-      action: () => console.log('Navigate to divisions'),
-      color: theme.palette.secondary.main,
-    },
-    {
-      id: '3',
-      title: 'Letter Management',
-      description: 'View and manage letters',
-      icon: <EmailIcon />,
-      action: () => console.log('Navigate to letters'),
-      color: theme.palette.warning.main,
-    },
-    {
-      id: '4',
-      title: 'System Settings',
-      description: 'Configure system settings',
-      icon: <SecurityIcon />,
-      action: () => console.log('Navigate to settings'),
-      color: theme.palette.info.main,
-    },
-    {
-      id: '5',
-      title: 'View Reports',
-      description: 'Generate system reports',
-      icon: <AssignmentIcon />,
-      action: () => console.log('Navigate to reports'),
-      color: theme.palette.success.main,
-    },
-  ]
-
-  const getActivityIcon = (
-    type: SystemActivity['type'],
-    severity: SystemActivity['severity'],
-  ) => {
-    if (severity === 'error') return <ErrorIcon color="error" />
-    if (severity === 'warning') return <WarningIcon color="warning" />
-    if (severity === 'success') return <CheckCircleIcon color="success" />
-
-    switch (type) {
-      case 'user':
-        return <PeopleIcon color="primary" />
-      case 'division':
-        return <BusinessIcon color="secondary" />
-      case 'letter':
-        return <EmailIcon color="info" />
-      case 'system':
-        return <InfoIcon color="action" />
-      default:
-        return <InfoIcon color="action" />
-    }
-  }
-
-  const getChangeIcon = (changeType: 'increase' | 'decrease' | 'neutral') => {
-    if (changeType === 'increase')
-      return (
-        <ArrowUpwardIcon
-          sx={{ fontSize: 16, color: theme.palette.success.main }}
-        />
-      )
-    if (changeType === 'decrease')
-      return (
-        <ArrowDownwardIcon
-          sx={{ fontSize: 16, color: theme.palette.error.main }}
-        />
-      )
-    return null
-  }
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -300,7 +164,7 @@ export const AdminDashboard: React.FC = () => {
             }}
           >
             <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Avatar
                   sx={{
                     bgcolor: `${stat.color}20`,
@@ -317,7 +181,7 @@ export const AdminDashboard: React.FC = () => {
                     variant="h4"
                     sx={{ fontWeight: 700, color: stat.color }}
                   >
-                    {usersLoading || divisionsLoading ? (
+                    {usersLoading || divisionsLoading || lettersLoading ? (
                       <LinearProgress
                         sx={{ width: 60, height: 8, borderRadius: 1 }}
                       />
@@ -330,36 +194,17 @@ export const AdminDashboard: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {getChangeIcon(stat.changeType)}
-                <Typography
-                  variant="body2"
-                  sx={{
-                    ml: 0.5,
-                    color:
-                      stat.changeType === 'increase'
-                        ? theme.palette.success.main
-                        : stat.changeType === 'decrease'
-                          ? theme.palette.error.main
-                          : theme.palette.text.secondary,
-                    fontWeight: 500,
-                  }}
-                >
-                  {stat.changeType === 'increase' ? '+' : ''}
-                  {stat.change}% from last month
-                </Typography>
-              </Box>
             </CardContent>
           </Card>
         ))}
       </Box>
 
-      {/* Division Workload Section */}
+      {/* Division Letters Section */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-          Division Workload
+          Division Letters
         </Typography>
-        {divisionsLoading ? (
+        {divisionsLoading || lettersLoading ? (
           <LinearProgress />
         ) : divisions.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
@@ -369,160 +214,126 @@ export const AdminDashboard: React.FC = () => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gridTemplateColumns: {
+                xs: '1fr',
+                md: '1fr 1fr',
+                lg: 'repeat(3, 1fr)',
+              },
               gap: 2,
             }}
           >
-            {divisions.map((division: any) => (
-              <DivisionWorkloadCard
-                key={division.id}
-                divisionName={division.name}
-                totalTasks={10} // mock data
-                completedTasks={Math.floor(Math.random() * 10)} // mock data
-                pendingTasks={10 - Math.floor(Math.random() * 10)} // mock data
-              />
-            ))}
-          </Box>
-        )}
-      </Box>
-
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: '1fr',
-            lg: '2fr 1fr',
-          },
-          gap: 3,
-        }}
-      >
-        {/* System Activity */}
-        <Card elevation={3} sx={{ borderRadius: 3, height: 'fit-content' }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 3,
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Recent System Activity
-              </Typography>
-              <IconButton size="small">
-                <MoreVertIcon />
-              </IconButton>
-            </Box>
-            <Stack spacing={2}>
-              {systemActivities.map((activity, index) => (
-                <Box key={activity.id}>
-                  <Box
-                    sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}
-                  >
-                    <Avatar sx={{ width: 40, height: 40 }}>
-                      {getActivityIcon(activity.type, activity.severity)}
-                    </Avatar>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {activity.title}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 0.5 }}
-                      >
-                        {activity.description}
-                      </Typography>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
-                        <Typography variant="caption" color="text.secondary">
-                          {activity.timestamp}
-                        </Typography>
-                        {activity.user && (
-                          <>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              •
-                            </Typography>
-                            <Chip
-                              label={activity.user}
-                              size="small"
-                              variant="outlined"
-                              sx={{ height: 20, fontSize: '0.7rem' }}
-                            />
-                          </>
-                        )}
-                      </Box>
-                    </Box>
-                  </Box>
-                  {index < systemActivities.length - 1 && (
-                    <Divider sx={{ mt: 2 }} />
-                  )}
-                </Box>
-              ))}
-            </Stack>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions & System Overview */}
-        <Stack spacing={3}>
-          {/* Quick Actions */}
-          <Card elevation={3} sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-                Quick Actions
-              </Typography>
-              <Stack spacing={2}>
-                {quickActions.map((action) => (
-                  <Paper
-                    key={action.id}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: `1px solid ${theme.palette.divider}`,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        borderColor: action.color,
-                        boxShadow: `0 4px 12px ${action.color}20`,
-                        transform: 'translateY(-2px)',
-                      },
-                    }}
-                    onClick={action.action}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {divisions.map((division: Division) => {
+              const messageCounts = getMessageCountsByDivision(division.id)
+              return (
+                <Card
+                  key={division.id}
+                  elevation={2}
+                  sx={{
+                    borderRadius: 2,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme.shadows[6],
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Avatar
                         sx={{
-                          bgcolor: `${action.color}20`,
-                          color: action.color,
-                          width: 36,
-                          height: 36,
+                          bgcolor: theme.palette.primary.main,
+                          width: 40,
+                          height: 40,
+                          mr: 2,
                         }}
                       >
-                        {action.icon}
+                        <BusinessIcon />
                       </Avatar>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ fontWeight: 600 }}
-                        >
-                          {action.title}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {action.description}
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {division.name}
                         </Typography>
                       </Box>
                     </Box>
-                  </Paper>
-                ))}
-              </Stack>
-            </CardContent>
-          </Card>
-        </Stack>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    <Box
+                      sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          Total Letters:
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {messageCounts.total}
+                        </Typography>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <Typography variant="body2" color="success.main">
+                          Completed:
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: 600, color: 'success.main' }}
+                        >
+                          {messageCounts.completed}
+                        </Typography>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <Typography variant="body2" color="warning.main">
+                          Pending:
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: 600, color: 'warning.main' }}
+                        >
+                          {messageCounts.pending}
+                        </Typography>
+                      </Box>
+
+                      {messageCounts.overdue > 0 && (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <Typography variant="body2" color="error.main">
+                            Overdue:
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 600, color: 'error.main' }}
+                          >
+                            {messageCounts.overdue}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </Box>
+        )}
       </Box>
     </Container>
   )
