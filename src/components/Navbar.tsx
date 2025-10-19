@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   AppBar,
   Avatar,
@@ -29,8 +29,29 @@ import { useNavigate } from '@tanstack/react-router'
 import { useTheme as useThemeContext } from '@/theme'
 import { useAuth } from '@/core'
 
+// Import the WebSocket service
+import { webSocketService } from '@/services/WebSocketService'
+
+// Define a type for our notification object
+interface Notification {
+  title: string
+  message: string
+  link?: string
+}
+
 interface NavbarProps {
   onMenuClick: () => void
+}
+
+// --- ADD THIS HELPER FUNCTION ---
+/**
+ * Safely extracts the token from the user object, which currently
+ * has an incomplete type definition in the core auth module.
+ * @param user The user object from the auth context.
+ * @returns The user's JWT token, or undefined if not available.
+ */
+const getAuthToken = (user: any): string | undefined => {
+  return user?.token
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
@@ -43,6 +64,30 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     useState<null | HTMLElement>(null)
   const [notificationsMenuAnchor, setNotificationsMenuAnchor] =
     useState<null | HTMLElement>(null)
+
+  // State for real-time notifications
+  const [notifications, setNotifications] = useState<Array<Notification>>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  // useEffect hook to manage the WebSocket connection
+  // ... inside your Navbar component
+  useEffect(() => {
+    // --- USE THE HELPER FUNCTION HERE ---
+    const token = getAuthToken(auth.user)
+
+    if (token) {
+      // ... the rest of your logic is unchanged
+      const onNotificationReceived = (newNotification: Notification) => {
+        setNotifications((prev) => [newNotification, ...prev])
+        setUnreadCount((prev) => prev + 1)
+      }
+      webSocketService.connect(token, onNotificationReceived)
+    }
+
+    return () => {
+      webSocketService.disconnect()
+    }
+  }, [auth.user]) // --- UPDATE THE DEPENDENCY ---
 
   // Helper function to get user initials
   const getUserInitials = () => {
@@ -94,6 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     event: React.MouseEvent<HTMLElement>,
   ) => {
     setNotificationsMenuAnchor(event.currentTarget)
+    setUnreadCount(0) // Reset unread count when menu is opened
   }
 
   const handleNotificationsMenuClose = () => {
@@ -195,7 +241,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                 },
               }}
             >
-              <Badge badgeContent={4} color="error">
+              <Badge
+                badgeContent={unreadCount}
+                color="error"
+                invisible={unreadCount === 0}
+              >
                 <NotificationsIcon />
               </Badge>
             </IconButton>
@@ -335,46 +385,30 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
             </Typography>
           </Box>
           <Divider />
-          <MenuItem onClick={handleNotificationsMenuClose}>
-            <Box>
-              <Typography variant="subtitle2" color="text.primary">
-                New user registered
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                2 minutes ago
-              </Typography>
-            </Box>
-          </MenuItem>
-          <MenuItem onClick={handleNotificationsMenuClose}>
-            <Box>
-              <Typography variant="subtitle2" color="text.primary">
-                System update available
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                1 hour ago
-              </Typography>
-            </Box>
-          </MenuItem>
-          <MenuItem onClick={handleNotificationsMenuClose}>
-            <Box>
-              <Typography variant="subtitle2" color="text.primary">
-                Backup completed successfully
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                3 hours ago
-              </Typography>
-            </Box>
-          </MenuItem>
-          <MenuItem onClick={handleNotificationsMenuClose}>
-            <Box>
-              <Typography variant="subtitle2" color="text.primary">
-                Database maintenance scheduled
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                1 day ago
-              </Typography>
-            </Box>
-          </MenuItem>
+          {notifications.length > 0 ? (
+            notifications.map((notification, index) => (
+              <MenuItem
+                key={index}
+                onClick={() => {
+                  if (notification.link) navigate({ to: notification.link })
+                  handleNotificationsMenuClose()
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2" color="text.primary">
+                    {notification.title}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {notification.message}
+                  </Typography>
+                </Box>
+              </MenuItem>
+            ))
+          ) : (
+            <MenuItem disabled>
+              <ListItemText primary="You have no new notifications" />
+            </MenuItem>
+          )}
         </Menu>
       </Toolbar>
     </AppBar>
