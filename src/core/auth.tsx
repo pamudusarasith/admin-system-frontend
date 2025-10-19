@@ -1,10 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { jwtDecode } from 'jwt-decode'
+import type { User as UserProfile } from '@/api'
 import {
   login as apiLogin,
   logout as apiLogout,
   refreshToken as apiRefreshToken,
+  getUserProfile,
 } from '@/api'
+
+export type { User as UserProfile } from '@/api'
 
 interface User {
   id: number
@@ -18,6 +22,7 @@ interface User {
 export interface AuthState {
   isAuthenticated: boolean
   user: User | null
+  profile: UserProfile | null
   isLoading: boolean
   error: string | null
   hasAuthority: (authority: string) => boolean
@@ -46,6 +51,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -89,6 +95,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setError(null) // Clear errors on successful auth
     } else {
       setUser(null)
+      setProfile(null) // Clear profile when user is logged out
+    }
+  }
+
+  // Fetch and store user profile
+  const fetchProfile = async (): Promise<void> => {
+    try {
+      const response = await getUserProfile()
+      if (response.data) {
+        setProfile(response.data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err)
+      // Don't throw - profile fetch failure shouldn't break auth
     }
   }
 
@@ -102,6 +122,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { access_token } = await apiLogin(username, password)
       localStorage.setItem('access_token', access_token)
       updateAuthState()
+
+      // Fetch profile after successful login
+      await fetchProfile()
+
       return true
     } catch (loginError: any) {
       const errorMessage = loginError.response?.data?.message || 'Login failed'
@@ -141,6 +165,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { access_token } = await apiRefreshToken()
       localStorage.setItem('access_token', access_token)
       updateAuthState()
+
+      // Fetch profile after successful token refresh
+      await fetchProfile()
+
       return true
     } catch (refreshError) {
       console.error('Token refresh failed:', refreshError)
@@ -164,6 +192,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (userData) {
         setUser(userData)
         setError(null)
+        // Fetch profile for existing session
+        await fetchProfile()
       } else {
         setUser(null)
         // Attempt to refresh token if none found
@@ -215,6 +245,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     () => ({
       isAuthenticated: user !== null,
       user,
+      profile,
       isLoading,
       error,
       hasAuthority,
@@ -224,7 +255,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       logout,
       clearError,
     }),
-    [user, isLoading, error],
+    [user, profile, isLoading, error],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

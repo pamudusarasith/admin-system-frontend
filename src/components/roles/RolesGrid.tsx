@@ -5,7 +5,7 @@ import type { Role } from '@/api'
 interface RolesGridProps {
   loading: boolean
   searchTerm: string
-  filteredRoles: Array<Role>
+  roles: Array<Role>
   onViewDetails: (role: Role) => void
   onMenuOpen: (event: React.MouseEvent<HTMLElement>, role: Role) => void
 }
@@ -13,7 +13,7 @@ interface RolesGridProps {
 export function RolesGrid({
   loading,
   searchTerm,
-  filteredRoles,
+  roles,
   onViewDetails,
   onMenuOpen,
 }: Readonly<RolesGridProps>) {
@@ -33,7 +33,7 @@ export function RolesGrid({
     )
   }
 
-  if (filteredRoles.length === 0) {
+  if (roles.length === 0) {
     return (
       <Box
         sx={{
@@ -56,7 +56,7 @@ export function RolesGrid({
 
   return (
     <>
-      {filteredRoles.map((role) => (
+      {roles.map((role) => (
         <RoleCard
           key={role.id}
           role={role}

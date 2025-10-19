@@ -13,11 +13,9 @@ import {
   useTheme,
 } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-
 import { Edit } from '@mui/icons-material'
 import type { UpdateUserProfilePayload } from '@/schemas'
 import { EditProfileForm, SidebarLayout, useSnackbar } from '@/components'
-
 import { getUserProfile, updateProfile } from '@/api'
 
 export const Route = createFileRoute('/_authenticated/profile')({
@@ -32,16 +30,18 @@ function ProfilePage() {
 
   // TanStack Query for fetching user profile
   const {
-    data: user,
+    data: userResponse,
     isLoading: loading,
     error,
   } = useQuery({
-    queryKey: ['userProfile'],
+    queryKey: ['user-profile'],
     queryFn: getUserProfile,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 2, // Retry failed requests 2 times
   })
+
+  const user = userResponse?.data
 
   const updateProfileMutation = useMutation({
     mutationFn: (data: UpdateUserProfilePayload) => updateProfile(data),
@@ -51,7 +51,7 @@ function ProfilePage() {
         message: data?.message || 'Profile updated successfully.',
         severity: 'success',
       })
-      queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+      queryClient.invalidateQueries({ queryKey: ['user-profile'] })
       setEditFormOpen(false)
     },
     onError: (e) => {
@@ -101,7 +101,7 @@ function ProfilePage() {
             </Typography>
             <Button
               variant="contained"
-              onClick={() => window.location.reload()}
+              onClick={() => globalThis.location.reload()}
               sx={{ mr: 2 }}
             >
               Refresh Page
@@ -125,11 +125,6 @@ function ProfilePage() {
       </SidebarLayout>
     )
   }
-
-  console.log('User Profile Name:', user)
-  console.log('User Profile Name:', user.fullName)
-  console.log('User Profile Phone:', user.phoneNumber)
-  console.log('User Profile Status:', user.isActive)
 
   return (
     <SidebarLayout>
@@ -179,7 +174,7 @@ function ProfilePage() {
                   {/* User Profile Typography */}
                   <Box
                     sx={{
-                      border: `2px solid ${theme.palette.secondary}`,
+                      border: `2px solid ${theme.palette.secondary.main}`,
                       borderRadius: 2,
                       bgcolor: theme.palette.background.default,
                       px: 3,
