@@ -44,6 +44,44 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
   const [notificationsMenuAnchor, setNotificationsMenuAnchor] =
     useState<null | HTMLElement>(null)
 
+  // Helper function to get user initials
+  const getUserInitials = () => {
+    if (auth.profile?.fullName) {
+      return auth.profile.fullName
+        .split(' ')
+        .map((name) => name.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    }
+    if (auth.user?.fullName) {
+      return auth.user.fullName
+        .split(' ')
+        .map((name) => name.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    }
+    return auth.user?.username
+      ? auth.user.username.slice(0, 2).toUpperCase()
+      : 'U'
+  }
+
+  // Helper function to get display name
+  const getDisplayName = () => {
+    return (
+      auth.profile?.fullName ||
+      auth.user?.fullName ||
+      auth.user?.username ||
+      'User'
+    )
+  }
+
+  // Helper function to get user email
+  const getUserEmail = () => {
+    return auth.profile?.email || 'user@example.com'
+  }
+
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setProfileMenuAnchor(event.currentTarget)
   }
@@ -186,7 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                   fontSize: '0.875rem',
                 }}
               >
-                JD
+                {getUserInitials()}
               </Avatar>
             </IconButton>
           </Tooltip>
@@ -231,10 +269,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
         >
           <Box sx={{ px: 2, py: 1.5 }}>
             <Typography variant="subtitle2" color="text.primary">
-              John Doe
+              {getDisplayName()}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              john.doe@example.com
+              {getUserEmail()}
             </Typography>
           </Box>
           <Divider />

@@ -27,8 +27,9 @@ import {
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
-import { accountSetupSchema, type AccountSetupPayload } from '@/schemas'
 import type { ApiResponse } from '@/api'
+import type {AccountSetupPayload} from '@/schemas';
+import {  accountSetupSchema } from '@/schemas'
 import { accountSetup } from '@/api'
 import { AnimatedIcon, useSnackbar } from '@/components'
 import { useAuth } from '@/core'
