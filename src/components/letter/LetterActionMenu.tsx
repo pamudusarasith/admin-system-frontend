@@ -46,6 +46,7 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   onMarkAsComplete,
   onReopen,
   onReturnFromDivision,
+  onReturnFromUser,
   onEdit,
 }) => {
   const { user, hasAuthority, hasAnyAuthority } = useAuth()
@@ -69,10 +70,19 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
     !letter.assignedUser &&
     hasAuthority(P.letterAssignUser)
   const canReturnFromDivision =
+    letter.status !== 'CLOSED' &&
     letter.assignedDivision &&
     letter.assignedDivision.id === user?.divisionId &&
     !letter.assignedUser &&
     hasAuthority(P.letterReturnFromDivision)
+
+  const canReturnFromUser =
+    letter.status !== 'CLOSED' &&
+    letter.assignedDivision &&
+    letter.assignedDivision.id === user?.divisionId &&
+    letter.assignedUser &&
+    letter.assignedUser.id === user.id &&
+    hasAuthority(P.letterReturnFromUser)
   const canAcceptLetter =
     letter.status !== 'CLOSED' &&
     letter.assignedDivision &&
@@ -165,6 +175,17 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         >
           <ReturnIcon sx={{ mr: 2 }} />
           Return from Division
+        </MenuItem>
+      )}
+      {canReturnFromUser && (
+        <MenuItem
+          onClick={() => {
+            onReturnFromUser()
+            onClose()
+          }}
+        >
+          <ReturnIcon sx={{ mr: 2 }} />
+          Return from User
         </MenuItem>
       )}
       {canAcceptLetter && (
