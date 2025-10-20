@@ -53,7 +53,10 @@ export { MarkAsCompleteDialog } from './letter/MarkAsCompleteDialog'
 // Cabinet Paper Components (from ./cabinet-paper)
 // ============================================
 export { AddCabinetPaperDialog } from './cabinet-paper/AddCabinetPaperDialog'
+export { CabinetPaperActionMenu } from './cabinet-paper/CabinetPaperActionMenu'
 export { CabinetPaperCard } from './cabinet-paper/CabinetPaperCard'
+export { CabinetPaperDetailsGrid } from './cabinet-paper/CabinetPaperDetailsGrid'
+export { CabinetPaperHeader } from './cabinet-paper/CabinetPaperHeader'
 export { CabinetPaperSearchBar } from './cabinet-paper/CabinetPaperSearchBar'
 
 // ============================================

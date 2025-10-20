@@ -1,3 +1,6 @@
 export { AddCabinetPaperDialog } from './AddCabinetPaperDialog'
+export { CabinetPaperActionMenu } from './CabinetPaperActionMenu'
 export { CabinetPaperCard } from './CabinetPaperCard'
+export { CabinetPaperDetailsGrid } from './CabinetPaperDetailsGrid'
+export { CabinetPaperHeader } from './CabinetPaperHeader'
 export { CabinetPaperSearchBar } from './CabinetPaperSearchBar'

@@ -1,0 +1,1 @@
+export { getFileTypeDescription } from './fileTypes'

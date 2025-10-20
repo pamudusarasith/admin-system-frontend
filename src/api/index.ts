@@ -57,7 +57,13 @@ export type {
   GetLettersParams,
 } from './letters'
 
-export { getCabinetPapers, createCabinetPaper } from './cabinet-papers'
+export {
+  getCabinetPapers,
+  createCabinetPaper,
+  getCabinetPaperById,
+  updateCabinetPaper,
+  deleteCabinetPaper,
+} from './cabinet-papers'
 export type { CabinetPaper, CabinetPaperCategory } from './cabinet-papers'
 
 // Cabinet Categories Exports

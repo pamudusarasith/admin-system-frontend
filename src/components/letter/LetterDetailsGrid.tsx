@@ -24,6 +24,7 @@ import type {
   SenderDetails,
   User,
 } from '@/api'
+import { getFileTypeDescription } from '@/utils'
 
 interface LetterDetailsGridProps {
   sender: SenderDetails
@@ -462,7 +463,10 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
                     {attachment.fileName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" noWrap>
-                    {attachment.fileType || 'Unknown type'}
+                    {getFileTypeDescription(
+                      attachment.fileType || '',
+                      attachment.fileName,
+                    )}
                   </Typography>
                 </Box>
                 <IconButton size="small" sx={{ ml: 0.5 }}>
