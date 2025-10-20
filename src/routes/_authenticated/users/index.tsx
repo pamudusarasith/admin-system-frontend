@@ -1,15 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import {
-  Alert,
-  Box,
-  Button,
-  Container,
-  Modal,
-  Paper,
-  useTheme,
-} from '@mui/material'
+import { Alert, Button, Container, Paper, useTheme } from '@mui/material'
 import type { ApiResponse, User } from '@/api'
 import type { UserSearchParams } from '@/schemas'
 import { userSearchParamsSchema } from '@/schemas'
@@ -22,6 +14,7 @@ import {
   UserTable,
 } from '@/components'
 import { getUsers } from '@/api'
+import { Permission as P, useAuth } from '@/core'
 
 export const Route = createFileRoute('/_authenticated/users/')({
   component: RouteComponent,
@@ -31,9 +24,14 @@ export const Route = createFileRoute('/_authenticated/users/')({
 function RouteComponent() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { hasAuthority } = useAuth()
   const [open, setOpen] = useState(false)
 
   const searchParams = Route.useSearch()
+
+  // Check permissions
+  const canCreate = hasAuthority(P.userCreate)
+  const canUpdate = hasAuthority(P.userUpdate)
 
   const {
     data: response,
@@ -119,7 +117,7 @@ function RouteComponent() {
   return (
     <SidebarLayout>
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <UserHeader onAddUser={handleOpen} />
+        <UserHeader onAddUser={canCreate ? handleOpen : undefined} />
 
         <Paper
           elevation={1}
@@ -167,6 +165,7 @@ function RouteComponent() {
             users={users}
             isLoading={isLoading}
             emptyMessage={emptyMessage}
+            canUpdate={canUpdate}
           />
 
           {pagination && (
@@ -178,31 +177,7 @@ function RouteComponent() {
           )}
         </Paper>
 
-        <Modal
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="create-user-modal"
-          aria-describedby="create-user-form"
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: { xs: '90%', sm: '80%', md: '70%', lg: '60%' },
-              maxWidth: 1000,
-              maxHeight: '90vh',
-              bgcolor: 'background.paper',
-              borderRadius: 2,
-              boxShadow: 24,
-              p: 4,
-              overflow: 'auto',
-            }}
-          >
-            <CreateUser onClose={handleClose} />
-          </Box>
-        </Modal>
+        <CreateUser open={open} onClose={handleClose} />
       </Container>
     </SidebarLayout>
   )

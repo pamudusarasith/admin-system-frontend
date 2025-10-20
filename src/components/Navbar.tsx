@@ -23,7 +23,6 @@ import {
   Notifications as NotificationsIcon,
   Person as PersonIcon,
   Search as SearchIcon,
-  Settings as SettingsIcon,
 } from '@mui/icons-material'
 import { useNavigate } from '@tanstack/react-router'
 import { useTheme as useThemeContext } from '@/theme'
@@ -86,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     setProfileMenuAnchor(event.currentTarget)
   }
 
-  const handleProfileMenuClose = () => {
+  const handleMenuClose = () => {
     setProfileMenuAnchor(null)
   }
 
@@ -100,6 +99,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     setNotificationsMenuAnchor(null)
   }
 
+  const handleProfile = () => {
+    // Navigate to profile page
+    handleMenuClose()
+    navigate({ to: '/profile' })
+  }
+
   const handleLogout = async () => {
     try {
       await auth.logout()
@@ -107,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
       console.error('Logout failed:', error)
     } finally {
       // Navigate to login regardless of logout success/failure
-      handleProfileMenuClose()
+      handleMenuClose()
       navigate({ to: '/login', search: { redirect: '/' } })
     }
   }
@@ -235,32 +240,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           id="profile-menu"
           anchorEl={profileMenuAnchor}
           open={Boolean(profileMenuAnchor)}
-          onClose={handleProfileMenuClose}
-          onClick={handleProfileMenuClose}
-          PaperProps={{
-            elevation: 3,
-            sx: {
-              overflow: 'visible',
-              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-              mt: 1.5,
-              minWidth: 200,
-              '& .MuiAvatar-root': {
-                width: 32,
-                height: 32,
-                ml: -0.5,
-                mr: 1,
-              },
-              '&:before': {
-                content: '""',
-                display: 'block',
-                position: 'absolute',
-                top: 0,
-                right: 14,
-                width: 10,
-                height: 10,
-                bgcolor: 'background.paper',
-                transform: 'translateY(-50%) rotate(45deg)',
-                zIndex: 0,
+          onClose={handleMenuClose}
+          onClick={handleMenuClose}
+          slotProps={{
+            paper: {
+              elevation: 3,
+              sx: {
+                overflow: 'visible',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                mt: 1.5,
+                minWidth: 200,
+                '& .MuiAvatar-root': {
+                  width: 32,
+                  height: 32,
+                  ml: -0.5,
+                  mr: 1,
+                },
+                '&:before': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  right: 14,
+                  width: 10,
+                  height: 10,
+                  bgcolor: 'background.paper',
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  zIndex: 0,
+                },
               },
             },
           }}
@@ -276,19 +283,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
             </Typography>
           </Box>
           <Divider />
-          <MenuItem onClick={handleProfileMenuClose}>
+          <MenuItem onClick={handleProfile}>
             <ListItemIcon>
               <PersonIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>Profile</ListItemText>
           </MenuItem>
-          <MenuItem onClick={handleProfileMenuClose}>
-            <ListItemIcon>
-              <SettingsIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Settings</ListItemText>
-          </MenuItem>
-          <Divider />
           <MenuItem onClick={handleLogout}>
             <ListItemIcon>
               <LogoutIcon fontSize="small" />
@@ -296,33 +296,33 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
             <ListItemText>Logout</ListItemText>
           </MenuItem>
         </Menu>
-
-        {/* Notifications Menu */}
         <Menu
           id="notifications-menu"
           anchorEl={notificationsMenuAnchor}
           open={Boolean(notificationsMenuAnchor)}
           onClose={handleNotificationsMenuClose}
           onClick={handleNotificationsMenuClose}
-          PaperProps={{
-            elevation: 3,
-            sx: {
-              overflow: 'visible',
-              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-              mt: 1.5,
-              minWidth: 300,
-              maxWidth: 400,
-              '&:before': {
-                content: '""',
-                display: 'block',
-                position: 'absolute',
-                top: 0,
-                right: 20,
-                width: 10,
-                height: 10,
-                bgcolor: 'background.paper',
-                transform: 'translateY(-50%) rotate(45deg)',
-                zIndex: 0,
+          slotProps={{
+            paper: {
+              elevation: 3,
+              sx: {
+                overflow: 'visible',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                mt: 1.5,
+                minWidth: 300,
+                maxWidth: 400,
+                '&:before': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  right: 20,
+                  width: 10,
+                  height: 10,
+                  bgcolor: 'background.paper',
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  zIndex: 0,
+                },
               },
             },
           }}

@@ -8,12 +8,8 @@ import {
   InputAdornment,
   Paper,
   Stack,
-  Step,
-  StepLabel,
-  Stepper,
   TextField,
   Typography,
-  useMediaQuery,
   useTheme,
 } from '@mui/material'
 import {
@@ -48,13 +44,9 @@ function AccountSetupPage() {
   const { showSnackbar } = useSnackbar()
   const { profile, refresh } = useAuth()
   const search = Route.useSearch()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const [showOldPassword, setShowOldPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
-  const [activeStep, setActiveStep] = useState(0)
-
-  const steps = ['Personal Info', 'Contact Details', 'Security']
 
   const accountSetupMutation = useMutation({
     mutationFn: accountSetup,
@@ -95,254 +87,6 @@ function AccountSetupPage() {
       await accountSetupMutation.mutateAsync(value)
     },
   })
-
-  const handleNext = () => {
-    setActiveStep((prevStep) => Math.min(prevStep + 1, steps.length - 1))
-  }
-
-  const handleBack = () => {
-    setActiveStep((prevStep) => Math.max(prevStep - 1, 0))
-  }
-
-  const getStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return (
-          <form.Field name="fullName">
-            {(field) => (
-              <TextField
-                fullWidth
-                label="Full Name"
-                type="text"
-                variant="outlined"
-                value={field.state.value || ''}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                error={
-                  field.state.meta.isTouched && !!field.state.meta.errors.length
-                }
-                helperText={field.state.meta.errors
-                  .map((e) => e?.message)
-                  .join(', ')}
-                disabled={accountSetupMutation.isPending}
-                autoComplete="name"
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <AccountCircleIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                  },
-                }}
-              />
-            )}
-          </form.Field>
-        )
-
-      case 1:
-        return (
-          <Stack spacing={3}>
-            <form.Field name="email">
-              {(field) => (
-                <TextField
-                  fullWidth
-                  label="Email Address"
-                  type="email"
-                  variant="outlined"
-                  value={field.state.value || ''}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={
-                    field.state.meta.isTouched &&
-                    !!field.state.meta.errors.length
-                  }
-                  helperText={field.state.meta.errors
-                    .map((e) => e?.message)
-                    .join(', ')}
-                  disabled={accountSetupMutation.isPending}
-                  autoComplete="email"
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <EmailIcon color="action" />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              )}
-            </form.Field>
-
-            <form.Field name="phoneNumber">
-              {(field) => (
-                <TextField
-                  fullWidth
-                  label="Phone Number"
-                  type="tel"
-                  variant="outlined"
-                  value={field.state.value || ''}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={
-                    field.state.meta.isTouched &&
-                    !!field.state.meta.errors.length
-                  }
-                  helperText={field.state.meta.errors
-                    .map((e) => e?.message)
-                    .join(', ')}
-                  disabled={accountSetupMutation.isPending}
-                  placeholder="0771234567"
-                  autoComplete="tel"
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <PhoneIcon color="action" />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              )}
-            </form.Field>
-          </Stack>
-        )
-
-      case 2:
-        return (
-          <Stack spacing={3}>
-            <form.Field name="oldPassword">
-              {(field) => (
-                <TextField
-                  fullWidth
-                  label="Current Password"
-                  type={showOldPassword ? 'text' : 'password'}
-                  variant="outlined"
-                  value={field.state.value || ''}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={
-                    field.state.meta.isTouched &&
-                    !!field.state.meta.errors.length
-                  }
-                  helperText={field.state.meta.errors
-                    .map((e) => e?.message)
-                    .join(', ')}
-                  disabled={accountSetupMutation.isPending}
-                  autoComplete="current-password"
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LockIcon color="action" />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowOldPassword(!showOldPassword)}
-                            edge="end"
-                            disabled={accountSetupMutation.isPending}
-                          >
-                            {showOldPassword ? (
-                              <VisibilityOff />
-                            ) : (
-                              <Visibility />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              )}
-            </form.Field>
-
-            <form.Field name="newPassword">
-              {(field) => (
-                <TextField
-                  fullWidth
-                  label="New Password"
-                  type={showNewPassword ? 'text' : 'password'}
-                  variant="outlined"
-                  value={field.state.value || ''}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={
-                    field.state.meta.isTouched &&
-                    !!field.state.meta.errors.length
-                  }
-                  helperText={field.state.meta.errors
-                    .map((e) => e?.message)
-                    .join(', ')}
-                  disabled={accountSetupMutation.isPending}
-                  autoComplete="new-password"
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LockIcon color="action" />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowNewPassword(!showNewPassword)}
-                            edge="end"
-                            disabled={accountSetupMutation.isPending}
-                          >
-                            {showNewPassword ? (
-                              <VisibilityOff />
-                            ) : (
-                              <Visibility />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              )}
-            </form.Field>
-
-            <Alert severity="info" sx={{ borderRadius: 2 }}>
-              For security purposes, you must change your password on first
-              login.
-            </Alert>
-          </Stack>
-        )
-
-      default:
-        return null
-    }
-  }
 
   return (
     <Box
@@ -417,20 +161,6 @@ function AccountSetupPage() {
             </Typography>
           </Box>
 
-          {/* Stepper */}
-          <Stepper
-            activeStep={activeStep}
-            alternativeLabel={!isMobile}
-            orientation={isMobile ? 'vertical' : 'horizontal'}
-            sx={{ width: '100%' }}
-          >
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-
           {/* Form */}
           <Box
             component="form"
@@ -441,69 +171,309 @@ function AccountSetupPage() {
             }}
             sx={{ width: '100%' }}
           >
-            <Stack spacing={4}>
-              {/* Step Content */}
-              <Box sx={{ minHeight: 200 }}>{getStepContent(activeStep)}</Box>
-
-              {/* Navigation Buttons */}
-              <Stack
-                direction={{ xs: 'column-reverse', sm: 'row' }}
-                spacing={2}
-                justifyContent="space-between"
+            <Stack spacing={3}>
+              {/* Personal Info Section */}
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
               >
-                <Button
-                  disabled={activeStep === 0 || accountSetupMutation.isPending}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handleBack()
-                  }}
-                  variant="outlined"
-                  size="large"
-                  fullWidth={isMobile}
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                  }}
-                >
-                  Back
-                </Button>
+                <AccountCircleIcon /> Personal Information
+              </Typography>
 
-                <Button
-                  type={activeStep === steps.length - 1 ? 'submit' : 'button'}
-                  onClick={(e) => {
-                    if (activeStep !== steps.length - 1) {
-                      e.preventDefault()
-                      handleNext()
+              <form.Field name="fullName">
+                {(field) => (
+                  <TextField
+                    fullWidth
+                    label="Full Name"
+                    type="text"
+                    variant="outlined"
+                    value={field.state.value || ''}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    error={
+                      field.state.meta.isTouched &&
+                      !!field.state.meta.errors.length
                     }
-                  }}
-                  variant="contained"
-                  size="large"
-                  fullWidth={isMobile}
-                  disabled={accountSetupMutation.isPending}
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                    boxShadow: `0 4px 20px ${theme.palette.primary.main}30`,
-                    '&:hover': {
-                      background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
-                      transform: 'translateY(-2px)',
-                      boxShadow: `0 8px 25px ${theme.palette.primary.main}40`,
-                    },
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  {(() => {
-                    if (accountSetupMutation.isPending) return 'Saving...'
-                    if (activeStep === steps.length - 1) return 'Complete Setup'
-                    return 'Next'
-                  })()}
-                </Button>
-              </Stack>
+                    helperText={
+                      field.state.meta.isTouched &&
+                      field.state.meta.errors[0]?.message
+                    }
+                    disabled={accountSetupMutation.isPending}
+                    autoComplete="name"
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <AccountCircleIcon color="action" />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+                )}
+              </form.Field>
+
+              {/* Contact Details Section */}
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  mt: 2,
+                }}
+              >
+                <EmailIcon /> Contact Details
+              </Typography>
+
+              <form.Field name="email">
+                {(field) => (
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    type="email"
+                    variant="outlined"
+                    value={field.state.value || ''}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    error={
+                      field.state.meta.isTouched &&
+                      !!field.state.meta.errors.length
+                    }
+                    helperText={
+                      field.state.meta.isTouched &&
+                      field.state.meta.errors[0]?.message
+                    }
+                    disabled={accountSetupMutation.isPending}
+                    autoComplete="email"
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <EmailIcon color="action" />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+                )}
+              </form.Field>
+
+              <form.Field name="phoneNumber">
+                {(field) => (
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    type="tel"
+                    variant="outlined"
+                    value={field.state.value || ''}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    error={
+                      field.state.meta.isTouched &&
+                      !!field.state.meta.errors.length
+                    }
+                    helperText={
+                      field.state.meta.isTouched &&
+                      field.state.meta.errors[0]?.message
+                    }
+                    disabled={accountSetupMutation.isPending}
+                    placeholder="0771234567"
+                    autoComplete="tel"
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <PhoneIcon color="action" />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+                )}
+              </form.Field>
+
+              {/* Security Section */}
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  mt: 2,
+                }}
+              >
+                <LockIcon /> Security
+              </Typography>
+
+              <Alert severity="info" sx={{ borderRadius: 2 }}>
+                For security purposes, you must change your password on first
+                login.
+              </Alert>
+
+              <form.Field name="oldPassword">
+                {(field) => (
+                  <TextField
+                    fullWidth
+                    label="Current Password"
+                    type={showOldPassword ? 'text' : 'password'}
+                    variant="outlined"
+                    value={field.state.value || ''}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    error={
+                      field.state.meta.isTouched &&
+                      !!field.state.meta.errors.length
+                    }
+                    helperText={
+                      field.state.meta.isTouched &&
+                      field.state.meta.errors[0]?.message
+                    }
+                    disabled={accountSetupMutation.isPending}
+                    autoComplete="current-password"
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LockIcon color="action" />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() =>
+                                setShowOldPassword(!showOldPassword)
+                              }
+                              edge="end"
+                              disabled={accountSetupMutation.isPending}
+                            >
+                              {showOldPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+                )}
+              </form.Field>
+
+              <form.Field name="newPassword">
+                {(field) => (
+                  <TextField
+                    fullWidth
+                    label="New Password"
+                    type={showNewPassword ? 'text' : 'password'}
+                    variant="outlined"
+                    value={field.state.value || ''}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    error={
+                      field.state.meta.isTouched &&
+                      !!field.state.meta.errors.length
+                    }
+                    helperText={
+                      field.state.meta.isTouched &&
+                      field.state.meta.errors[0]?.message
+                    }
+                    disabled={accountSetupMutation.isPending}
+                    autoComplete="new-password"
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LockIcon color="action" />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() =>
+                                setShowNewPassword(!showNewPassword)
+                              }
+                              edge="end"
+                              disabled={accountSetupMutation.isPending}
+                            >
+                              {showNewPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      },
+                    }}
+                  />
+                )}
+              </form.Field>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={accountSetupMutation.isPending}
+                sx={{
+                  mt: 2,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  py: 1.5,
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                  boxShadow: `0 4px 20px ${theme.palette.primary.main}30`,
+                  '&:hover': {
+                    background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 8px 25px ${theme.palette.primary.main}40`,
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                {accountSetupMutation.isPending
+                  ? 'Saving...'
+                  : 'Complete Setup'}
+              </Button>
             </Stack>
           </Box>
 

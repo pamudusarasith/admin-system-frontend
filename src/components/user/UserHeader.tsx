@@ -2,7 +2,7 @@ import { Box, Typography, useTheme } from '@mui/material'
 import { AddButton } from '@/components'
 
 interface UserHeaderProps {
-  onAddUser: () => void
+  onAddUser?: () => void
 }
 
 export const UserHeader: React.FC<UserHeaderProps> = ({ onAddUser }) => {
@@ -42,13 +42,15 @@ export const UserHeader: React.FC<UserHeaderProps> = ({ onAddUser }) => {
           Manage user accounts, roles, and permissions.
         </Typography>
       </Box>
-      <Box sx={{ alignSelf: { xs: 'flex-start', md: 'flex-start' } }}>
-        <AddButton
-          label="Add new User"
-          tooltip="Create a new user account"
-          onClick={onAddUser}
-        />
-      </Box>
+      {onAddUser && (
+        <Box sx={{ alignSelf: { xs: 'flex-start', md: 'flex-start' } }}>
+          <AddButton
+            label="Add new User"
+            tooltip="Create a new user account"
+            onClick={onAddUser}
+          />
+        </Box>
+      )}
     </Box>
   )
 }

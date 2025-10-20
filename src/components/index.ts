@@ -24,7 +24,7 @@ export { CategoryDialog } from './CategoryDialog'
 // ============================================
 // Form Components
 // ============================================
-export { CreateUser } from './CreateUser'
+export { CreateUser } from './user/CreateUser'
 export { EditProfileForm } from './EditProfileForm'
 export { default as EditUsers } from './Editusers'
 

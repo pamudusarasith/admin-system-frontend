@@ -106,6 +106,7 @@ const menuItems: Array<MenuItem> = [
     id: 'users',
     label: 'User Management',
     icon: <PeopleIcon />,
+    authorities: [P.userRead, P.roleRead],
     children: [
       {
         id: 'users-list',
@@ -127,11 +128,13 @@ const menuItems: Array<MenuItem> = [
     id: 'cabinet',
     label: 'Cabinet Papers',
     icon: <ReceiptIcon />,
+    authorities: [P.cabinetPaperRead, P.categoryRead],
     children: [
       {
         id: 'all-papers',
         label: 'All Papers',
         icon: <ReceiptIcon />,
+        authorities: [P.cabinetPaperRead],
         path: { to: '/cabinet-papers' },
       },
       {

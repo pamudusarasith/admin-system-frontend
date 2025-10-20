@@ -20,6 +20,7 @@ interface UserTableProps {
   users: Array<User>
   isLoading: boolean
   emptyMessage?: string
+  canUpdate?: boolean
   onEditUser?: (user: User) => void
   onMoreActions?: (user: User) => void
 }
@@ -28,6 +29,7 @@ export const UserTable: React.FC<UserTableProps> = ({
   users,
   isLoading,
   emptyMessage = 'No users found.',
+  canUpdate = false,
   onEditUser,
   onMoreActions,
 }) => {
@@ -99,17 +101,19 @@ export const UserTable: React.FC<UserTableProps> = ({
                 Role
               </Typography>
             </TableCell>
-            <TableCell align="right">
-              <Typography variant="subtitle2" fontWeight={600}>
-                Actions
-              </Typography>
-            </TableCell>
+            {canUpdate && (
+              <TableCell align="right">
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Actions
+                </Typography>
+              </TableCell>
+            )}
           </TableRow>
         </TableHead>
         <TableBody>
           {isLoading && (
             <TableRow>
-              <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+              <TableCell colSpan={canUpdate ? 5 : 4} align="center" sx={{ py: 4 }}>
                 <CircularProgress />
                 <Typography variant="body2" sx={{ mt: 2 }}>
                   Loading users...
@@ -120,7 +124,7 @@ export const UserTable: React.FC<UserTableProps> = ({
 
           {!isLoading && users.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+              <TableCell colSpan={canUpdate ? 5 : 4} align="center" sx={{ py: 4 }}>
                 <Typography variant="body2" color="text.secondary">
                   {emptyMessage}
                 </Typography>
@@ -192,22 +196,24 @@ export const UserTable: React.FC<UserTableProps> = ({
                     {user.role}
                   </Typography>
                 </TableCell>
-                <TableCell align="right">
-                  <IconButton
-                    size="small"
-                    onClick={() => onEditUser?.(user)}
-                    title="Edit user"
-                  >
-                    <Edit fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => onMoreActions?.(user)}
-                    title="More actions"
-                  >
-                    <MoreVert fontSize="small" />
-                  </IconButton>
-                </TableCell>
+                {canUpdate && (
+                  <TableCell align="right">
+                    <IconButton
+                      size="small"
+                      onClick={() => onEditUser?.(user)}
+                      title="Edit user"
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => onMoreActions?.(user)}
+                      title="More actions"
+                    >
+                      <MoreVert fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
         </TableBody>
