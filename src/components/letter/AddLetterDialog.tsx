@@ -186,13 +186,13 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
         sender_details: {
           name: letter.senderDetails.name,
           email: (letter.senderDetails as any).email || '',
-          phone_number: (letter.senderDetails as any).phoneNumber || '',
+          phone_number: (letter.senderDetails as any).phone_number || '',
           address: (letter.senderDetails as any).address || '',
         },
         receiver_details: {
           name: letter.receiverDetails.name,
           designation: (letter.receiverDetails as any).designation || '',
-          division_name: (letter.receiverDetails as any).divisionName || '',
+          division_name: (letter.receiverDetails as any).division_name || '',
         },
         priority: letter.priority,
         mode_of_arrival: letter.modeOfArrival,

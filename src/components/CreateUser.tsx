@@ -17,6 +17,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import type { CreateUserPayload } from '@/schemas'
+import type { ApiResponse, Division, Role } from '@/api'
 import { createUser, getDivisions, getRoles } from '@/api'
 import { createUserSchema } from '@/schemas'
 
@@ -33,19 +34,21 @@ export function CreateUser({ onClose }: CreateUserProps) {
 
   // Fetch roles and divisions using TanStack Query
   const {
-    data: roles = [],
+    data: rolesResponse,
     isLoading: rolesLoading,
     error: rolesError,
-  } = useQuery({
+  } = useQuery<ApiResponse<Array<Role>>, Error>({
     queryKey: ['roles'],
-    queryFn: getRoles,
+    queryFn: () => getRoles({}),
   })
+
+  const roles = rolesResponse?.data ?? []
 
   const {
     data: divisionsResponse,
     isLoading: divisionsLoading,
     error: divisionsError,
-  } = useQuery({
+  } = useQuery<ApiResponse<Array<Division>>, Error>({
     queryKey: ['divisions'],
     queryFn: () => getDivisions({}),
   })
@@ -188,8 +191,10 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       label="Username"
                       placeholder="Please insert the username here..."
                       variant="outlined"
-                      error={field.state.meta.errors.length > 0}
-                      helperText={field.state.meta.errors.join(', ')}
+                      error={!field.state.meta.isValid}
+                      helperText={field.state.meta.errors
+                        .map((err: any) => err?.message || String(err))
+                        .join(', ')}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -223,8 +228,10 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       type="email"
                       placeholder="Please insert the email here..."
                       variant="outlined"
-                      error={field.state.meta.errors.length > 0}
-                      helperText={field.state.meta.errors.join(', ')}
+                      error={!field.state.meta.isValid}
+                      helperText={field.state.meta.errors
+                        .map((err: any) => err?.message || String(err))
+                        .join(', ')}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -256,7 +263,8 @@ export function CreateUser({ onClose }: CreateUserProps) {
                   name="divisionId"
                   validators={{
                     onChange: ({ value }) => {
-                      if (!value) return 'Division is required'
+                      if (!value || Number(value) <= 0)
+                        return 'Division is required'
                       return undefined
                     },
                   }}
@@ -271,11 +279,13 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       <Select
                         name={field.name}
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        onChange={(e) =>
+                          field.handleChange(Number(e.target.value))
+                        }
                         onBlur={field.handleBlur}
                         label="Division"
                       >
-                        <MenuItem value="">
+                        <MenuItem value={0}>
                           <em>None</em>
                         </MenuItem>
                         {divisionsError ? (
@@ -296,7 +306,9 @@ export function CreateUser({ onClose }: CreateUserProps) {
                           color="error"
                           sx={{ mt: 1, ml: 2 }}
                         >
-                          {field.state.meta.errors.join(', ')}
+                          {field.state.meta.errors
+                            .map((err: any) => err?.message || String(err))
+                            .join(', ')}
                         </Typography>
                       )}
                     </FormControl>
@@ -306,7 +318,8 @@ export function CreateUser({ onClose }: CreateUserProps) {
                   name="roleId"
                   validators={{
                     onChange: ({ value }) => {
-                      if (!value) return 'Role is required'
+                      if (!value || Number(value) <= 0)
+                        return 'Role is required'
                       return undefined
                     },
                   }}
@@ -321,11 +334,13 @@ export function CreateUser({ onClose }: CreateUserProps) {
                       <Select
                         name={field.name}
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        onChange={(e) =>
+                          field.handleChange(Number(e.target.value))
+                        }
                         onBlur={field.handleBlur}
                         label="Role"
                       >
-                        <MenuItem value="">
+                        <MenuItem value={0}>
                           <em>None</em>
                         </MenuItem>
                         {rolesError ? (
@@ -346,7 +361,9 @@ export function CreateUser({ onClose }: CreateUserProps) {
                           color="error"
                           sx={{ mt: 1, ml: 2 }}
                         >
-                          {field.state.meta.errors.join(', ')}
+                          {field.state.meta.errors
+                            .map((err: any) => err?.message || String(err))
+                            .join(', ')}
                         </Typography>
                       )}
                     </FormControl>

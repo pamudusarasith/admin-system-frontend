@@ -14,7 +14,7 @@ export interface SenderDetails {
 export interface ReceiverDetails {
   name: string
   designation?: string
-  divisionName?: string
+  division_name?: string
 }
 
 export interface Attachment {
@@ -47,6 +47,30 @@ export interface AddNoteEventDetails {
 export interface ChangePriorityEventDetails {
   newPriority: LetterPriority
   previousPriority: LetterPriority
+}
+
+export interface UpdateLetterEventDetails {
+  reference?: string
+  senderDetailsName?: string
+  senderDetailsAddress?: string
+  senderDetailsEmail?: string
+  senderDetailsPhoneNumber?: string
+  receiverDetailsName?: string
+  receiverDetailsDesignation?: string
+  receiverDetailsDivisionName?: string
+  sentDate?: string
+  receivedDate?: string
+  modeOfArrival?:
+    | 'REGISTERED_POST'
+    | 'UNREGISTERED_POST'
+    | 'EMAIL'
+    | 'WHATSAPP'
+    | 'HAND_DELIVERED'
+    | 'FAX'
+    | 'OTHER'
+  subject?: string
+  updatedContent?: string
+  updatedPriority?: LetterPriority
 }
 
 export interface LetterEvent {
