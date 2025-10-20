@@ -32,9 +32,11 @@ export { default as EditUsers } from './Editusers'
 // Letter Components (from ./letter)
 // ============================================
 export { AddLetterDialog } from './letter/AddLetterDialog'
+// Edit functionality is provided by AddLetterDialog in edit mode
 export { AddNoteDialog } from './letter/AddNoteDialog'
 export { AddAttachmentDialog } from './letter/AddAttachmentDialog'
 export { AddReplyDialog } from './letter/AddReplyDialog'
+export { ChangePriorityDialog } from './letter/ChangePriorityDialog'
 export { AssignDivisionDialog } from './letter/AssignDivisionDialog'
 export { AssignUserDialog } from './letter/AssignUserDialog'
 export { LetterActionMenu } from './letter/LetterActionMenu'

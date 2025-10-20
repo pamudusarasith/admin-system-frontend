@@ -21,6 +21,8 @@ interface LetterActionMenuProps {
   letter: Letter
   onAddNote: () => void
   onAddAttachment: () => void
+  onChangePriority: () => void
+  onEdit?: () => void
   onAssignDivision: () => void
   onAssignUser: () => void
   onAcceptLetter: () => void
@@ -37,12 +39,14 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   letter,
   onAddNote,
   onAddAttachment,
+  onChangePriority,
   onAssignDivision,
   onAssignUser,
   onAcceptLetter,
   onMarkAsComplete,
   onReopen,
   onReturnFromDivision,
+  onEdit,
 }) => {
   const { user, hasAuthority, hasAnyAuthority } = useAuth()
 
@@ -120,7 +124,12 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
   return (
     <Menu anchorEl={anchorEl} open={open} onClose={onClose}>
       {canEdit && (
-        <MenuItem onClick={onClose}>
+        <MenuItem
+          onClick={() => {
+            if (onEdit) onEdit()
+            onClose()
+          }}
+        >
           <EditIcon sx={{ mr: 2 }} />
           Edit Letter Details
         </MenuItem>
@@ -170,7 +179,12 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
         </MenuItem>
       )}
       {canChangePriority && (
-        <MenuItem onClick={onClose}>
+        <MenuItem
+          onClick={() => {
+            onChangePriority()
+            onClose()
+          }}
+        >
           <FlagIcon sx={{ mr: 2 }} />
           Change Priority
         </MenuItem>
