@@ -20,7 +20,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Division } from '@/api'
+import type { AxiosError } from 'axios'
+import type { Division, ApiResponse } from '@/api'
 import {
   AddButton,
   ConfirmationDialog,
@@ -28,6 +29,7 @@ import {
   PaginationControls,
   SearchBar,
   SidebarLayout,
+  useSnackbar,
 } from '@/components'
 import { deleteDivision, getDivisions } from '@/api'
 
@@ -37,6 +39,7 @@ export const Route = createFileRoute('/_authenticated/divisions')({
 
 function DivisionPage() {
   const theme = useTheme()
+  const { showSnackbar } = useSnackbar()
   const [isDivisionDialogOpen, setIsDivisionDialogOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)
@@ -68,13 +71,36 @@ function DivisionPage() {
   // Mutation for deleting divisions
   const deleteDivisionMutation = useMutation({
     mutationFn: deleteDivision,
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['divisions'] })
       setDeleteDialogOpen(false)
+
+      // Extract success message from response
+      const successMessage =
+        response?.message ||
+        response?.data?.message ||
+        'Division deleted successfully'
+
+      showSnackbar({
+        message: successMessage,
+        severity: 'success',
+      })
+
       setDivisionToDelete(null)
     },
-    onError: (e) => {
-      console.error('Failed to delete division:', e)
+    onError: (error: AxiosError<ApiResponse<unknown>>) => {
+      console.error('Failed to delete division:', error)
+
+      // Extract error message from response
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to delete division. Please try again.'
+
+      showSnackbar({
+        message: errorMessage,
+        severity: 'error',
+      })
     },
   })
 
@@ -120,8 +146,9 @@ function DivisionPage() {
 
     try {
       await deleteDivisionMutation.mutateAsync(String(divisionToDelete.id))
-    } catch (e) {
-      console.error('Error deleting division:', e)
+    } catch (error) {
+      // Error is already handled in mutation onError
+      console.error('Error deleting division:', error)
     }
   }
 
@@ -219,20 +246,6 @@ function DivisionPage() {
           >
             Failed to load divisions.{' '}
             {error instanceof Error ? error.message : 'Please try again.'}
-          </Alert>
-        )}
-
-        {/* Delete Division Error Alert */}
-        {deleteDivisionMutation.isError && (
-          <Alert
-            severity="error"
-            sx={{ maxWidth: '1300px', mx: 'auto', mb: 2 }}
-            onClose={() => deleteDivisionMutation.reset()}
-          >
-            Failed to delete division.{' '}
-            {deleteDivisionMutation.error instanceof Error
-              ? deleteDivisionMutation.error.message
-              : 'Please try again.'}
           </Alert>
         )}
 
