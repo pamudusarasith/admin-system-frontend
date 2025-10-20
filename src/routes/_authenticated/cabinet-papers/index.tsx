@@ -19,7 +19,8 @@ import {
   FolderOpen as FolderOpenIcon,
 } from '@mui/icons-material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { z } from 'zod'
+import type { CabinetPaperSearchParams } from '@/schemas'
+import { cabinetPaperSearchParamsSchema } from '@/schemas'
 import { getCabinetPapers } from '@/api'
 import {
   AddCabinetPaperDialog,
@@ -31,15 +32,9 @@ import {
   CabinetPaperSearchBar,
 } from '@/components/cabinet-paper'
 
-const cabinetPaperSearchSchema = z.object({
-  query: z.string().optional(),
-  page: z.coerce.number().optional(),
-  pageSize: z.coerce.number().optional(),
-})
-
 export const Route = createFileRoute('/_authenticated/cabinet-papers/')({
   component: CabinetPapersPage,
-  validateSearch: cabinetPaperSearchSchema,
+  validateSearch: cabinetPaperSearchParamsSchema,
 })
 
 function CabinetPapersPage() {
@@ -56,18 +51,25 @@ function CabinetPapersPage() {
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: [
-      'cabinet-papers',
-      {
-        ...(searchParams.page && { page: searchParams.page - 1 }),
-        ...(searchParams.pageSize && { pageSize: searchParams.pageSize }),
-      },
-    ],
-    queryFn: ({ queryKey }) => {
-      const [, params] = queryKey as [
-        string,
-        { page?: number; pageSize?: number },
-      ]
+    queryKey: ['cabinet-papers', searchParams],
+    queryFn: () => {
+      // Convert dates to ISO format for the API
+      const params: CabinetPaperSearchParams = {
+        ...searchParams,
+        page: searchParams.page ? searchParams.page - 1 : undefined,
+        createdAtFrom: searchParams.createdAtFrom
+          ? new Date(searchParams.createdAtFrom).toISOString()
+          : undefined,
+        createdAtTo: searchParams.createdAtTo
+          ? new Date(searchParams.createdAtTo).toISOString()
+          : undefined,
+        updatedAtFrom: searchParams.updatedAtFrom
+          ? new Date(searchParams.updatedAtFrom).toISOString()
+          : undefined,
+        updatedAtTo: searchParams.updatedAtTo
+          ? new Date(searchParams.updatedAtTo).toISOString()
+          : undefined,
+      }
       return getCabinetPapers(params)
     },
     placeholderData: keepPreviousData,
@@ -77,26 +79,12 @@ function CabinetPapersPage() {
   const papers = papersResponse?.data || []
   const pagination = papersResponse?.pagination
 
-  // Filter papers based on search query
-  const filteredPapers = searchParams.query
-    ? papers.filter((paper) => {
-        const q = searchParams.query!.toLowerCase()
-        return (
-          paper.subject.toLowerCase().includes(q) ||
-          paper.referenceId.toLowerCase().includes(q) ||
-          paper.category.name.toLowerCase().includes(q) ||
-          paper.summary?.toLowerCase().includes(q)
-        )
-      })
-    : papers
-
-  const handleSearch = (query: string) => {
+  const handleSearch = (params: CabinetPaperSearchParams) => {
     navigate({
       to: '/cabinet-papers',
       search: {
-        ...searchParams,
-        query: query || undefined,
-        page: undefined,
+        ...params,
+        page: undefined, // Reset to first page
       },
     })
   }
@@ -235,7 +223,7 @@ function CabinetPapersPage() {
         <Fade in timeout={1000}>
           <div>
             <CabinetPaperSearchBar
-              searchQuery={searchParams.query || ''}
+              searchParams={searchParams}
               onSearch={handleSearch}
               onClear={handleClearFilters}
             />
@@ -247,7 +235,7 @@ function CabinetPapersPage() {
           {(() => {
             if (isLoading) {
               return <LoadingSkeletons />
-            } else if (filteredPapers.length === 0) {
+            } else if (papers.length === 0) {
               return (
                 <NoPapersCard
                   hasSearchQuery={!!searchParams.query}
@@ -255,7 +243,7 @@ function CabinetPapersPage() {
                 />
               )
             } else {
-              return filteredPapers.map((paper, index) => (
+              return papers.map((paper, index) => (
                 <CabinetPaperCard
                   key={paper.id}
                   paper={paper}
@@ -282,7 +270,7 @@ function CabinetPapersPage() {
         </Stack>
 
         {/* Pagination */}
-        {!isLoading && filteredPapers.length > 0 && pagination && (
+        {!isLoading && papers.length > 0 && pagination && (
           <Fade in timeout={1200}>
             <Box
               sx={{

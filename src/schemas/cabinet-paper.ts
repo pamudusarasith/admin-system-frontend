@@ -36,3 +36,20 @@ export const cabinetPaperFormDataSchema = z.object({
 
 export type CabinetPaperStatus = z.infer<typeof cabinetPaperStatusEnum>
 export type CabinetPaperFormData = z.infer<typeof cabinetPaperFormDataSchema>
+
+export const cabinetPaperSearchParamsSchema = z.object({
+  query: z.string().optional(),
+  status: cabinetPaperStatusEnum.optional(),
+  categoryName: z.string().optional(),
+  submittedByUser: z.string().optional(),
+  createdAtFrom: z.string().optional(),
+  createdAtTo: z.string().optional(),
+  updatedAtFrom: z.string().optional(),
+  updatedAtTo: z.string().optional(),
+  page: z.number().min(0).optional(),
+  pageSize: z.number().min(1).max(100).optional(),
+})
+
+export type CabinetPaperSearchParams = z.infer<
+  typeof cabinetPaperSearchParamsSchema
+>
