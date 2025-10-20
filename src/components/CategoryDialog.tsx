@@ -21,6 +21,7 @@ import type { Category, CategoryFormData } from '@/api/categories'
 import { createCategory, updateCategory } from '@/api/categories'
 import { categoryFormDataSchema } from '@/schemas'
 import { useSnackbar } from '@/components'
+import { Permission as P, useAuth } from '@/core'
 
 interface CategoryDialogProps {
   open: boolean
@@ -37,8 +38,16 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const queryClient = useQueryClient()
   const { showSnackbar } = useSnackbar()
+  const { hasAuthority } = useAuth()
 
   const isEditing = Boolean(category)
+
+  // Check permissions
+  const canCreate = hasAuthority(P.categoryCreate)
+  const canUpdate = hasAuthority(P.categoryUpdate)
+
+  // Determine if user can perform the action
+  const canPerformAction = isEditing ? canUpdate : canCreate
 
   const createMutation = useMutation({
     mutationFn: createCategory,
@@ -95,9 +104,17 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
       description: category?.description || '',
     } as CategoryFormData,
     onSubmit: ({ value }) => {
-      if (isEditing && category) {
+      if (!canPerformAction) {
+        showSnackbar({
+          message: `You don't have permission to ${isEditing ? 'update' : 'create'} categories`,
+          severity: 'error',
+        })
+        return
+      }
+
+      if (isEditing && canUpdate && category) {
         updateMutation.mutate({ id: String(category.id), data: value })
-      } else {
+      } else if (!isEditing && canCreate) {
         createMutation.mutate(value)
       }
     },
@@ -206,6 +223,7 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
                             .join(', ')
                         : ''
                     }
+                    disabled={!canPerformAction}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
@@ -251,6 +269,7 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
                             .join(', ')
                         : ''
                     }
+                    disabled={!canPerformAction}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
@@ -307,7 +326,8 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
                   disabled={
                     !canSubmit ||
                     createMutation.isPending ||
-                    updateMutation.isPending
+                    updateMutation.isPending ||
+                    !canPerformAction
                   }
                   sx={{
                     borderRadius: 2,

@@ -65,4 +65,10 @@ export enum Permission {
   divisionCreate = 'division:create',
   divisionUpdate = 'division:update',
   divisionDelete = 'division:delete',
+
+  //Cabinet Category Management
+  categoryRead = 'cabinet_paper_category:read',
+  categoryCreate = 'cabinet_paper_category:create',
+  categoryUpdate = 'cabinet_paper_category:update',
+  categoryDelete = 'cabinet_paper_category:delete',
 }
