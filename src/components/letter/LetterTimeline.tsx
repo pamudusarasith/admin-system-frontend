@@ -123,7 +123,7 @@ export function LetterTimeline({
                   details={event.eventDetails as UpdateLetterEventDetails}
                 />
               )
-            // eslint-disable-next-line no-fallthrough
+              break
             default:
               break
           }
@@ -946,9 +946,7 @@ interface UpdateLetterEventDetailsProps {
   details: UpdateLetterEventDetails
 }
 
-function UpdateLetter({
-  details,
-}: Readonly<UpdateLetterEventDetailsProps>) {
+function UpdateLetter({ details }: Readonly<UpdateLetterEventDetailsProps>) {
   // Show a friendly sentence per updated field like "Subject updated to X".
   const modeLabels: Record<string, string> = {
     REGISTERED_POST: 'Registered post',
@@ -964,31 +962,81 @@ function UpdateLetter({
     if (!d) return undefined
     const dt = new Date(d)
     if (Number.isNaN(dt.getTime())) return d
-    return dt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    return dt.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
   }
 
   const fields: Array<{ label: string; value: string } | null> = [
     details.reference ? { label: 'Reference', value: details.reference } : null,
     details.subject ? { label: 'Subject', value: details.subject } : null,
-    details.updatedContent ? { label: 'Content', value: details.updatedContent } : null,
-    details.updatedPriority ? { label: 'Priority', value: details.updatedPriority } : null,
-    details.modeOfArrival ? { label: 'Mode of arrival', value: modeLabels[details.modeOfArrival] ?? details.modeOfArrival } : null,
-    details.sentDate ? { label: 'Sent date', value: fmtDate(details.sentDate) ?? details.sentDate } : null,
-    details.receivedDate ? { label: 'Received date', value: fmtDate(details.receivedDate) ?? details.receivedDate } : null,
-    details.senderDetailsName ? { label: 'Sender name', value: details.senderDetailsName } : null,
-    details.senderDetailsAddress ? { label: 'Sender address', value: details.senderDetailsAddress } : null,
-    details.senderDetailsEmail ? { label: 'Sender email', value: details.senderDetailsEmail } : null,
-    details.senderDetailsPhoneNumber ? { label: 'Sender phone', value: details.senderDetailsPhoneNumber } : null,
-    details.receiverDetailsName ? { label: 'Receiver name', value: details.receiverDetailsName } : null,
-    details.receiverDetailsDesignation ? { label: 'Receiver designation', value: details.receiverDetailsDesignation } : null,
-    details.receiverDetailsDivisionName ? { label: 'Receiver division', value: details.receiverDetailsDivisionName } : null,
+    details.updatedContent
+      ? { label: 'Content', value: details.updatedContent }
+      : null,
+    details.updatedPriority
+      ? { label: 'Priority', value: details.updatedPriority }
+      : null,
+    details.modeOfArrival
+      ? {
+          label: 'Mode of arrival',
+          value: modeLabels[details.modeOfArrival] ?? details.modeOfArrival,
+        }
+      : null,
+    details.sentDate
+      ? {
+          label: 'Sent date',
+          value: fmtDate(details.sentDate) ?? details.sentDate,
+        }
+      : null,
+    details.receivedDate
+      ? {
+          label: 'Received date',
+          value: fmtDate(details.receivedDate) ?? details.receivedDate,
+        }
+      : null,
+    details.senderDetailsName
+      ? { label: 'Sender name', value: details.senderDetailsName }
+      : null,
+    details.senderDetailsAddress
+      ? { label: 'Sender address', value: details.senderDetailsAddress }
+      : null,
+    details.senderDetailsEmail
+      ? { label: 'Sender email', value: details.senderDetailsEmail }
+      : null,
+    details.senderDetailsPhoneNumber
+      ? { label: 'Sender phone', value: details.senderDetailsPhoneNumber }
+      : null,
+    details.receiverDetailsName
+      ? { label: 'Receiver name', value: details.receiverDetailsName }
+      : null,
+    details.receiverDetailsDesignation
+      ? {
+          label: 'Receiver designation',
+          value: details.receiverDetailsDesignation,
+        }
+      : null,
+    details.receiverDetailsDivisionName
+      ? {
+          label: 'Receiver division',
+          value: details.receiverDetailsDivisionName,
+        }
+      : null,
   ]
 
-  const visible = fields.filter(Boolean) as Array<{ label: string; value: string }>
+  const visible = fields.filter(Boolean) as Array<{
+    label: string
+    value: string
+  }>
 
   return (
     <TimelineCard
-      icon={<EditIcon sx={{ fontSize: 16, color: (t) => t.palette.warning.light }} />}
+      icon={
+        <EditIcon
+          sx={{ fontSize: 16, color: (t) => t.palette.warning.light }}
+        />
+      }
       title="Letter Updated"
       borderColor={(t) => `${t.palette.warning.light}40`}
       headerColor={(t) => t.palette.warning.light}
@@ -1005,12 +1053,19 @@ function UpdateLetter({
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                   Content updated
                 </Typography>
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ whiteSpace: 'pre-wrap', color: 'text.primary' }}
+                >
                   {f.value}
                 </Typography>
               </Box>
             ) : (
-              <Typography key={f.label} variant="body2" sx={{ color: 'text.primary' }}>
+              <Typography
+                key={f.label}
+                variant="body2"
+                sx={{ color: 'text.primary' }}
+              >
                 <strong>{f.label}</strong> updated to {f.value}
               </Typography>
             ),
@@ -1020,8 +1075,6 @@ function UpdateLetter({
     </TimelineCard>
   )
 }
-
-
 
 type ThemeColor = string | ((theme: Theme) => string)
 
