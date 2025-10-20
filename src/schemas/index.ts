@@ -40,8 +40,13 @@ export type { DivisionFormData } from './division'
 export {
   cabinetPaperFormDataSchema,
   cabinetPaperStatusEnum,
+  cabinetPaperSearchParamsSchema,
 } from './cabinet-paper'
-export type { CabinetPaperFormData, CabinetPaperStatus } from './cabinet-paper'
+export type {
+  CabinetPaperFormData,
+  CabinetPaperStatus,
+  CabinetPaperSearchParams,
+} from './cabinet-paper'
 
 // Category schemas
 export { categoryFormDataSchema } from './category'

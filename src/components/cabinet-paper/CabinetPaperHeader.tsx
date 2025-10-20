@@ -12,6 +12,7 @@ import {
   ArrowBack as ArrowBackIcon,
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material'
+import { useNavigate } from '@tanstack/react-router'
 import type { CabinetPaper } from '@/api'
 
 interface CabinetPaperHeaderProps {
@@ -27,11 +28,13 @@ export const CabinetPaperHeader: React.FC<CabinetPaperHeaderProps> = ({
   getStatusColor,
   getCategoryColor,
 }) => {
+  const navigate = useNavigate()
+
   return (
     <Box sx={{ mb: 4 }}>
       <Button
         startIcon={<ArrowBackIcon />}
-        onClick={() => globalThis.history.back()}
+        onClick={() => navigate({ to: '/cabinet-papers' })}
         sx={{ mb: 3 }}
         variant="outlined"
       >

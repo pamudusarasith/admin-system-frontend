@@ -13,6 +13,7 @@ import {
   MoreVert as MoreVertIcon,
   Reply as ReplyIcon,
 } from '@mui/icons-material'
+import { useNavigate } from '@tanstack/react-router'
 import type { Letter } from '@/api'
 import { useAuth } from '@/core'
 
@@ -32,6 +33,7 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
   getStatusColor,
 }) => {
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   const canReply =
     user?.id &&
@@ -42,7 +44,7 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
     <Box sx={{ mb: 4 }}>
       <Button
         startIcon={<ArrowBackIcon />}
-        onClick={() => window.history.back()}
+        onClick={() => navigate({ to: '/letters' })}
         sx={{ mb: 3 }}
         variant="outlined"
       >

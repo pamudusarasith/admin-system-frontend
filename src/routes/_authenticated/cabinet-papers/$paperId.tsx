@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Container, useTheme } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -25,6 +25,7 @@ export const Route = createFileRoute('/_authenticated/cabinet-papers/$paperId')(
 
 function CabinetPaperDetailsView() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { showSnackbar } = useSnackbar()
 
@@ -50,7 +51,7 @@ function CabinetPaperDetailsView() {
         response.message?.trim() || 'Cabinet paper deleted successfully.'
       showSnackbar({ message, severity: 'success' })
       // Navigate back to cabinet papers list
-      globalThis.history.back()
+      navigate({ to: '/cabinet-papers' })
     },
     onError: (err: AxiosError<ApiResponse<any>>) => {
       const message =

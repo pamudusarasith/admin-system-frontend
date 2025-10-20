@@ -1,5 +1,9 @@
 import { client } from './client'
-import type { CabinetPaperFormData, CabinetPaperStatus } from '@/schemas'
+import type {
+  CabinetPaperFormData,
+  CabinetPaperSearchParams,
+  CabinetPaperStatus,
+} from '@/schemas'
 import type { ApiResponse } from './client'
 import type { User } from './users'
 import type { Category } from './categories'
@@ -25,13 +29,8 @@ export interface CabinetPaper {
   updatedAt: string
 }
 
-interface GetCabinetPapersProps {
-  page?: number
-  pageSize?: number
-}
-
 export async function getCabinetPapers(
-  params: GetCabinetPapersProps,
+  params: CabinetPaperSearchParams,
 ): Promise<ApiResponse<Array<CabinetPaper>>> {
   const response = await client.get('/cabinet-papers', { params })
   return response.data
