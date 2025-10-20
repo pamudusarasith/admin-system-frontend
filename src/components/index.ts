@@ -20,6 +20,7 @@ export { AddButton } from './AddButton'
 export { AddCabinetPaperDialog } from './AddCabinetPaperDialog'
 export { DivisionDialog } from './DivisionDialog'
 export { AddRoleDialog } from './AddRoleDialog'
+export { default as CategoryDialog } from './CategoryDialog'
 
 // ============================================
 // Form Components

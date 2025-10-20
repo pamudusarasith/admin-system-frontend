@@ -56,3 +56,6 @@ export type {
   Letter,
   GetLettersParams,
 } from './letters'
+
+//Cabinet Categories Exports
+export * from './categories'
