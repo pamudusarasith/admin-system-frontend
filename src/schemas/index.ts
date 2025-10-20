@@ -25,11 +25,13 @@ export {
   createUserSchema,
   updateUserProfileSchema,
   accountSetupSchema,
+  userSearchParamsSchema,
 } from './users'
 export type {
   CreateUserPayload,
   UpdateUserProfilePayload,
   AccountSetupPayload,
+  UserSearchParams,
 } from './users'
 
 // Division schemas

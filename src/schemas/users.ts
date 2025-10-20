@@ -32,3 +32,13 @@ export const accountSetupSchema = z.object({
 })
 
 export type AccountSetupPayload = z.infer<typeof accountSetupSchema>
+
+export const userSearchParamsSchema = z.object({
+  query: z.string().optional(),
+  role: z.string().optional(),
+  division: z.string().optional(),
+  page: z.number().min(0).optional(),
+  pageSize: z.number().min(1).max(100).optional(),
+})
+
+export type UserSearchParams = z.infer<typeof userSearchParamsSchema>

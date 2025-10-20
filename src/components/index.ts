@@ -70,6 +70,13 @@ export { RolesGrid } from './roles/RolesGrid'
 export { RoleDialog } from './roles/RoleDialog'
 
 // ============================================
+// User Components (from ./user)
+// ============================================
+export { UserHeader } from './user/UserHeader'
+export { UserSearchBar } from './user/UserSearchBar'
+export { UserTable } from './user/UserTable'
+
+// ============================================
 // Common/Utility Components (from ./common)
 // ============================================
 export { ConfirmationDialog } from './common/ConfirmationDialog'

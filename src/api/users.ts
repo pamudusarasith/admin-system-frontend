@@ -17,10 +17,12 @@ export interface User {
 
 interface GetUsersParams {
   query?: string
+  roleName?: string
+  divisionName?: string
   divisionId?: number
+  assignableOnly?: boolean
   page?: number
   pageSize?: number
-  assignableOnly?: boolean
 }
 
 export async function getUsers(
