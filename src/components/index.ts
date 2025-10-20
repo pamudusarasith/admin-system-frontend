@@ -19,7 +19,7 @@ export { default as DivisionWorkloadCard } from './DivisionWorkloadCard'
 export { AddButton } from './AddButton'
 export { DivisionDialog } from './DivisionDialog'
 export { AddRoleDialog } from './AddRoleDialog'
-export { default as CategoryDialog } from './CategoryDialog'
+export { CategoryDialog } from './CategoryDialog'
 
 // ============================================
 // Form Components

@@ -75,13 +75,19 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
   })
 
   // Mutation for updating a letter (used when `letter` prop is provided)
-  const updateLetterMutation = useMutation<ApiResponse<any>, AxiosError<ApiResponse<any>>, { id: number; data: LetterFormData }>({
+  const updateLetterMutation = useMutation<
+    ApiResponse<any>,
+    AxiosError<ApiResponse<any>>,
+    { id: number; data: LetterFormData }
+  >({
     mutationFn: ({ id, data }) => updateLetter(id, data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['letters'] })
-      if (letter) queryClient.invalidateQueries({ queryKey: ['letter', letter.id] })
+      if (letter)
+        queryClient.invalidateQueries({ queryKey: ['letter', letter.id] })
       handleClose()
-      if (data.message) showSnackbar({ message: data.message, severity: 'success' })
+      if (data.message)
+        showSnackbar({ message: data.message, severity: 'success' })
     },
     onError: (error) => {
       const message =
@@ -190,7 +196,8 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
         },
         priority: letter.priority,
         mode_of_arrival: letter.modeOfArrival,
-        received_date: letter.receivedDate || new Date().toISOString().split('T')[0],
+        received_date:
+          letter.receivedDate || new Date().toISOString().split('T')[0],
         sent_date: letter.sentDate,
         subject: letter.subject || '',
         content: letter.content || '',

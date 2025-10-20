@@ -49,7 +49,8 @@ function LetterThreadView() {
   const [markAsCompleteDialogOpen, setMarkAsCompleteDialogOpen] =
     useState(false)
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false)
-  const [changePriorityDialogOpen, setChangePriorityDialogOpen] = useState(false)
+  const [changePriorityDialogOpen, setChangePriorityDialogOpen] =
+    useState(false)
   const [addAttachmentDialogOpen, setAddAttachmentDialogOpen] = useState(false)
   const [returnFromDivisionDialogOpen, setReturnFromDivisionDialogOpen] =
     useState(false)

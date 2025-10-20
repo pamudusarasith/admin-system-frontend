@@ -31,7 +31,6 @@ import { alpha } from '@mui/material/styles'
 import type { Theme } from '@mui/material/styles'
 import type { ReactNode } from 'react'
 import type {
- 
   AddNoteEventDetails,
   ChangePriorityEventDetails,
   ChangeStatusEventDetails,
@@ -109,11 +108,11 @@ export function LetterTimeline({
               )
               break
             case 'CHANGE_PRIORITY':
-                  element = (
-                    <ChangePriority
-                      details={event.eventDetails as ChangePriorityEventDetails}
-                    />
-                  )
+              element = (
+                <ChangePriority
+                  details={event.eventDetails as ChangePriorityEventDetails}
+                />
+              )
               break
             case 'UPDATE_DETAILS':
             default:
@@ -906,8 +905,10 @@ interface ChangePriorityEventDetailsProps {
   details: ChangePriorityEventDetails
 }
 
-function ChangePriority({ details }: Readonly<ChangePriorityEventDetailsProps>) {
-  console.log("details", details)
+function ChangePriority({
+  details,
+}: Readonly<ChangePriorityEventDetailsProps>) {
+  console.log('details', details)
   return (
     <TimelineCard
       icon={
@@ -931,8 +932,6 @@ function ChangePriority({ details }: Readonly<ChangePriorityEventDetailsProps>) 
     </TimelineCard>
   )
 }
-
-
 
 type ThemeColor = string | ((theme: Theme) => string)
 
@@ -1069,4 +1068,3 @@ function UserDetails({ user }: Readonly<UserDetailsProps>) {
     </Stack>
   )
 }
-

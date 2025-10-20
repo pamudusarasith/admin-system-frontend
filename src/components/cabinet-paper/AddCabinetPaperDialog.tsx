@@ -37,7 +37,7 @@ import type { AxiosError } from 'axios'
 import type { ApiResponse, CabinetPaperCategory } from '@/api'
 import type { CabinetPaperFormData } from '@/schemas'
 import { FileUploadField, useSnackbar } from '@/components'
-import { createCabinetPaper, getCabinetPaperCategories } from '@/api'
+import { createCabinetPaper, getCategories } from '@/api'
 import { cabinetPaperFormDataSchema, cabinetPaperStatusEnum } from '@/schemas'
 
 interface AddCabinetPaperDialogProps {
@@ -93,7 +93,7 @@ export const AddCabinetPaperDialog: React.FC<AddCabinetPaperDialogProps> = ({
   } = useInfiniteQuery({
     queryKey: ['cabinet-paper-categories-search', debouncedSearch],
     queryFn: ({ pageParam = 0 }) =>
-      getCabinetPaperCategories({
+      getCategories({
         query: debouncedSearch || undefined,
         page: pageParam,
         pageSize: PAGE_SIZE,

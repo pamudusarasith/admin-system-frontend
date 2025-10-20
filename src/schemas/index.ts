@@ -42,3 +42,7 @@ export {
   cabinetPaperStatusEnum,
 } from './cabinet-paper'
 export type { CabinetPaperFormData, CabinetPaperStatus } from './cabinet-paper'
+
+// Category schemas
+export { categoryFormDataSchema } from './category'
+export type { CategoryFormData } from './category'

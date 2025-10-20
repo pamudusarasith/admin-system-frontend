@@ -22,7 +22,7 @@ export async function getCategories(
   params?: GetCategoriesParams,
 ): Promise<ApiResponse<Array<Category>>> {
   try {
-    const response = await client.get('/cabinet-paper-categories', {
+    const response = await client.get('/cabinet-papers/categories', {
       params: params,
     })
     return response.data
@@ -36,7 +36,7 @@ export async function createCategory(
   data: CategoryFormData,
 ): Promise<ApiResponse<any>> {
   try {
-    const response = await client.post('/cabinet-paper-categories', data)
+    const response = await client.post('/cabinet-papers/categories', data)
     return response.data
   } catch (error) {
     console.error('Failed to create category:', error)
@@ -49,7 +49,7 @@ export async function updateCategory(
   data: CategoryFormData,
 ): Promise<ApiResponse<any>> {
   try {
-    const response = await client.put(`/cabinet-paper-categories/${id}`, data)
+    const response = await client.put(`/cabinet-papers/categories/${id}`, data)
     return response.data
   } catch (error) {
     console.error('Failed to update category:', error)
@@ -59,7 +59,7 @@ export async function updateCategory(
 
 export async function deleteCategory(id: string): Promise<ApiResponse<any>> {
   try {
-    const response = await client.delete(`/cabinet-paper-categories/${id}`)
+    const response = await client.delete(`/cabinet-papers/categories/${id}`)
     return response.data
   } catch (error) {
     console.error('Failed to delete category:', error)

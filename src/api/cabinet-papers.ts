@@ -2,6 +2,7 @@ import { client } from './client'
 import type { CabinetPaperFormData, CabinetPaperStatus } from '@/schemas'
 import type { ApiResponse } from './client'
 import type { User } from './users'
+import type { Category } from './categories'
 
 export interface CabinetPaperCategory {
   id: number
@@ -14,7 +15,7 @@ export interface CabinetPaper {
   referenceId: string
   subject: string
   summary?: string
-  category: CabinetPaperCategory
+  category: Category
   status: CabinetPaperStatus
   submittedByUser: User
   createdAt: string
@@ -30,19 +31,6 @@ export async function getCabinetPapers(
   params: GetCabinetPapersProps,
 ): Promise<ApiResponse<Array<CabinetPaper>>> {
   const response = await client.get('/cabinet-papers', { params })
-  return response.data
-}
-
-interface GetCabinetPaperCategoriesProps {
-  query?: string
-  page?: number
-  pageSize?: number
-}
-
-export async function getCabinetPaperCategories(
-  params?: GetCabinetPaperCategoriesProps,
-): Promise<ApiResponse<Array<CabinetPaperCategory>>> {
-  const response = await client.get('/cabinet-paper-categories', { params })
   return response.data
 }
 
