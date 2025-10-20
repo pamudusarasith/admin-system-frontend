@@ -138,6 +138,7 @@ const menuItems: Array<MenuItem> = [
         id: 'categories',
         label: 'Categories',
         icon: <Bookmark />,
+        authorities: [P.categoryRead],
         path: { to: '/cabinet-papers/categories' },
       },
     ],
