@@ -32,6 +32,7 @@ import {
   useSnackbar,
 } from '@/components'
 import { deleteDivision, getDivisions } from '@/api'
+import { Permission as P, useAuth } from '@/core'
 
 export const Route = createFileRoute('/_authenticated/divisions')({
   component: DivisionPage,
@@ -40,6 +41,7 @@ export const Route = createFileRoute('/_authenticated/divisions')({
 function DivisionPage() {
   const theme = useTheme()
   const { showSnackbar } = useSnackbar()
+  const { hasAuthority } = useAuth()
   const [isDivisionDialogOpen, setIsDivisionDialogOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)
@@ -50,6 +52,26 @@ function DivisionPage() {
     null,
   )
   const queryClient = useQueryClient()
+
+  // Check permissions
+  const canRead = hasAuthority(P.divisionRead)
+  const canCreate = hasAuthority(P.divisionCreate)
+  const canUpdate = hasAuthority(P.divisionUpdate)
+  const canDelete = hasAuthority(P.divisionDelete)
+
+  // If user doesn't have read permission, show access denied
+  if (!canRead) {
+    return (
+      <SidebarLayout>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Alert severity="error" sx={{ maxWidth: '1300px', mx: 'auto' }}>
+            You don't have permission to view divisions. Please contact your
+            administrator.
+          </Alert>
+        </Container>
+      </SidebarLayout>
+    )
+  }
 
   // React Query to fetch divisions with search and pagination
   const {
@@ -63,6 +85,7 @@ function DivisionPage() {
     queryFn: () => getDivisions({ query, page, pageSize }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
+    enabled: canRead, // Only fetch if user has read permission
   })
 
   const divisions = response?.data ?? []
@@ -115,18 +138,33 @@ function DivisionPage() {
 
   const handlePageChange = (newPage?: number) => {
     if (newPage !== undefined) {
-      setPage(newPage - 1) // Convert to 0-indexed
+      setPage(newPage - 1)
     }
   }
 
   const handlePageSizeChange = (newPageSize?: number) => {
     if (newPageSize !== undefined) {
       setPageSize(newPageSize)
-      setPage(0) // Reset to first page when changing page size
+      setPage(0)
     }
   }
 
   const handleOpenDivisionDialog = (division?: Division) => {
+    // Check permission before opening dialog
+    if (division && !canUpdate) {
+      showSnackbar({
+        message: "You don't have permission to edit divisions",
+        severity: 'error',
+      })
+      return
+    }
+    if (!division && !canCreate) {
+      showSnackbar({
+        message: "You don't have permission to create divisions",
+        severity: 'error',
+      })
+      return
+    }
     setEditingDivision(division || null)
     setIsDivisionDialogOpen(true)
   }
@@ -137,12 +175,19 @@ function DivisionPage() {
   }
 
   const handleDeleteDivision = (division: Division) => {
+    if (!canDelete) {
+      showSnackbar({
+        message: "You don't have permission to delete divisions",
+        severity: 'error',
+      })
+      return
+    }
     setDivisionToDelete(division)
     setDeleteDialogOpen(true)
   }
 
   const confirmDeleteDivision = async () => {
-    if (!divisionToDelete) return
+    if (!divisionToDelete || !canDelete) return
 
     try {
       await deleteDivisionMutation.mutateAsync(String(divisionToDelete.id))
@@ -193,14 +238,17 @@ function DivisionPage() {
               View and manage divisions within your organization.
             </Typography>
           </Box>
-          <Box sx={{ alignSelf: { xs: 'flex-start', md: 'flex-start' } }}>
-            <AddButton
-              label="Add new Division"
-              tooltip="Add a new division"
-              onClick={() => handleOpenDivisionDialog()}
-            />
-          </Box>
+          {canCreate && (
+            <Box sx={{ alignSelf: { xs: 'flex-start', md: 'flex-start' } }}>
+              <AddButton
+                label="Add new Division"
+                tooltip="Add a new division"
+                onClick={() => handleOpenDivisionDialog()}
+              />
+            </Box>
+          )}
         </Box>
+
         <Paper
           elevation={2}
           sx={{
@@ -221,14 +269,12 @@ function DivisionPage() {
             }}
           >
             <Box sx={{ flex: 1, width: '100%' }}>
-              <Box>
-                <SearchBar
-                  placeholder="Search divisions by name or description..."
-                  value={query}
-                  onChange={setQuery}
-                  onSearch={handleSearch}
-                />
-              </Box>
+              <SearchBar
+                placeholder="Search divisions by name or description..."
+                value={query}
+                onChange={setQuery}
+                onSearch={handleSearch}
+              />
             </Box>
           </Box>
         </Paper>
@@ -324,23 +370,26 @@ function DivisionPage() {
                         Description
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ minWidth: 100 }}>
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        Actions
-                      </Typography>
-                    </TableCell>
+                    {(canUpdate || canDelete) && (
+                      <TableCell sx={{ minWidth: 100 }}>
+                        <Typography variant="subtitle2" fontWeight="bold">
+                          Actions
+                        </Typography>
+                      </TableCell>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {divisions.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={3}
+                        colSpan={canUpdate || canDelete ? 3 : 2}
                         sx={{ textAlign: 'center', py: 4 }}
                       >
                         <Typography variant="body2" color="text.secondary">
-                          No divisions found. Click "Add new Division" to create
-                          one.
+                          No divisions found.{' '}
+                          {canCreate &&
+                            'Click "Add new Division" to create one.'}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -382,25 +431,34 @@ function DivisionPage() {
                             {division.description}
                           </Typography>
                         </TableCell>
-                        <TableCell align="right">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenDivisionDialog(division)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDeleteDivision(division)}
-                            disabled={deleteDivisionMutation.isPending}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </TableCell>
+                        {(canUpdate || canDelete) && (
+                          <TableCell align="right">
+                            {canUpdate && (
+                              <IconButton
+                                size="small"
+                                onClick={() =>
+                                  handleOpenDivisionDialog(division)
+                                }
+                                title="Edit Division"
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                            {canDelete && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteDivision(division)}
+                                disabled={deleteDivisionMutation.isPending}
+                                title="Delete Division"
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))
                   )}
-                  <Divider />
                 </TableBody>
               </Table>
             </TableContainer>
@@ -423,22 +481,24 @@ function DivisionPage() {
         />
 
         {/* Delete Confirmation Dialog */}
-        <ConfirmationDialog
-          open={deleteDialogOpen}
-          onClose={cancelDeleteDivision}
-          onConfirm={confirmDeleteDivision}
-          title="Delete Division"
-          message={
-            divisionToDelete
-              ? `Are you sure you want to delete "${divisionToDelete.name}"? This action cannot be undone.`
-              : 'Are you sure you want to delete this division?'
-          }
-          confirmText="Delete"
-          cancelText="Cancel"
-          variant="error"
-          danger
-          loading={deleteDivisionMutation.isPending}
-        />
+        {canDelete && (
+          <ConfirmationDialog
+            open={deleteDialogOpen}
+            onClose={cancelDeleteDivision}
+            onConfirm={confirmDeleteDivision}
+            title="Delete Division"
+            message={
+              divisionToDelete
+                ? `Are you sure you want to delete "${divisionToDelete.name}"? This action cannot be undone.`
+                : 'Are you sure you want to delete this division?'
+            }
+            confirmText="Delete"
+            cancelText="Cancel"
+            variant="error"
+            danger
+            loading={deleteDivisionMutation.isPending}
+          />
+        )}
       </Container>
     </SidebarLayout>
   )

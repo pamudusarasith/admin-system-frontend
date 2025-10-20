@@ -29,6 +29,7 @@ import type { Division } from '@/api/divisions'
 import { useSnackbar } from '@/components'
 import { createDivision, updateDivision } from '@/api/divisions'
 import { divisionSchema } from '@/schemas'
+import { Permission as P, useAuth } from '@/core'
 
 interface DivisionDialogProps {
   open: boolean
@@ -44,8 +45,16 @@ export const DivisionDialog: React.FC<DivisionDialogProps> = ({
   const theme = useTheme()
   const queryClient = useQueryClient()
   const { showSnackbar } = useSnackbar()
+  const { hasAuthority } = useAuth()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isEditMode = !!division
+
+  // Check permissions
+  const canCreate = hasAuthority(P.divisionCreate)
+  const canUpdate = hasAuthority(P.divisionUpdate)
+
+  // Determine if user can perform the action
+  const canPerformAction = isEditMode ? canUpdate : canCreate
 
   // Create mutation
   const createDivisionMutation = useMutation({
@@ -104,9 +113,17 @@ export const DivisionDialog: React.FC<DivisionDialogProps> = ({
       description: division?.description || '',
     } as DivisionFormData,
     onSubmit: ({ value }) => {
-      if (isEditMode) {
+      if (!canPerformAction) {
+        showSnackbar({
+          message: `You don't have permission to ${isEditMode ? 'update' : 'create'} divisions`,
+          severity: 'error',
+        })
+        return
+      }
+
+      if (isEditMode && canUpdate) {
         updateDivisionMutation.mutate({ id: String(division.id), data: value })
-      } else {
+      } else if (!isEditMode && canCreate) {
         createDivisionMutation.mutate(value)
       }
     },
@@ -204,6 +221,7 @@ export const DivisionDialog: React.FC<DivisionDialogProps> = ({
                         helperText={field.state.meta.errors
                           .map((e) => e?.message)
                           .join(', ')}
+                        disabled={!canPerformAction}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
@@ -235,6 +253,7 @@ export const DivisionDialog: React.FC<DivisionDialogProps> = ({
                         helperText={field.state.meta.errors
                           .map((e) => e?.message)
                           .join(', ')}
+                        disabled={!canPerformAction}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
@@ -288,7 +307,7 @@ export const DivisionDialog: React.FC<DivisionDialogProps> = ({
                   type="submit"
                   variant="contained"
                   startIcon={isEditMode ? <EditIcon /> : <AddIcon />}
-                  disabled={!canSubmit || isPending}
+                  disabled={!canSubmit || isPending || !canPerformAction}
                   sx={{
                     borderRadius: 2,
                     textTransform: 'none',
