@@ -136,9 +136,9 @@ const menuItems: Array<MenuItem> = [
       },
       {
         id: 'categories',
-        label: 'categories',
+        label: 'Categories',
         icon: <Bookmark />,
-        path: { to: '/categories' },
+        path: { to: '/cabinet-papers/categories' },
       },
     ],
   },

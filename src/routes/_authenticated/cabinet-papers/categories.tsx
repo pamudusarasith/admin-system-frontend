@@ -32,7 +32,7 @@ import {
 } from '@/components'
 import { deleteCategory, getCategories } from '@/api/categories'
 
-export const Route = createFileRoute('/_authenticated/categories')({
+export const Route = createFileRoute('/_authenticated/cabinet-papers/categories')({
   component: CategoryPage,
 })
 
