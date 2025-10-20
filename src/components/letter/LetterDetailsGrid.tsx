@@ -170,7 +170,7 @@ export const LetterDetailsGrid: React.FC<LetterDetailsGridProps> = ({
               {receiver.designation || 'No designation specified'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {receiver.divisionName || 'No division specified'}
+              {receiver.division_name || 'No division specified'}
             </Typography>
           </Box>
         </Box>

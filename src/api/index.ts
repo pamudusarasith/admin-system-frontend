@@ -52,6 +52,7 @@ export type {
   ChangeStatusEventDetails,
   AddNoteEventDetails,
   ChangePriorityEventDetails,
+  UpdateLetterEventDetails,
   LetterEvent,
   Letter,
   GetLettersParams,
