@@ -74,3 +74,14 @@ export {
   deleteCategory,
 } from './categories'
 export type { Category, CategoryFormData } from './categories'
+
+// Dashboard exports
+export { getDashboardStats } from './dashboard'
+export type {
+  DashboardStats,
+  UserStats,
+  LetterStats,
+  CabinetPaperStats,
+  DivisionStats,
+  RoleStats,
+} from './dashboard'

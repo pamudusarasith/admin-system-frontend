@@ -20,10 +20,7 @@ import {
   FilterAlt as FilterAltIcon,
   Search as SearchIcon,
 } from '@mui/icons-material'
-import type {
-  CabinetPaperSearchParams,
-  CabinetPaperStatus,
-} from '@/schemas'
+import type { CabinetPaperSearchParams, CabinetPaperStatus } from '@/schemas'
 
 interface CabinetPaperSearchBarProps {
   searchParams: CabinetPaperSearchParams
@@ -52,15 +49,11 @@ export const CabinetPaperSearchBar: React.FC<CabinetPaperSearchBarProps> = ({
   const [createdAtFrom, setCreatedAtFrom] = useState(
     searchParams.createdAtFrom || '',
   )
-  const [createdAtTo, setCreatedAtTo] = useState(
-    searchParams.createdAtTo || '',
-  )
+  const [createdAtTo, setCreatedAtTo] = useState(searchParams.createdAtTo || '')
   const [updatedAtFrom, setUpdatedAtFrom] = useState(
     searchParams.updatedAtFrom || '',
   )
-  const [updatedAtTo, setUpdatedAtTo] = useState(
-    searchParams.updatedAtTo || '',
-  )
+  const [updatedAtTo, setUpdatedAtTo] = useState(searchParams.updatedAtTo || '')
 
   const [expandedFilters, setExpandedFilters] = useState(false)
 
@@ -417,4 +410,3 @@ export const CabinetPaperSearchBar: React.FC<CabinetPaperSearchBarProps> = ({
     </Paper>
   )
 }
-
