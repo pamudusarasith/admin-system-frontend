@@ -1,7 +1,5 @@
 import {
-  Alert,
   Box,
-  Button,
   CircularProgress,
   Container,
   Divider,
@@ -18,25 +16,31 @@ import {
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTheme } from '@mui/material/styles'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import type { Category } from '@/api/categories'
+import type { ApiResponse } from '@/api'
 import {
   AddButton,
-  ConfirmationDialog,
   CategoryDialog,
+  ConfirmationDialog,
   PaginationControls,
   SearchBar,
   SidebarLayout,
+  useSnackbar,
 } from '@/components'
 import { deleteCategory, getCategories } from '@/api/categories'
 
-export const Route = createFileRoute('/_authenticated/categories')({
+export const Route = createFileRoute(
+  '/_authenticated/cabinet-papers/categories',
+)({
   component: CategoryPage,
 })
 
 function CategoryPage() {
   const theme = useTheme()
+  const { showSnackbar } = useSnackbar()
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)
@@ -54,7 +58,6 @@ function CategoryPage() {
     isLoading,
     isError,
     error,
-    refetch,
   } = useQuery({
     queryKey: ['categories', query, page, pageSize],
     queryFn: () => getCategories({ query, page, pageSize }),
@@ -65,22 +68,38 @@ function CategoryPage() {
   const categories = response?.data ?? []
   const pagination = response?.pagination
 
+  // Show error snackbar when query fails
+  useEffect(() => {
+    if (isError) {
+      const errorMessage =
+        error instanceof AxiosError
+          ? (error.response?.data?.message ?? 'Failed to load categories')
+          : 'Failed to load categories'
+      showSnackbar({ message: errorMessage, severity: 'error' })
+    }
+  }, [isError, error, showSnackbar])
+
   // Mutation for deleting categories
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({
+        queryKey: ['cabinet-paper-categories-search'],
+      })
+      showSnackbar({
+        message: 'Category deleted successfully!',
+        severity: 'success',
+      })
       setDeleteDialogOpen(false)
       setCategoryToDelete(null)
     },
-    onError: (e) => {
-      console.error('Failed to delete category:', e)
+    onError: (err: AxiosError<ApiResponse<any>>) => {
+      const message =
+        err.response?.data.message?.trim() ?? 'Failed to delete category'
+      showSnackbar({ message, severity: 'error' })
     },
   })
-
-  const handleRefresh = () => {
-    refetch()
-  }
 
   const handleSearch = (value: string) => {
     setQuery(value)
@@ -205,36 +224,6 @@ function CategoryPage() {
             </Box>
           </Box>
         </Paper>
-
-        {/* Error Alert */}
-        {isError && (
-          <Alert
-            severity="error"
-            sx={{ maxWidth: '1300px', mx: 'auto', mb: 2 }}
-            action={
-              <Button color="inherit" size="small" onClick={handleRefresh}>
-                Retry
-              </Button>
-            }
-          >
-            Failed to load categories.{' '}
-            {error instanceof Error ? error.message : 'Please try again.'}
-          </Alert>
-        )}
-
-        {/* Delete Category Error Alert */}
-        {deleteCategoryMutation.isError && (
-          <Alert
-            severity="error"
-            sx={{ maxWidth: '1300px', mx: 'auto', mb: 2 }}
-            onClose={() => deleteCategoryMutation.reset()}
-          >
-            Failed to delete category.{' '}
-            {deleteCategoryMutation.error instanceof Error
-              ? deleteCategoryMutation.error.message
-              : 'Please try again.'}
-          </Alert>
-        )}
 
         {/* Loading or Table */}
         {isLoading ? (

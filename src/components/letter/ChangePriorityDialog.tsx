@@ -48,7 +48,8 @@ export const ChangePriorityDialog: React.FC<ChangePriorityDialogProps> = ({
       onClose()
     },
     onError: (e: AxiosError<ApiResponse<any>>) => {
-      const message = e.response?.data.message?.trim() || 'Failed to change priority.'
+      const message =
+        e.response?.data.message?.trim() || 'Failed to change priority.'
       showSnackbar({ message, severity: 'error' })
     },
   })
@@ -69,7 +70,9 @@ export const ChangePriorityDialog: React.FC<ChangePriorityDialogProps> = ({
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>Change Letter Priority</DialogTitle>
       <DialogContent>
-        <Typography sx={{ mb: 2 }}>Select a new priority for this letter.</Typography>
+        <Typography sx={{ mb: 2 }}>
+          Select a new priority for this letter.
+        </Typography>
         <FormControl fullWidth>
           <InputLabel id="priority-label">Priority</InputLabel>
           <Select
@@ -85,8 +88,14 @@ export const ChangePriorityDialog: React.FC<ChangePriorityDialogProps> = ({
         </FormControl>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="outlined">Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={mutation.isPending}>
+        <Button onClick={onClose} variant="outlined">
+          Cancel
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          disabled={mutation.isPending}
+        >
           {mutation.isPending ? 'Updating...' : 'Update Priority'}
         </Button>
       </DialogActions>

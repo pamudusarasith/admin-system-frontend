@@ -11,52 +11,41 @@ import {
 import {
   ArrowBack as ArrowBackIcon,
   MoreVert as MoreVertIcon,
-  Reply as ReplyIcon,
 } from '@mui/icons-material'
-import type { Letter } from '@/api'
-import { useAuth } from '@/core'
+import type { CabinetPaper } from '@/api'
 
-interface LetterHeaderProps {
-  letter: Letter
-  onReply: () => void
+interface CabinetPaperHeaderProps {
+  paper: CabinetPaper
   onMenuClick: (event: React.MouseEvent<HTMLElement>) => void
-  getPriorityColor: (priority: string) => string
   getStatusColor: (status: string) => string
+  getCategoryColor: (category: string) => string
 }
 
-export const LetterHeader: React.FC<LetterHeaderProps> = ({
-  letter,
-  onReply,
+export const CabinetPaperHeader: React.FC<CabinetPaperHeaderProps> = ({
+  paper,
   onMenuClick,
-  getPriorityColor,
   getStatusColor,
+  getCategoryColor,
 }) => {
-  const { user } = useAuth()
-
-  const canReply =
-    user?.id &&
-    user.id === letter.assignedUser?.id &&
-    letter.status !== 'CLOSED'
-
   return (
     <Box sx={{ mb: 4 }}>
       <Button
         startIcon={<ArrowBackIcon />}
-        onClick={() => window.history.back()}
+        onClick={() => globalThis.history.back()}
         sx={{ mb: 3 }}
         variant="outlined"
       >
-        Back to Letters
+        Back to Cabinet Papers
       </Button>
 
       <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
-        <Link underline="hover" color="inherit" href="/letters">
-          Letters
+        <Link underline="hover" color="inherit" href="/cabinet-papers">
+          Cabinet Papers
         </Link>
-        <Typography color="text.primary">{letter.reference}</Typography>
+        <Typography color="text.primary">{paper.referenceId}</Typography>
       </Breadcrumbs>
 
-      {/* Letter Title Section */}
+      {/* Cabinet Paper Title Section */}
       <Paper
         elevation={0}
         sx={{
@@ -80,14 +69,14 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
               variant="h5"
               sx={{ fontWeight: 600, mb: 1, lineHeight: 1.25 }}
             >
-              {letter.subject}
+              {paper.subject}
             </Typography>
             <Typography
               variant="subtitle1"
               color="text.secondary"
               sx={{ mb: 2 }}
             >
-              Reference: {letter.reference}
+              Reference: {paper.referenceId}
             </Typography>
             <Box
               sx={{
@@ -98,7 +87,7 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
               }}
             >
               <Chip
-                label={letter.priority.replace('_', ' ')}
+                label={paper.category.name}
                 size="small"
                 sx={{
                   px: 1,
@@ -106,11 +95,15 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
                   letterSpacing: 0.4,
                   fontWeight: 600,
                   color: 'white',
-                  backgroundColor: getPriorityColor(letter.priority),
+                  backgroundColor: getCategoryColor(paper.category.name),
                 }}
               />
               <Chip
-                label={letter.status.replaceAll('_', ' ')}
+                label={
+                  typeof paper.status === 'string'
+                    ? paper.status.replaceAll('_', ' ')
+                    : String(paper.status).replaceAll('_', ' ')
+                }
                 size="small"
                 sx={{
                   px: 1,
@@ -118,25 +111,14 @@ export const LetterHeader: React.FC<LetterHeaderProps> = ({
                   letterSpacing: 0.4,
                   fontWeight: 600,
                   color: 'white',
-                  backgroundColor: getStatusColor(letter.status),
+                  backgroundColor: getStatusColor(String(paper.status)),
                 }}
               />
             </Box>
           </Box>
 
-          {/* Primary Actions */}
+          {/* Actions */}
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-            {canReply && (
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<ReplyIcon />}
-                onClick={onReply}
-                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-              >
-                Add Reply
-              </Button>
-            )}
             <Button
               variant="outlined"
               onClick={onMenuClick}

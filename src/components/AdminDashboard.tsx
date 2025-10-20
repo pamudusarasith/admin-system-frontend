@@ -16,10 +16,10 @@ import {
   People as PeopleIcon,
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
-import { getDivisions, getUsers } from '@/api'
-import { getLetters } from '@/api/letters'
 import type { Division } from '@/api/divisions'
 import type { Letter } from '@/api/letters'
+import { getDivisions, getUsers } from '@/api'
+import { getLetters } from '@/api/letters'
 
 interface DashboardStats {
   title: string

@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -22,52 +24,152 @@ import {
 import {
   Add as AddIcon,
   Article as ArticleIcon,
+  Category as CategoryIcon,
   Close as CloseIcon,
 } from '@mui/icons-material'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
 import type { AxiosError } from 'axios'
-import type { ApiResponse } from '@/api'
+import type { ApiResponse, CabinetPaper, CabinetPaperCategory } from '@/api'
 import type { CabinetPaperFormData } from '@/schemas'
 import { FileUploadField, useSnackbar } from '@/components'
-import { createCabinetPaper } from '@/api'
-import { getCategories } from '@/api/categories'
+import { createCabinetPaper, getCategories, updateCabinetPaper } from '@/api'
 import { cabinetPaperFormDataSchema, cabinetPaperStatusEnum } from '@/schemas'
 
 interface AddCabinetPaperDialogProps {
   open: boolean
   onClose: () => void
+  paper?: CabinetPaper
+}
+
+const PAGE_SIZE = 10
+
+interface CategoryOption extends CabinetPaperCategory {
+  readonly highlight?: string
 }
 
 export const AddCabinetPaperDialog: React.FC<AddCabinetPaperDialogProps> = ({
   open,
   onClose,
+  paper,
 }) => {
   const theme = useTheme()
   const queryClient = useQueryClient()
   const { showSnackbar } = useSnackbar()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-  // Fetch categories
-  const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
-    {
-      queryKey: ['cabinet-paper-categories'],
-      queryFn: () => getCategories(),
-      enabled: open,
-    },
-  )
+  const isEditing = Boolean(paper)
 
-  const categories = categoriesResponse?.data || []
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [autocompleteOpen, setAutocompleteOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryOption | null>(null)
+
+  useEffect(() => {
+    if (!open) {
+      setSearchTerm('')
+      setDebouncedSearch('')
+      setAutocompleteOpen(false)
+      setSelectedCategory(null)
+    } else if (paper?.category) {
+      // Set the category when editing
+      setSelectedCategory({
+        id: paper.category.id,
+        name: paper.category.name,
+        description: paper.category.description,
+      })
+    }
+  }, [open, paper])
+
+  useEffect(() => {
+    const timer = globalThis.setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim())
+    }, 300)
+
+    return () => globalThis.clearTimeout(timer)
+  }, [searchTerm])
+
+  // Fetch categories with infinite query
+  const {
+    data: categoriesData,
+    isLoading: isLoadingCategories,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['cabinet-paper-categories-search', debouncedSearch],
+    queryFn: ({ pageParam = 0 }) =>
+      getCategories({
+        query: debouncedSearch || undefined,
+        page: pageParam,
+        pageSize: PAGE_SIZE,
+      }),
+    getNextPageParam: (lastPage) => {
+      const pagination = lastPage.pagination
+      if (!pagination) return undefined
+      const nextPage = pagination.page + 1
+      return nextPage < pagination.totalPages ? nextPage : undefined
+    },
+    initialPageParam: 0,
+    enabled: open && autocompleteOpen,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const categoryOptions: Array<CategoryOption> = useMemo(() => {
+    return (
+      categoriesData?.pages
+        .flatMap((page) => page.data ?? [])
+        .map((category) => ({
+          ...category,
+          highlight: debouncedSearch,
+        })) ?? []
+    )
+  }, [categoriesData, debouncedSearch])
+
+  const handleListboxScroll = useCallback(
+    (event: React.SyntheticEvent) => {
+      const listboxNode = event.currentTarget as HTMLElement
+
+      const scrollThreshold =
+        listboxNode.scrollHeight - listboxNode.clientHeight
+      const currentScroll = listboxNode.scrollTop
+
+      if (
+        currentScroll >= scrollThreshold - 64 &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
+        void fetchNextPage()
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage],
+  )
 
   const createCabinetPaperMutation = useMutation({
     mutationFn: (paperFormData: CabinetPaperFormData) => {
+      if (isEditing && paper) {
+        return updateCabinetPaper(paper.id, paperFormData)
+      }
       return createCabinetPaper(paperFormData)
     },
-    onSuccess: (data) => {
+    onSuccess: (data: ApiResponse<void>) => {
       queryClient.invalidateQueries({ queryKey: ['cabinet-papers'] })
+      if (isEditing && paper) {
+        queryClient.invalidateQueries({
+          queryKey: ['cabinet-paper', paper.id],
+        })
+      }
       handleClose()
+      const defaultMessage = isEditing
+        ? 'Cabinet paper updated successfully!'
+        : 'Cabinet paper created successfully!'
       showSnackbar({
-        message: data.message?.trim() || 'Cabinet paper created successfully!',
+        message: data.message?.trim() || defaultMessage,
         severity: 'success',
       })
     },
@@ -84,11 +186,11 @@ export const AddCabinetPaperDialog: React.FC<AddCabinetPaperDialogProps> = ({
 
   const form = useForm({
     defaultValues: {
-      referenceId: '',
-      subject: '',
-      summary: '',
-      categoryId: 0,
-      status: 'DRAFT' as const,
+      referenceId: paper?.referenceId || '',
+      subject: paper?.subject || '',
+      summary: paper?.summary || '',
+      categoryId: paper?.category.id || 0,
+      status: paper?.status || 'DRAFT',
       attachments: [] as Array<File>,
     } as CabinetPaperFormData,
     onSubmit: ({ value }) => {
@@ -99,10 +201,22 @@ export const AddCabinetPaperDialog: React.FC<AddCabinetPaperDialogProps> = ({
     },
   })
 
+  // Sync selectedCategory with form field
+  useEffect(() => {
+    if (selectedCategory) {
+      form.setFieldValue('categoryId', selectedCategory.id)
+    }
+  }, [selectedCategory, form])
+
   const handleClose = () => {
     form.reset()
+    setSelectedCategory(null)
+    setSearchTerm('')
+    setAutocompleteOpen(false)
     onClose()
   }
+
+  const loading = isLoadingCategories || isFetchingNextPage
 
   return (
     <Dialog
@@ -162,7 +276,7 @@ export const AddCabinetPaperDialog: React.FC<AddCabinetPaperDialogProps> = ({
                 color: theme.palette.text.primary,
               }}
             >
-              Create Cabinet Paper
+              {isEditing ? 'Edit Cabinet Paper' : 'Create Cabinet Paper'}
             </Typography>
           </Box>
           <IconButton
@@ -324,17 +438,20 @@ export const AddCabinetPaperDialog: React.FC<AddCabinetPaperDialogProps> = ({
                 </form.Field>
 
                 {/* Category and Status Row */}
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={2}
+                  sx={{
+                    // make children (category + status) equal width on sm+ and full width on xs
+                    '& > *': {
+                      flex: { xs: '0 0 100%', sm: '1 1 0' },
+                    },
+                  }}
+                >
                   {/* Category */}
                   <form.Field name="categoryId">
                     {(field) => (
-                      <FormControl
-                        fullWidth
-                        error={
-                          !field.state.meta.isValid &&
-                          field.state.meta.isTouched
-                        }
-                      >
+                      <Box sx={{ flex: 1 }}>
                         <Typography
                           variant="body2"
                           sx={{
@@ -345,38 +462,144 @@ export const AddCabinetPaperDialog: React.FC<AddCabinetPaperDialogProps> = ({
                         >
                           Category *
                         </Typography>
-                        <Select
-                          value={field.state.value}
-                          onChange={(e) =>
-                            field.handleChange(Number(e.target.value))
+                        <Autocomplete
+                          open={autocompleteOpen}
+                          onOpen={() => setAutocompleteOpen(true)}
+                          onClose={() => setAutocompleteOpen(false)}
+                          options={categoryOptions}
+                          loading={loading}
+                          inputValue={searchTerm}
+                          value={selectedCategory}
+                          onChange={(_event, value) => {
+                            setSelectedCategory(value)
+                            if (value) {
+                              setAutocompleteOpen(false)
+                            }
+                          }}
+                          onInputChange={(_event, value, reason) => {
+                            if (reason === 'reset') return
+                            setSearchTerm(value)
+                          }}
+                          getOptionLabel={(option) => option.name}
+                          isOptionEqualToValue={(option, value) =>
+                            option.id === value.id
                           }
-                          onBlur={field.handleBlur}
-                          disabled={isLoadingCategories}
-                          sx={{
-                            borderRadius: 2,
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: theme.palette.primary.main,
+                          filterOptions={(options) => options}
+                          noOptionsText={
+                            debouncedSearch
+                              ? 'No categories match your search.'
+                              : 'No categories available.'
+                          }
+                          slotProps={{
+                            listbox: {
+                              sx: {
+                                maxHeight: 280,
+                                '&::-webkit-scrollbar': {
+                                  width: 8,
+                                },
+                                '&::-webkit-scrollbar-thumb': {
+                                  borderRadius: 4,
+                                  backgroundColor: `${theme.palette.primary.main}44`,
+                                },
+                              },
+                              onScroll: handleListboxScroll,
                             },
                           }}
-                        >
-                          <MenuItem value={0} disabled>
-                            Select a category
-                          </MenuItem>
-                          {categories.map((category) => (
-                            <MenuItem key={category.id} value={category.id}>
-                              {category.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        {!field.state.meta.isValid &&
-                          field.state.meta.isTouched && (
-                            <FormHelperText>
-                              {field.state.meta.errors
-                                .map((e) => e?.message)
-                                .join(', ')}
-                            </FormHelperText>
+                          renderInput={(params) => {
+                            const { InputProps: inputProps, ...restParams } =
+                              params
+
+                            return (
+                              <TextField
+                                {...restParams}
+                                placeholder="Type to search categories..."
+                                fullWidth
+                                error={
+                                  !field.state.meta.isValid &&
+                                  field.state.meta.isTouched
+                                }
+                                helperText={
+                                  field.state.meta.isTouched
+                                    ? field.state.meta.errors
+                                        .map((e) => e?.message)
+                                        .join(', ')
+                                    : ''
+                                }
+                                slotProps={{
+                                  input: {
+                                    ...inputProps,
+                                    endAdornment: (
+                                      <React.Fragment>
+                                        {loading ? (
+                                          <CircularProgress
+                                            color="primary"
+                                            size={20}
+                                          />
+                                        ) : null}
+                                        {inputProps.endAdornment}
+                                      </React.Fragment>
+                                    ),
+                                  },
+                                }}
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: 2,
+                                    '&:hover fieldset': {
+                                      borderColor: theme.palette.primary.main,
+                                    },
+                                  },
+                                }}
+                              />
+                            )
+                          }}
+                          renderOption={(props, option) => (
+                            <Box
+                              component="li"
+                              {...props}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: 1.5,
+                                py: 1,
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 36,
+                                  height: 36,
+                                  borderRadius: 2,
+                                  backgroundColor: `${theme.palette.primary.main}14`,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                <CategoryIcon
+                                  color="primary"
+                                  fontSize="small"
+                                />
+                              </Box>
+                              <Box sx={{ flex: 1 }}>
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{ fontWeight: 600 }}
+                                >
+                                  {option.name}
+                                </Typography>
+                                {option.description && (
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    sx={{ mt: 0.5 }}
+                                  >
+                                    {option.description}
+                                  </Typography>
+                                )}
+                              </Box>
+                            </Box>
                           )}
-                      </FormControl>
+                        />
+                      </Box>
                     )}
                   </form.Field>
 
@@ -484,30 +707,37 @@ export const AddCabinetPaperDialog: React.FC<AddCabinetPaperDialogProps> = ({
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
           >
-            {([canSubmit, isSubmitting]) => (
-              <Button
-                type="submit"
-                variant="contained"
-                startIcon={<AddIcon />}
-                disabled={!canSubmit || createCabinetPaperMutation.isPending}
-                sx={{
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  minWidth: 140,
-                  boxShadow: theme.shadows[2],
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: theme.shadows[4],
-                  },
-                }}
-              >
-                {createCabinetPaperMutation.isPending || isSubmitting
-                  ? 'Creating...'
-                  : 'Create Paper'}
-              </Button>
-            )}
+            {([canSubmit, isSubmitting]) => {
+              let buttonText
+              if (createCabinetPaperMutation.isPending || isSubmitting) {
+                buttonText = isEditing ? 'Updating...' : 'Creating...'
+              } else {
+                buttonText = isEditing ? 'Update Paper' : 'Create Paper'
+              }
+
+              return (
+                <Button
+                  type="submit"
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  disabled={!canSubmit || createCabinetPaperMutation.isPending}
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    minWidth: 140,
+                    boxShadow: theme.shadows[2],
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme.shadows[4],
+                    },
+                  }}
+                >
+                  {buttonText}
+                </Button>
+              )
+            }}
           </form.Subscribe>
         </DialogActions>
       </form>

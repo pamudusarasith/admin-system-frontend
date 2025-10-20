@@ -49,7 +49,6 @@ export interface ChangePriorityEventDetails {
   previousPriority: LetterPriority
 }
 
-
 export interface LetterEvent {
   id: string
   user: User
@@ -378,7 +377,9 @@ export async function changePriority(
   priority: 'NORMAL' | 'HIGH' | 'URGENT',
 ): Promise<ApiResponse<any>> {
   try {
-    const response = await client.put(`/letters/${letterId}/priority`, { priority })
+    const response = await client.put(`/letters/${letterId}/priority`, {
+      priority,
+    })
     return response.data
   } catch (error) {
     console.error(

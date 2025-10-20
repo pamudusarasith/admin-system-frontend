@@ -17,10 +17,9 @@ export { default as DivisionWorkloadCard } from './DivisionWorkloadCard'
 // Dialog Components
 // ============================================
 export { AddButton } from './AddButton'
-export { AddCabinetPaperDialog } from './AddCabinetPaperDialog'
 export { DivisionDialog } from './DivisionDialog'
 export { AddRoleDialog } from './AddRoleDialog'
-export { default as CategoryDialog } from './CategoryDialog'
+export { CategoryDialog } from './CategoryDialog'
 
 // ============================================
 // Form Components
@@ -49,6 +48,16 @@ export { LetterTimeline } from './letter/LetterTimeline'
 export { ReOpenDialog } from './letter/ReOpenDialog'
 export { LetterSearchBar } from './letter/LetterSearchBar'
 export { MarkAsCompleteDialog } from './letter/MarkAsCompleteDialog'
+
+// ============================================
+// Cabinet Paper Components (from ./cabinet-paper)
+// ============================================
+export { AddCabinetPaperDialog } from './cabinet-paper/AddCabinetPaperDialog'
+export { CabinetPaperActionMenu } from './cabinet-paper/CabinetPaperActionMenu'
+export { CabinetPaperCard } from './cabinet-paper/CabinetPaperCard'
+export { CabinetPaperDetailsGrid } from './cabinet-paper/CabinetPaperDetailsGrid'
+export { CabinetPaperHeader } from './cabinet-paper/CabinetPaperHeader'
+export { CabinetPaperSearchBar } from './cabinet-paper/CabinetPaperSearchBar'
 
 // ============================================
 // Role Components (from ./roles)
