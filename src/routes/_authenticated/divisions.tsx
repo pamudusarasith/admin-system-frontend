@@ -4,7 +4,6 @@ import {
   Button,
   CircularProgress,
   Container,
-  Divider,
   IconButton,
   Paper,
   Table,
@@ -21,7 +20,7 @@ import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
-import type { Division, ApiResponse } from '@/api'
+import type { ApiResponse, Division } from '@/api'
 import {
   AddButton,
   ConfirmationDialog,
@@ -59,20 +58,6 @@ function DivisionPage() {
   const canUpdate = hasAuthority(P.divisionUpdate)
   const canDelete = hasAuthority(P.divisionDelete)
 
-  // If user doesn't have read permission, show access denied
-  if (!canRead) {
-    return (
-      <SidebarLayout>
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-          <Alert severity="error" sx={{ maxWidth: '1300px', mx: 'auto' }}>
-            You don't have permission to view divisions. Please contact your
-            administrator.
-          </Alert>
-        </Container>
-      </SidebarLayout>
-    )
-  }
-
   // React Query to fetch divisions with search and pagination
   const {
     data: response,
@@ -94,15 +79,13 @@ function DivisionPage() {
   // Mutation for deleting divisions
   const deleteDivisionMutation = useMutation({
     mutationFn: deleteDivision,
-    onSuccess: (response) => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['divisions'] })
       setDeleteDialogOpen(false)
 
       // Extract success message from response
       const successMessage =
-        response?.message ||
-        response?.data?.message ||
-        'Division deleted successfully'
+        res.message || res.data?.message || 'Division deleted successfully'
 
       showSnackbar({
         message: successMessage,
@@ -111,13 +94,13 @@ function DivisionPage() {
 
       setDivisionToDelete(null)
     },
-    onError: (error: AxiosError<ApiResponse<unknown>>) => {
-      console.error('Failed to delete division:', error)
+    onError: (err: AxiosError<ApiResponse<unknown>>) => {
+      console.error('Failed to delete division:', err)
 
       // Extract error message from response
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
+        err.response?.data.message ||
+        err.message ||
         'Failed to delete division. Please try again.'
 
       showSnackbar({
@@ -191,9 +174,9 @@ function DivisionPage() {
 
     try {
       await deleteDivisionMutation.mutateAsync(String(divisionToDelete.id))
-    } catch (error) {
+    } catch (err) {
       // Error is already handled in mutation onError
-      console.error('Error deleting division:', error)
+      console.error('Error deleting division:', err)
     }
   }
 
