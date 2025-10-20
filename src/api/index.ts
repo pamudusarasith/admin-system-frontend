@@ -38,6 +38,7 @@ export {
   createLetter,
   getLetterById,
   addNote,
+  updateLetter,
   assignDivision,
   assignUser,
   returnFromDivision,
@@ -50,6 +51,7 @@ export type {
   Attachment,
   ChangeStatusEventDetails,
   AddNoteEventDetails,
+  ChangePriorityEventDetails,
   LetterEvent,
   Letter,
   GetLettersParams,
@@ -61,3 +63,6 @@ export {
   createCabinetPaper,
 } from './cabinet-papers'
 export type { CabinetPaper, CabinetPaperCategory } from './cabinet-papers'
+
+// Cabinet Categories Exports
+export * from './categories'

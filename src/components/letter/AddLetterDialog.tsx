@@ -30,18 +30,21 @@ import { useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import type { LetterFormData } from '@/schemas'
-import type { ApiResponse } from '@/api'
-import { createLetter } from '@/api'
+import type { ApiResponse, Letter } from '@/api'
+import { createLetter, updateLetter } from '@/api'
 import { useSnackbar } from '@/components'
 
 interface AddLetterDialogProps {
   open: boolean
   onClose: () => void
+  // when provided, dialog switches to edit mode and pre-fills values
+  letter?: Letter
 }
 
 export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
   open,
   onClose,
+  letter,
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -71,6 +74,24 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
     },
   })
 
+  // Mutation for updating a letter (used when `letter` prop is provided)
+  const updateLetterMutation = useMutation<ApiResponse<any>, AxiosError<ApiResponse<any>>, { id: number; data: LetterFormData }>({
+    mutationFn: ({ id, data }) => updateLetter(id, data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['letters'] })
+      if (letter) queryClient.invalidateQueries({ queryKey: ['letter', letter.id] })
+      handleClose()
+      if (data.message) showSnackbar({ message: data.message, severity: 'success' })
+    },
+    onError: (error) => {
+      const message =
+        error.response?.data.message?.trim() ||
+        'An unexpected error occurred. Please try again.'
+      showSnackbar({ message, severity: 'error' })
+      console.error('Failed to update letter:', error)
+    },
+  })
+
   // TanStack Form setup
   const form = useForm({
     defaultValues: {
@@ -95,7 +116,12 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
       attachments: undefined,
     } as LetterFormData,
     onSubmit: ({ value }) => {
-      createLetterMutation.mutate(value)
+      // decide whether to create or update based on presence of `letter` prop
+      if (letter) {
+        updateLetterMutation.mutate({ id: letter.id, data: value })
+      } else {
+        createLetterMutation.mutate(value)
+      }
     },
   })
 
@@ -146,6 +172,33 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
     onClose()
   }
 
+  // When dialog opens in edit mode, populate the form with letter values
+  React.useEffect(() => {
+    if (letter && open) {
+      form.reset({
+        reference: letter.reference,
+        sender_details: {
+          name: letter.senderDetails.name,
+          email: (letter.senderDetails as any).email || '',
+          phone_number: (letter.senderDetails as any).phoneNumber || '',
+          address: (letter.senderDetails as any).address || '',
+        },
+        receiver_details: {
+          name: letter.receiverDetails.name,
+          designation: (letter.receiverDetails as any).designation || '',
+          division_name: (letter.receiverDetails as any).divisionName || '',
+        },
+        priority: letter.priority,
+        mode_of_arrival: letter.modeOfArrival,
+        received_date: letter.receivedDate || new Date().toISOString().split('T')[0],
+        sent_date: letter.sentDate,
+        subject: letter.subject || '',
+        content: letter.content || '',
+        attachments: undefined,
+      } as LetterFormData)
+    }
+  }, [letter, open, form])
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
@@ -186,7 +239,7 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
             color: theme.palette.text.primary,
           }}
         >
-          Add New Letter
+          {letter ? 'Edit Letter' : 'Add New Letter'}
         </Typography>
         <IconButton
           onClick={handleClose}
@@ -625,78 +678,80 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                   )}
                 </form.Field>
 
-                {/* File Attachments */}
-                <form.Field name="attachments">
-                  {(field) => (
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          color: theme.palette.text.primary,
-                          mb: 2,
-                        }}
-                      >
-                        Attachments
-                      </Typography>
-
-                      <Button
-                        component="label"
-                        variant="outlined"
-                        startIcon={<UploadIcon />}
-                        sx={{
-                          borderRadius: 2,
-                          borderStyle: 'dashed',
-                          borderColor: theme.palette.primary.main,
-                          color: theme.palette.primary.main,
-                          padding: 2,
-                          '&:hover': {
-                            backgroundColor: `${theme.palette.primary.main}10`,
-                            borderColor: theme.palette.primary.dark,
-                          },
-                        }}
-                        fullWidth
-                      >
-                        <Typography>
-                          Upload Files (PNG, JPEG, PDF, DOCX)
+                {/* File Attachments (only for create mode) */}
+                {!letter && (
+                  <form.Field name="attachments">
+                    {(field) => (
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: theme.palette.text.primary,
+                            mb: 2,
+                          }}
+                        >
+                          Attachments
                         </Typography>
-                        <input
-                          type="file"
-                          hidden
-                          multiple
-                          accept=".png,.jpg,.jpeg,.pdf,.docx"
-                          onChange={handleFileUpload}
-                        />
-                      </Button>
 
-                      {/* Attached Files List */}
-                      {(field.state.value?.length || 0) > 0 && (
-                        <Box sx={{ mt: 2 }}>
-                          <Stack spacing={1}>
-                            {field.state.value?.map((file, index) => (
-                              <Chip
-                                key={index}
-                                icon={<AttachFileIcon />}
-                                label={`${file.name} (${formatFileSize(file.size)})`}
-                                onDelete={() => removeAttachment(index)}
-                                deleteIcon={<DeleteIcon />}
-                                variant="outlined"
-                                sx={{
-                                  justifyContent: 'space-between',
-                                  '& .MuiChip-label': {
-                                    maxWidth: { xs: '200px', sm: '300px' },
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                  },
-                                }}
-                              />
-                            ))}
-                          </Stack>
-                        </Box>
-                      )}
-                    </Box>
-                  )}
-                </form.Field>
+                        <Button
+                          component="label"
+                          variant="outlined"
+                          startIcon={<UploadIcon />}
+                          sx={{
+                            borderRadius: 2,
+                            borderStyle: 'dashed',
+                            borderColor: theme.palette.primary.main,
+                            color: theme.palette.primary.main,
+                            padding: 2,
+                            '&:hover': {
+                              backgroundColor: `${theme.palette.primary.main}10`,
+                              borderColor: theme.palette.primary.dark,
+                            },
+                          }}
+                          fullWidth
+                        >
+                          <Typography>
+                            Upload Files (PNG, JPEG, PDF, DOCX)
+                          </Typography>
+                          <input
+                            type="file"
+                            hidden
+                            multiple
+                            accept=".png,.jpg,.jpeg,.pdf,.docx"
+                            onChange={handleFileUpload}
+                          />
+                        </Button>
+
+                        {/* Attached Files List */}
+                        {(field.state.value?.length || 0) > 0 && (
+                          <Box sx={{ mt: 2 }}>
+                            <Stack spacing={1}>
+                              {field.state.value?.map((file, index) => (
+                                <Chip
+                                  key={index}
+                                  icon={<AttachFileIcon />}
+                                  label={`${file.name} (${formatFileSize(file.size)})`}
+                                  onDelete={() => removeAttachment(index)}
+                                  deleteIcon={<DeleteIcon />}
+                                  variant="outlined"
+                                  sx={{
+                                    justifyContent: 'space-between',
+                                    '& .MuiChip-label': {
+                                      maxWidth: { xs: '200px', sm: '300px' },
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                    },
+                                  }}
+                                />
+                              ))}
+                            </Stack>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                  </form.Field>
+                )}
               </Stack>
             </form>
           </CardContent>

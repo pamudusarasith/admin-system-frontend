@@ -12,10 +12,12 @@ import {
 } from '@/api'
 import {
   AddAttachmentDialog,
+  AddLetterDialog,
   AddNoteDialog,
   AddReplyDialog,
   AssignDivisionDialog,
   AssignUserDialog,
+  ChangePriorityDialog,
   ConfirmationDialog,
   ErrorMessage,
   LetterActionMenu,
@@ -47,6 +49,7 @@ function LetterThreadView() {
   const [markAsCompleteDialogOpen, setMarkAsCompleteDialogOpen] =
     useState(false)
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false)
+  const [changePriorityDialogOpen, setChangePriorityDialogOpen] = useState(false)
   const [addAttachmentDialogOpen, setAddAttachmentDialogOpen] = useState(false)
   const [returnFromDivisionDialogOpen, setReturnFromDivisionDialogOpen] =
     useState(false)
@@ -54,6 +57,7 @@ function LetterThreadView() {
     useState(false)
   const [returnReason, setReturnReason] = useState('')
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
 
   const { letterId } = Route.useParams()
   const result = useQuery({
@@ -216,6 +220,7 @@ function LetterThreadView() {
           letter={letter}
           onAddNote={() => setAddNoteDialogOpen(true)}
           onAddAttachment={() => setAddAttachmentDialogOpen(true)}
+          onChangePriority={() => setChangePriorityDialogOpen(true)}
           onAssignDivision={() => setAssignDivisionDialogOpen(true)}
           onAssignUser={() => setAssignUserDialogOpen(true)}
           onAcceptLetter={() => setAcceptLetterDialogOpen(true)}
@@ -223,6 +228,7 @@ function LetterThreadView() {
           onReopen={() => setReopenDialogOpen(true)}
           onReturnFromDivision={() => setReturnFromDivisionDialogOpen(true)}
           onReturnFromUser={() => setReturnFromUserDialogOpen(true)}
+          onEdit={() => setEditDialogOpen(true)}
         />
 
         <AddReplyDialog
@@ -241,6 +247,12 @@ function LetterThreadView() {
           letterId={Number(letterId)}
           open={addAttachmentDialogOpen}
           onClose={() => setAddAttachmentDialogOpen(false)}
+        />
+
+        <ChangePriorityDialog
+          letter={letter}
+          open={changePriorityDialogOpen}
+          onClose={() => setChangePriorityDialogOpen(false)}
         />
 
         <AssignDivisionDialog
@@ -265,6 +277,12 @@ function LetterThreadView() {
           letter={letter}
           open={reopenDialogOpen}
           onClose={() => setReopenDialogOpen(false)}
+        />
+
+        <AddLetterDialog
+          open={editDialogOpen}
+          onClose={() => setEditDialogOpen(false)}
+          letter={letter}
         />
 
         <ConfirmationDialog

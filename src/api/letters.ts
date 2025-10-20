@@ -2,7 +2,7 @@ import { client } from './client'
 import type { ApiResponse } from './client'
 import type { Division } from './divisions'
 import type { User } from './users'
-import type { AddNoteFormData, LetterFormData } from '@/schemas'
+import type { AddNoteFormData, LetterFormData, LetterPriority } from '@/schemas'
 
 export interface SenderDetails {
   name: string
@@ -44,6 +44,12 @@ export interface AddNoteEventDetails {
   attachments?: Array<Attachment>
 }
 
+export interface ChangePriorityEventDetails {
+  newPriority: LetterPriority
+  previousPriority: LetterPriority
+}
+
+
 export interface LetterEvent {
   id: string
   user: User
@@ -56,6 +62,7 @@ export interface LetterEvent {
     | 'CHANGE_PRIORITY'
     | 'UPDATE_DETAILS'
   eventDetails?:
+    | ChangePriorityEventDetails
     | ChangeStatusEventDetails
     | AddNoteEventDetails
     | Record<string, any>
@@ -144,6 +151,21 @@ export async function createLetter(
     return response.data
   } catch (error) {
     console.error('Failed to create letter:', error)
+    throw error
+  }
+}
+
+export async function updateLetter(
+  letterId: number,
+  letterData: LetterFormData,
+): Promise<ApiResponse<any>> {
+  try {
+    // Only update the non-file details. Attachments are managed separately.
+    const { attachments, ...details } = letterData
+    const response = await client.put(`/letters/${letterId}`, details)
+    return response.data
+  } catch (error) {
+    console.error(`Failed to update letter with ID ${letterId}:`, error)
     throw error
   }
 }
@@ -347,6 +369,22 @@ export async function reopenLetter(
     return response.data
   } catch (error) {
     console.error(`Failed to reopen letter with ID ${letterId}:`, error)
+    throw error
+  }
+}
+
+export async function changePriority(
+  letterId: number,
+  priority: 'NORMAL' | 'HIGH' | 'URGENT',
+): Promise<ApiResponse<any>> {
+  try {
+    const response = await client.put(`/letters/${letterId}/priority`, { priority })
+    return response.data
+  } catch (error) {
+    console.error(
+      `Failed to change priority for letter with ID ${letterId}:`,
+      error,
+    )
     throw error
   }
 }

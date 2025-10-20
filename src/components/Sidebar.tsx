@@ -16,6 +16,7 @@ import {
 } from '@mui/material'
 import {
   Assignment as AssignmentIcon,
+  Bookmark,
   Business as BusinessIcon,
   Dashboard as DashboardIcon,
   Email as EmailIcon,
@@ -132,6 +133,12 @@ const menuItems: Array<MenuItem> = [
         label: 'All Papers',
         icon: <ReceiptIcon />,
         path: { to: '/cabinet-papers' },
+      },
+      {
+        id: 'categories',
+        label: 'categories',
+        icon: <Bookmark />,
+        path: { to: '/categories' },
       },
     ],
   },
