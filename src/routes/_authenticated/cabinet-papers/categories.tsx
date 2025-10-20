@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   CircularProgress,
   Container,
@@ -31,6 +32,7 @@ import {
   useSnackbar,
 } from '@/components'
 import { deleteCategory, getCategories } from '@/api/categories'
+import { Permission as P, useAuth } from '@/core'
 
 export const Route = createFileRoute(
   '/_authenticated/cabinet-papers/categories',
@@ -41,6 +43,7 @@ export const Route = createFileRoute(
 function CategoryPage() {
   const theme = useTheme()
   const { showSnackbar } = useSnackbar()
+  const { hasAuthority } = useAuth()
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)
@@ -51,6 +54,26 @@ function CategoryPage() {
     null,
   )
   const queryClient = useQueryClient()
+
+  // Check permissions
+  const canRead = hasAuthority(P.categoryRead)
+  const canCreate = hasAuthority(P.categoryCreate)
+  const canUpdate = hasAuthority(P.categoryUpdate)
+  const canDelete = hasAuthority(P.categoryDelete)
+
+  // If user doesn't have read permission, show access denied
+  if (!canRead) {
+    return (
+      <SidebarLayout>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Alert severity="error" sx={{ maxWidth: '1300px', mx: 'auto' }}>
+            You don't have permission to view categories. Please contact your
+            administrator.
+          </Alert>
+        </Container>
+      </SidebarLayout>
+    )
+  }
 
   // React Query to fetch categories with search and pagination
   const {
@@ -63,6 +86,7 @@ function CategoryPage() {
     queryFn: () => getCategories({ query, page, pageSize }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
+    enabled: canRead, // Only fetch if user has read permission
   })
 
   const categories = response?.data ?? []
@@ -82,22 +106,39 @@ function CategoryPage() {
   // Mutation for deleting categories
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteCategory,
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       queryClient.invalidateQueries({
         queryKey: ['cabinet-paper-categories-search'],
       })
+
+      // Extract success message from response
+      const successMessage =
+        response?.message ||
+        response?.data?.message ||
+        'Category deleted successfully!'
+
       showSnackbar({
-        message: 'Category deleted successfully!',
+        message: successMessage,
         severity: 'success',
       })
+
       setDeleteDialogOpen(false)
       setCategoryToDelete(null)
     },
-    onError: (err: AxiosError<ApiResponse<any>>) => {
-      const message =
-        err.response?.data.message?.trim() ?? 'Failed to delete category'
-      showSnackbar({ message, severity: 'error' })
+    onError: (error: AxiosError<ApiResponse<unknown>>) => {
+      console.error('Failed to delete category:', error)
+
+      // Extract error message from response
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to delete category. Please try again.'
+
+      showSnackbar({
+        message: errorMessage,
+        severity: 'error',
+      })
     },
   })
 
@@ -120,6 +161,21 @@ function CategoryPage() {
   }
 
   const handleOpenCategoryDialog = (category?: Category) => {
+    // Check permission before opening dialog
+    if (category && !canUpdate) {
+      showSnackbar({
+        message: "You don't have permission to edit categories",
+        severity: 'error',
+      })
+      return
+    }
+    if (!category && !canCreate) {
+      showSnackbar({
+        message: "You don't have permission to create categories",
+        severity: 'error',
+      })
+      return
+    }
     setEditingCategory(category || null)
     setIsCategoryDialogOpen(true)
   }
@@ -130,17 +186,25 @@ function CategoryPage() {
   }
 
   const handleDeleteCategory = (category: Category) => {
+    if (!canDelete) {
+      showSnackbar({
+        message: "You don't have permission to delete categories",
+        severity: 'error',
+      })
+      return
+    }
     setCategoryToDelete(category)
     setDeleteDialogOpen(true)
   }
 
   const confirmDeleteCategory = async () => {
-    if (!categoryToDelete) return
+    if (!categoryToDelete || !canDelete) return
 
     try {
       await deleteCategoryMutation.mutateAsync(String(categoryToDelete.id))
-    } catch (e) {
-      console.error('Error deleting category:', e)
+    } catch (error) {
+      // Error is already handled in mutation onError
+      console.error('Error deleting category:', error)
     }
   }
 
@@ -185,14 +249,17 @@ function CategoryPage() {
               View and manage categories for organizing your content.
             </Typography>
           </Box>
-          <Box sx={{ alignSelf: { xs: 'flex-start', md: 'flex-start' } }}>
-            <AddButton
-              label="Add new Category"
-              tooltip="Add a new category"
-              onClick={() => handleOpenCategoryDialog()}
-            />
-          </Box>
+          {canCreate && (
+            <Box sx={{ alignSelf: { xs: 'flex-start', md: 'flex-start' } }}>
+              <AddButton
+                label="Add new Category"
+                tooltip="Add a new category"
+                onClick={() => handleOpenCategoryDialog()}
+              />
+            </Box>
+          )}
         </Box>
+
         <Paper
           elevation={2}
           sx={{
@@ -213,14 +280,12 @@ function CategoryPage() {
             }}
           >
             <Box sx={{ flex: 1, width: '100%' }}>
-              <Box>
-                <SearchBar
-                  placeholder="Search categories by name or description..."
-                  value={query}
-                  onChange={setQuery}
-                  onSearch={handleSearch}
-                />
-              </Box>
+              <SearchBar
+                placeholder="Search categories by name or description..."
+                value={query}
+                onChange={setQuery}
+                onSearch={handleSearch}
+              />
             </Box>
           </Box>
         </Paper>
@@ -300,23 +365,26 @@ function CategoryPage() {
                         Description
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ minWidth: 100 }}>
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        Actions
-                      </Typography>
-                    </TableCell>
+                    {(canUpdate || canDelete) && (
+                      <TableCell sx={{ minWidth: 100 }}>
+                        <Typography variant="subtitle2" fontWeight="bold">
+                          Actions
+                        </Typography>
+                      </TableCell>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {categories.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={3}
+                        colSpan={canUpdate || canDelete ? 3 : 2}
                         sx={{ textAlign: 'center', py: 4 }}
                       >
                         <Typography variant="body2" color="text.secondary">
-                          No categories found. Click "Add new Category" to
-                          create one.
+                          No categories found.{' '}
+                          {canCreate &&
+                            'Click "Add new Category" to create one.'}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -358,25 +426,34 @@ function CategoryPage() {
                             {category.description}
                           </Typography>
                         </TableCell>
-                        <TableCell align="right">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenCategoryDialog(category)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDeleteCategory(category)}
-                            disabled={deleteCategoryMutation.isPending}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </TableCell>
+                        {(canUpdate || canDelete) && (
+                          <TableCell align="right">
+                            {canUpdate && (
+                              <IconButton
+                                size="small"
+                                onClick={() =>
+                                  handleOpenCategoryDialog(category)
+                                }
+                                title="Edit Category"
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                            {canDelete && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteCategory(category)}
+                                disabled={deleteCategoryMutation.isPending}
+                                title="Delete Category"
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))
                   )}
-                  <Divider />
                 </TableBody>
               </Table>
             </TableContainer>
@@ -399,22 +476,24 @@ function CategoryPage() {
         />
 
         {/* Delete Confirmation Dialog */}
-        <ConfirmationDialog
-          open={deleteDialogOpen}
-          onClose={cancelDeleteCategory}
-          onConfirm={confirmDeleteCategory}
-          title="Delete Category"
-          message={
-            categoryToDelete
-              ? `Are you sure you want to delete "${categoryToDelete.name}"? This action cannot be undone.`
-              : 'Are you sure you want to delete this category?'
-          }
-          confirmText="Delete"
-          cancelText="Cancel"
-          variant="error"
-          danger
-          loading={deleteCategoryMutation.isPending}
-        />
+        {canDelete && (
+          <ConfirmationDialog
+            open={deleteDialogOpen}
+            onClose={cancelDeleteCategory}
+            onConfirm={confirmDeleteCategory}
+            title="Delete Category"
+            message={
+              categoryToDelete
+                ? `Are you sure you want to delete "${categoryToDelete.name}"? This action cannot be undone.`
+                : 'Are you sure you want to delete this category?'
+            }
+            confirmText="Delete"
+            cancelText="Cancel"
+            variant="error"
+            danger
+            loading={deleteCategoryMutation.isPending}
+          />
+        )}
       </Container>
     </SidebarLayout>
   )
