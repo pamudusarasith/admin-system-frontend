@@ -33,9 +33,37 @@ export async function getCabinetPapers(
   return response.data
 }
 
+interface GetCabinetPaperCategoriesProps {
+  query?: string
+  page?: number
+  pageSize?: number
+}
+
+export async function getCabinetPaperCategories(
+  params?: GetCabinetPaperCategoriesProps,
+): Promise<ApiResponse<Array<CabinetPaperCategory>>> {
+  const response = await client.get('/cabinet-paper-categories', { params })
+  return response.data
+}
+
 export async function createCabinetPaper(
   params: CabinetPaperFormData,
 ): Promise<ApiResponse<void>> {
-  const response = await client.post('/cabinet-papers', params)
+  const { attachments, ...details } = params
+  const formData = new FormData()
+  formData.append(
+    'details',
+    new Blob([JSON.stringify(details)], { type: 'application/json' }),
+  )
+  if (attachments) {
+    for (const file of attachments) {
+      formData.append(`attachments`, file)
+    }
+  }
+  const response = await client.post('/cabinet-papers', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
   return response.data
 }

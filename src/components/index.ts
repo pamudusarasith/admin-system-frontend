@@ -17,7 +17,6 @@ export { default as DivisionWorkloadCard } from './DivisionWorkloadCard'
 // Dialog Components
 // ============================================
 export { AddButton } from './AddButton'
-export { AddCabinetPaperDialog } from './AddCabinetPaperDialog'
 export { DivisionDialog } from './DivisionDialog'
 export { AddRoleDialog } from './AddRoleDialog'
 
@@ -50,6 +49,7 @@ export { MarkAsCompleteDialog } from './letter/MarkAsCompleteDialog'
 // ============================================
 // Cabinet Paper Components (from ./cabinet-paper)
 // ============================================
+export { AddCabinetPaperDialog } from './cabinet-paper/AddCabinetPaperDialog'
 export { CabinetPaperCard } from './cabinet-paper/CabinetPaperCard'
 export { CabinetPaperSearchBar } from './cabinet-paper/CabinetPaperSearchBar'
 

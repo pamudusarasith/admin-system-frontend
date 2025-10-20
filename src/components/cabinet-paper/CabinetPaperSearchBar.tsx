@@ -59,7 +59,7 @@ export function CabinetPaperSearchBar({
             placeholder="Search by subject, reference ID, or category..."
             value={localQuery}
             onChange={(e) => setLocalQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             slotProps={{
               input: {
                 startAdornment: (

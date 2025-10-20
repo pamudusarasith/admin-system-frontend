@@ -55,5 +55,9 @@ export type {
   GetLettersParams,
 } from './letters'
 
-export { getCabinetPapers } from './cabinet-papers'
-export type { CabinetPaper } from './cabinet-papers'
+export {
+  getCabinetPapers,
+  getCabinetPaperCategories,
+  createCabinetPaper,
+} from './cabinet-papers'
+export type { CabinetPaper, CabinetPaperCategory } from './cabinet-papers'

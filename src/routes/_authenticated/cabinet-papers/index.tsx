@@ -20,7 +20,6 @@ import {
 } from '@mui/icons-material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
-import type { CabinetPaper } from '@/api'
 import { getCabinetPapers } from '@/api'
 import {
   AddCabinetPaperDialog,
@@ -34,8 +33,8 @@ import {
 
 const cabinetPaperSearchSchema = z.object({
   query: z.string().optional(),
-  page: z.number().optional().catch(undefined),
-  pageSize: z.number().optional().catch(undefined),
+  page: z.coerce.number().optional(),
+  pageSize: z.coerce.number().optional(),
 })
 
 export const Route = createFileRoute('/_authenticated/cabinet-papers/')({
@@ -146,7 +145,7 @@ function CabinetPapersPage() {
     }
   }
 
-  const getCategoryColor = (categoryName: string) => {
+  const getCategoryColor = (categoryName?: string) => {
     const colors = [
       theme.palette.primary.main,
       theme.palette.secondary.main,
@@ -156,7 +155,7 @@ function CabinetPapersPage() {
     ]
     const hash = (categoryName || '')
       .split('')
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      .reduce((acc, char) => acc + (char.codePointAt(0) || 0), 0)
     return colors[hash % colors.length]
   }
 
