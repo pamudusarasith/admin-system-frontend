@@ -62,7 +62,7 @@ function AccountSetupPage() {
       await queryClient.invalidateQueries({ queryKey: ['user-profile'] })
 
       // Wait for React state to flush
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise(resolve => setTimeout(resolve, 100))
 
       // Navigate to redirect or home
       navigate({ to: search.redirect || '/', replace: true })

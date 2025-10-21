@@ -13,7 +13,8 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import { ArrowUpwardSharp, Edit, MoreVert } from '@mui/icons-material'
+import { ArrowUpwardSharp, Edit } from '@mui/icons-material'
+import { UserActionsMenu } from './UserActionsMenu'
 import type { User } from '@/api'
 
 interface UserTableProps {
@@ -21,8 +22,11 @@ interface UserTableProps {
   isLoading: boolean
   emptyMessage?: string
   canUpdate?: boolean
+  canDelete?: boolean
+  canResetPassword?: boolean
   onEditUser?: (user: User) => void
-  onMoreActions?: (user: User) => void
+  onDeleteUser?: (user: User) => void
+  onResetPassword?: (user: User) => void
 }
 
 export const UserTable: React.FC<UserTableProps> = ({
@@ -30,10 +34,15 @@ export const UserTable: React.FC<UserTableProps> = ({
   isLoading,
   emptyMessage = 'No users found.',
   canUpdate = false,
+  canDelete = false,
+  canResetPassword = false,
   onEditUser,
-  onMoreActions,
+  onDeleteUser,
+  onResetPassword,
 }) => {
   const theme = useTheme()
+
+  const showActions = canUpdate || canDelete || canResetPassword
 
   const generateAvatarUrl = (user: User) => {
     const initials = user.fullName
@@ -101,7 +110,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                 Role
               </Typography>
             </TableCell>
-            {canUpdate && (
+            {showActions && (
               <TableCell align="right">
                 <Typography variant="subtitle2" fontWeight={600}>
                   Actions
@@ -113,7 +122,7 @@ export const UserTable: React.FC<UserTableProps> = ({
         <TableBody>
           {isLoading && (
             <TableRow>
-              <TableCell colSpan={canUpdate ? 5 : 4} align="center" sx={{ py: 4 }}>
+              <TableCell colSpan={showActions ? 5 : 4} align="center" sx={{ py: 4 }}>
                 <CircularProgress />
                 <Typography variant="body2" sx={{ mt: 2 }}>
                   Loading users...
@@ -124,7 +133,7 @@ export const UserTable: React.FC<UserTableProps> = ({
 
           {!isLoading && users.length === 0 && (
             <TableRow>
-              <TableCell colSpan={canUpdate ? 5 : 4} align="center" sx={{ py: 4 }}>
+              <TableCell colSpan={showActions ? 5 : 4} align="center" sx={{ py: 4 }}>
                 <Typography variant="body2" color="text.secondary">
                   {emptyMessage}
                 </Typography>
@@ -196,22 +205,26 @@ export const UserTable: React.FC<UserTableProps> = ({
                     {user.role}
                   </Typography>
                 </TableCell>
-                {canUpdate && (
+                {showActions && (
                   <TableCell align="right">
-                    <IconButton
-                      size="small"
-                      onClick={() => onEditUser?.(user)}
-                      title="Edit user"
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => onMoreActions?.(user)}
-                      title="More actions"
-                    >
-                      <MoreVert fontSize="small" />
-                    </IconButton>
+                    <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                      {canUpdate && (
+                        <IconButton
+                          size="small"
+                          onClick={() => onEditUser?.(user)}
+                          title="Edit user"
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      )}
+                      <UserActionsMenu
+                        user={user}
+                        canDelete={canDelete}
+                        canResetPassword={canResetPassword}
+                        onDelete={onDeleteUser ?? (() => {})}
+                        onResetPassword={onResetPassword ?? (() => {})}
+                      />
+                    </Stack>
                   </TableCell>
                 )}
               </TableRow>

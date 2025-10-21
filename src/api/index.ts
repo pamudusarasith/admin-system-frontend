@@ -10,6 +10,8 @@ export {
   getUsers,
   createUser,
   updateUser,
+  deleteUser,
+  resetUserPassword,
   getUserProfile,
   updateProfile,
   accountSetup,

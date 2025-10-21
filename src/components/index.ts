@@ -76,6 +76,7 @@ export { RoleDialog } from './roles/RoleDialog'
 export { UserHeader } from './user/UserHeader'
 export { UserSearchBar } from './user/UserSearchBar'
 export { UserTable } from './user/UserTable'
+export { UserActionsMenu } from './user/UserActionsMenu'
 
 // ============================================
 // Common/Utility Components (from ./common)

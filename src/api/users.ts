@@ -56,6 +56,13 @@ export async function deleteUser(userId: number): Promise<ApiResponse<void>> {
   return response.data
 }
 
+export async function resetUserPassword(
+  userId: number,
+): Promise<ApiResponse<void>> {
+  const response = await client.post(`/users/${userId}/reset-password`)
+  return response.data
+}
+
 export async function getUserProfile(): Promise<ApiResponse<User>> {
   const response = await client.get('/profile')
   return response.data
