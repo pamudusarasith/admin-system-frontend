@@ -22,43 +22,116 @@ export const letterStatusEnum = z.enum([
   'CLOSED',
 ])
 
-export const createLetterSchema = z.object({
-  reference: z.string().min(1),
-  sender_details: z.object({
-    name: z.string().min(1),
-    address: z.string().optional(),
-    email: z.email().optional(),
-    phone_number: z.string().optional(),
-  }),
-  receiver_details: z.object({
-    name: z.string().min(1),
-    designation: z.string().optional(),
-    division_name: z.string().optional(),
-  }),
-  sent_date: z.iso.date().optional(),
-  received_date: z.iso.date(),
-  mode_of_arrival: modeOfArrivalEnum,
-  subject: z.string().min(1),
-  content: z.string().optional(),
-  priority: letterPriorityEnum,
-  attachments: z.array(z.file()).optional(),
-})
+export const createLetterSchema = z
+  .object({
+    reference: z
+      .string()
+      .min(1, 'Reference number is required')
+      .trim()
+      .nonempty('Reference number cannot be empty'),
+    sender_details: z.object({
+      name: z
+        .string()
+        .min(1, 'Sender name is required')
+        .trim()
+        .nonempty('Sender name cannot be empty'),
+      address: z.string().optional(),
+      email: z.email('Invalid email format').optional().or(z.literal('')),
+      phone_number: z.string().optional(),
+    }),
+    receiver_details: z.object({
+      name: z
+        .string()
+        .min(1, 'Receiver name is required')
+        .trim()
+        .nonempty('Receiver name cannot be empty'),
+      designation: z.string().optional(),
+      division_name: z.string().optional(),
+    }),
+    sent_date: z.string().optional().or(z.literal('')),
+    received_date: z
+      .string()
+      .min(1, 'Received date is required')
+      .refine((date) => !Number.isNaN(Date.parse(date)), {
+        message: 'Invalid date format',
+      }),
+    mode_of_arrival: modeOfArrivalEnum,
+    subject: z
+      .string()
+      .min(1, 'Subject is required')
+      .trim()
+      .nonempty('Subject cannot be empty'),
+    content: z.string().optional(),
+    priority: letterPriorityEnum,
+    attachments: z
+      .array(
+        z
+          .file()
+          .refine((file) => file.size <= 10 * 1024 * 1024, {
+            message: 'Each file must be less than 10MB',
+          })
+          .refine(
+            (file) =>
+              [
+                'image/png',
+                'image/jpeg',
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              ].includes(file.type),
+            {
+              message: 'Only PNG, JPEG, PDF, and DOCX files are allowed',
+            },
+          ),
+      )
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      // If sent_date is provided and not empty, validate it's before or equal to received_date
+      if (data.sent_date && data.sent_date.trim() !== '') {
+        const sentDate = new Date(data.sent_date)
+        const receivedDate = new Date(data.received_date)
+
+        // Check if sent_date is valid
+        if (Number.isNaN(sentDate.getTime())) {
+          return false
+        }
+
+        // Sent date should not be after received date
+        return sentDate <= receivedDate
+      }
+      return true
+    },
+    {
+      message: 'Sent date cannot be after received date',
+      path: ['sent_date'],
+    },
+  )
 
 export const addNoteSchema = z.object({
-  content: z.string().trim().min(1, { error: 'Note content is required' }),
+  content: z
+    .string()
+    .trim()
+    .min(1, 'Note content is required')
+    .nonempty('Note content cannot be empty'),
   attachments: z.array(
     z
       .file()
-      .max(10 * 1024 * 1024, { error: 'Each file must be less than 10MB' })
-      .mime(
-        [
-          'image/png',
-          'image/jpeg',
-          'application/pdf',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'text/plain',
-        ],
-        { error: 'Unsupported file type' },
+      .refine((file) => file.size <= 10 * 1024 * 1024, {
+        message: 'Each file must be less than 10MB',
+      })
+      .refine(
+        (file) =>
+          [
+            'image/png',
+            'image/jpeg',
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'text/plain',
+          ].includes(file.type),
+        {
+          message: 'Only PNG, JPEG, PDF, DOCX, and TXT files are allowed',
+        },
       ),
   ),
 })

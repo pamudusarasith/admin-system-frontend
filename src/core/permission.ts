@@ -66,7 +66,13 @@ export enum Permission {
   divisionUpdate = 'division:update',
   divisionDelete = 'division:delete',
 
-  //Cabinet Category Management
+  // Cabinet papers
+  cabinetPaperRead = 'cabinet:read',
+  cabinetPaperCreate = 'cabinet:create',
+  cabinetPaperUpdate = 'cabinet:update',
+  cabinetPaperDelete = 'cabinet:delete',
+
+  // Cabinet Category Management
   categoryRead = 'cabinet_paper_category:read',
   categoryCreate = 'cabinet_paper_category:create',
   categoryUpdate = 'cabinet_paper_category:update',

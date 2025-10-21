@@ -24,7 +24,8 @@ export { CategoryDialog } from './CategoryDialog'
 // ============================================
 // Form Components
 // ============================================
-export { CreateUser } from './CreateUser'
+export { CreateUser } from './user/CreateUser'
+export { UpdateUser } from './user/UpdateUser'
 export { EditProfileForm } from './EditProfileForm'
 export { default as EditUsers } from './Editusers'
 
@@ -68,6 +69,14 @@ export { RolesHeader } from './roles/RolesHeader'
 export { RolesSearchFilter } from './roles/RolesSearchFilter'
 export { RolesGrid } from './roles/RolesGrid'
 export { RoleDialog } from './roles/RoleDialog'
+
+// ============================================
+// User Components (from ./user)
+// ============================================
+export { UserHeader } from './user/UserHeader'
+export { UserSearchBar } from './user/UserSearchBar'
+export { UserTable } from './user/UserTable'
+export { UserActionsMenu } from './user/UserActionsMenu'
 
 // ============================================
 // Common/Utility Components (from ./common)

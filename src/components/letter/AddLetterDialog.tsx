@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardContent,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,10 +20,7 @@ import {
   useTheme,
 } from '@mui/material'
 import {
-  AttachFile as AttachFileIcon,
   Close as CloseIcon,
-  Delete as DeleteIcon,
-  CloudUpload as UploadIcon,
 } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -32,7 +28,8 @@ import type { AxiosError } from 'axios'
 import type { LetterFormData } from '@/schemas'
 import type { ApiResponse, Letter } from '@/api'
 import { createLetter, updateLetter } from '@/api'
-import { useSnackbar } from '@/components'
+import { FileUploadField, useSnackbar } from '@/components'
+import { createLetterSchema } from '@/schemas'
 
 interface AddLetterDialogProps {
   open: boolean
@@ -119,7 +116,7 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
       sent_date: undefined,
       subject: '',
       content: '',
-      attachments: undefined,
+      attachments: [],
     } as LetterFormData,
     onSubmit: ({ value }) => {
       // decide whether to create or update based on presence of `letter` prop
@@ -128,6 +125,9 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
       } else {
         createLetterMutation.mutate(value)
       }
+    },
+    validators: {
+      onChange: createLetterSchema,
     },
   })
 
@@ -146,32 +146,6 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
     'FAX',
     'OTHER',
   ]
-
-  const allowedFileTypes = [
-    'image/png',
-    'image/jpeg',
-    'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  ]
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || [])
-    const validFiles = files.filter(
-      (file) =>
-        allowedFileTypes.includes(file.type) && file.size <= 10 * 1024 * 1024, // 10MB limit
-    )
-
-    form.setFieldValue('attachments', (prev: Array<File> | undefined) => [
-      ...(prev || []),
-      ...validFiles,
-    ])
-  }
-
-  const removeAttachment = (index: number) => {
-    form.setFieldValue('attachments', (prev: Array<File> | undefined) =>
-      (prev || []).filter((_, i) => i !== index),
-    )
-  }
 
   const handleClose = () => {
     form.reset()
@@ -201,18 +175,10 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
         sent_date: letter.sentDate,
         subject: letter.subject || '',
         content: letter.content || '',
-        attachments: undefined,
+        attachments: [],
       } as LetterFormData)
     }
-  }, [letter, open, form])
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
+  }, [letter, open])
 
   return (
     <Dialog
@@ -280,15 +246,7 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
             >
               <Stack spacing={3}>
                 {/* Reference Number */}
-                <form.Field
-                  name="reference"
-                  validators={{
-                    onChange: ({ value }) =>
-                      !value.trim()
-                        ? 'Reference number is required'
-                        : undefined,
-                  }}
-                >
+                <form.Field name="reference">
                   {(field) => (
                     <TextField
                       fullWidth
@@ -297,8 +255,14 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
-                      error={!field.state.meta.isValid}
-                      helperText={field.state.meta.errors.join(', ')}
+                      error={
+                        !field.state.meta.isValid && field.state.meta.isTouched
+                      }
+                      helperText={
+                        field.state.meta.isTouched
+                          ? field.state.meta.errors[0]?.message
+                          : ''
+                      }
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
@@ -312,13 +276,7 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                 </form.Field>
 
                 {/* Subject */}
-                <form.Field
-                  name="subject"
-                  validators={{
-                    onChange: ({ value }) =>
-                      !value.trim() ? 'Subject is required' : undefined,
-                  }}
-                >
+                <form.Field name="subject">
                   {(field) => (
                     <TextField
                       fullWidth
@@ -327,8 +285,14 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
-                      error={!field.state.meta.isValid}
-                      helperText={field.state.meta.errors.join(', ')}
+                      error={
+                        !field.state.meta.isValid && field.state.meta.isTouched
+                      }
+                      helperText={
+                        field.state.meta.isTouched
+                          ? field.state.meta.errors[0]?.message
+                          : ''
+                      }
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
@@ -350,13 +314,7 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                     Sender Details
                   </Typography>
                   <Stack spacing={2}>
-                    <form.Field
-                      name="sender_details.name"
-                      validators={{
-                        onChange: ({ value }) =>
-                          !value.trim() ? 'Sender name is required' : undefined,
-                      }}
-                    >
+                    <form.Field name="sender_details.name">
                       {(field) => (
                         <TextField
                           fullWidth
@@ -365,8 +323,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                           value={field.state.value}
                           onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
-                          error={!field.state.meta.isValid}
-                          helperText={field.state.meta.errors.join(', ')}
+                          error={
+                            !field.state.meta.isValid &&
+                            field.state.meta.isTouched
+                          }
+                          helperText={
+                            field.state.meta.isTouched
+                              ? field.state.meta.errors[0]?.message
+                              : ''
+                          }
                           sx={{
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
@@ -386,8 +351,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                             value={field.state.value || ''}
                             onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
-                            error={!field.state.meta.isValid}
-                            helperText={field.state.meta.errors.join(', ')}
+                            error={
+                              !field.state.meta.isValid &&
+                              field.state.meta.isTouched
+                            }
+                            helperText={
+                              field.state.meta.isTouched
+                                ? field.state.meta.errors[0]?.message
+                                : ''
+                            }
                             sx={{
                               '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
@@ -405,8 +377,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                             value={field.state.value || ''}
                             onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
-                            error={!field.state.meta.isValid}
-                            helperText={field.state.meta.errors.join(', ')}
+                            error={
+                              !field.state.meta.isValid &&
+                              field.state.meta.isTouched
+                            }
+                            helperText={
+                              field.state.meta.isTouched
+                                ? field.state.meta.errors[0]?.message
+                                : ''
+                            }
                             sx={{
                               '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
@@ -427,8 +406,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                           value={field.state.value || ''}
                           onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
-                          error={!field.state.meta.isValid}
-                          helperText={field.state.meta.errors.join(', ')}
+                          error={
+                            !field.state.meta.isValid &&
+                            field.state.meta.isTouched
+                          }
+                          helperText={
+                            field.state.meta.isTouched
+                              ? field.state.meta.errors[0]?.message
+                              : ''
+                          }
                           sx={{
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
@@ -449,15 +435,7 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                     Receiver Details
                   </Typography>
                   <Stack spacing={2}>
-                    <form.Field
-                      name="receiver_details.name"
-                      validators={{
-                        onChange: ({ value }) =>
-                          !value.trim()
-                            ? 'Receiver name is required'
-                            : undefined,
-                      }}
-                    >
+                    <form.Field name="receiver_details.name">
                       {(field) => (
                         <TextField
                           fullWidth
@@ -466,8 +444,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                           value={field.state.value}
                           onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
-                          error={!field.state.meta.isValid}
-                          helperText={field.state.meta.errors.join(', ')}
+                          error={
+                            !field.state.meta.isValid &&
+                            field.state.meta.isTouched
+                          }
+                          helperText={
+                            field.state.meta.isTouched
+                              ? field.state.meta.errors[0]?.message
+                              : ''
+                          }
                           sx={{
                             '& .MuiOutlinedInput-root': {
                               borderRadius: 2,
@@ -486,8 +471,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                             value={field.state.value || ''}
                             onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
-                            error={!field.state.meta.isValid}
-                            helperText={field.state.meta.errors.join(', ')}
+                            error={
+                              !field.state.meta.isValid &&
+                              field.state.meta.isTouched
+                            }
+                            helperText={
+                              field.state.meta.isTouched
+                                ? field.state.meta.errors[0]?.message
+                                : ''
+                            }
                             sx={{
                               '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
@@ -505,8 +497,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                             value={field.state.value || ''}
                             onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
-                            error={!field.state.meta.isValid}
-                            helperText={field.state.meta.errors.join(', ')}
+                            error={
+                              !field.state.meta.isValid &&
+                              field.state.meta.isTouched
+                            }
+                            helperText={
+                              field.state.meta.isTouched
+                                ? field.state.meta.errors[0]?.message
+                                : ''
+                            }
                             sx={{
                               '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
@@ -590,7 +589,7 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                         >
                           {modesOfArrival.map((mode) => (
                             <MenuItem key={mode} value={mode}>
-                              {mode.replace(/_/g, ' ')}
+                              {mode.replaceAll('_', ' ')}
                             </MenuItem>
                           ))}
                         </Select>
@@ -601,13 +600,7 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
 
                 {/* Date Fields */}
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <form.Field
-                    name="received_date"
-                    validators={{
-                      onChange: ({ value }) =>
-                        !value ? 'Receiving date is required' : undefined,
-                    }}
-                  >
+                  <form.Field name="received_date">
                     {(field) => (
                       <TextField
                         fullWidth
@@ -616,8 +609,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        error={!field.state.meta.isValid}
-                        helperText={field.state.meta.errors.join(', ')}
+                        error={
+                          !field.state.meta.isValid &&
+                          field.state.meta.isTouched
+                        }
+                        helperText={
+                          field.state.meta.isTouched
+                            ? field.state.meta.errors[0]?.message
+                            : ''
+                        }
                         slotProps={{
                           inputLabel: {
                             shrink: true,
@@ -642,8 +642,15 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                           field.handleChange(e.target.value || undefined)
                         }
                         onBlur={field.handleBlur}
-                        error={!field.state.meta.isValid}
-                        helperText={field.state.meta.errors.join(', ')}
+                        error={
+                          !field.state.meta.isValid &&
+                          field.state.meta.isTouched
+                        }
+                        helperText={
+                          field.state.meta.isTouched
+                            ? field.state.meta.errors[0]?.message
+                            : ''
+                        }
                         slotProps={{
                           inputLabel: {
                             shrink: true,
@@ -671,8 +678,14 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
                       value={field.state.value || ''}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
-                      error={!field.state.meta.isValid}
-                      helperText={field.state.meta.errors.join(', ')}
+                      error={
+                        !field.state.meta.isValid && field.state.meta.isTouched
+                      }
+                      helperText={
+                        field.state.meta.isTouched
+                          ? field.state.meta.errors[0]?.message
+                          : ''
+                      }
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
@@ -687,75 +700,30 @@ export const AddLetterDialog: React.FC<AddLetterDialogProps> = ({
 
                 {/* File Attachments (only for create mode) */}
                 {!letter && (
-                  <form.Field name="attachments">
+                  <form.Field name="attachments" mode="array">
                     {(field) => (
-                      <Box>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            color: theme.palette.text.primary,
-                            mb: 2,
-                          }}
-                        >
-                          Attachments
-                        </Typography>
-
-                        <Button
-                          component="label"
-                          variant="outlined"
-                          startIcon={<UploadIcon />}
-                          sx={{
-                            borderRadius: 2,
-                            borderStyle: 'dashed',
-                            borderColor: theme.palette.primary.main,
-                            color: theme.palette.primary.main,
-                            padding: 2,
-                            '&:hover': {
-                              backgroundColor: `${theme.palette.primary.main}10`,
-                              borderColor: theme.palette.primary.dark,
-                            },
-                          }}
-                          fullWidth
-                        >
-                          <Typography>
-                            Upload Files (PNG, JPEG, PDF, DOCX)
-                          </Typography>
-                          <input
-                            type="file"
-                            hidden
-                            multiple
-                            accept=".png,.jpg,.jpeg,.pdf,.docx"
-                            onChange={handleFileUpload}
-                          />
-                        </Button>
-
-                        {/* Attached Files List */}
-                        {(field.state.value?.length || 0) > 0 && (
-                          <Box sx={{ mt: 2 }}>
-                            <Stack spacing={1}>
-                              {field.state.value?.map((file, index) => (
-                                <Chip
-                                  key={index}
-                                  icon={<AttachFileIcon />}
-                                  label={`${file.name} (${formatFileSize(file.size)})`}
-                                  onDelete={() => removeAttachment(index)}
-                                  deleteIcon={<DeleteIcon />}
-                                  variant="outlined"
-                                  sx={{
-                                    justifyContent: 'space-between',
-                                    '& .MuiChip-label': {
-                                      maxWidth: { xs: '200px', sm: '300px' },
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                    },
-                                  }}
-                                />
-                              ))}
-                            </Stack>
-                          </Box>
-                        )}
-                      </Box>
+                      <FileUploadField
+                        field={{
+                          state: {
+                            value: field.state.value || [],
+                            meta: field.state.meta,
+                          },
+                          pushValue: field.pushValue,
+                          removeValue: field.removeValue,
+                          validate: field.validate,
+                        }}
+                        label="Attachments"
+                        accept={{
+                          'image/png': ['.png'],
+                          'image/jpeg': ['.jpg', '.jpeg'],
+                          'application/pdf': ['.pdf'],
+                          'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                            ['.docx'],
+                        }}
+                        maxSize={10 * 1024 * 1024}
+                        multiple
+                        helperText="Drag & drop files here, or click to select (PNG, JPEG, PDF, DOCX - Max 10MB each)"
+                      />
                     )}
                   </form.Field>
                 )}
