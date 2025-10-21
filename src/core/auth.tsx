@@ -117,6 +117,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     password: string,
   ): Promise<boolean> => {
     setError(null)
+    setIsLoading(true) // Set loading state during login
 
     try {
       const { access_token } = await apiLogin(username, password)
@@ -131,6 +132,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const errorMessage = loginError.response?.data?.message || 'Login failed'
       setError(errorMessage)
       return false
+    } finally {
+      setIsLoading(false) // Always clear loading state
     }
   }
 
@@ -161,6 +164,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const refresh = async (): Promise<boolean> => {
+    setIsLoading(true) // Set loading state during refresh
+    
     try {
       const { access_token } = await apiRefreshToken()
       localStorage.setItem('access_token', access_token)
@@ -175,6 +180,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.removeItem('access_token')
       updateAuthState()
       return false
+    } finally {
+      setIsLoading(false) // Always clear loading state
     }
   }
 

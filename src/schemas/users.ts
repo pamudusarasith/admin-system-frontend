@@ -9,6 +9,20 @@ export const createUserSchema = z.object({
 
 export type CreateUserPayload = z.infer<typeof createUserSchema>
 
+export const updateUserSchema = z.object({
+  username: z.string().min(6, 'Username must be at least 6 characters'),
+  email: z.email('Invalid email format'),
+  divisionId: z.number().min(1, 'Division is required'),
+  roleId: z.number().min(1, 'Role is required'),
+  fullName: z.string().trim().min(1, 'Full name is required'),
+  phoneNumber: z
+    .string()
+    .length(10, 'Phone number must be exactly 10 digits')
+    .regex(/^\d{10}$/, 'Phone number must contain only digits')
+})
+
+export type UpdateUserPayload = z.infer<typeof updateUserSchema>
+
 export const updateUserProfileSchema = z.object({
   fullName: z.string().trim().min(1, 'Full name is required'),
   email: z.email('Invalid email format'),

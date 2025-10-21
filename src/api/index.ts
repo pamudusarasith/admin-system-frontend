@@ -9,6 +9,7 @@ export { getCsrf, login, refreshToken, logout } from './auth'
 export {
   getUsers,
   createUser,
+  updateUser,
   getUserProfile,
   updateProfile,
   accountSetup,

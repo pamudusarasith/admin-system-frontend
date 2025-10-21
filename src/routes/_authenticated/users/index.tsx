@@ -9,6 +9,7 @@ import {
   CreateUser,
   PaginationControls,
   SidebarLayout,
+  UpdateUser,
   UserHeader,
   UserSearchBar,
   UserTable,
@@ -26,6 +27,8 @@ function RouteComponent() {
   const navigate = useNavigate()
   const { hasAuthority } = useAuth()
   const [open, setOpen] = useState(false)
+  const [updateOpen, setUpdateOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   const searchParams = Route.useSearch()
 
@@ -67,6 +70,16 @@ function RouteComponent() {
 
   const handleClose = () => {
     setOpen(false)
+  }
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user)
+    setUpdateOpen(true)
+  }
+
+  const handleCloseUpdate = () => {
+    setUpdateOpen(false)
+    setSelectedUser(null)
   }
 
   const handleSearch = (params: UserSearchParams) => {
@@ -166,6 +179,7 @@ function RouteComponent() {
             isLoading={isLoading}
             emptyMessage={emptyMessage}
             canUpdate={canUpdate}
+            onEditUser={canUpdate ? handleEditUser : undefined}
           />
 
           {pagination && (
@@ -178,6 +192,11 @@ function RouteComponent() {
         </Paper>
 
         <CreateUser open={open} onClose={handleClose} />
+        <UpdateUser
+          open={updateOpen}
+          onClose={handleCloseUpdate}
+          user={selectedUser}
+        />
       </Container>
     </SidebarLayout>
   )

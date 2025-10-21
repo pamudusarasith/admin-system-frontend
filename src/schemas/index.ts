@@ -23,12 +23,14 @@ export type { RoleFormData, RoleSearchParams } from './role'
 // User schemas
 export {
   createUserSchema,
+  updateUserSchema,
   updateUserProfileSchema,
   accountSetupSchema,
   userSearchParamsSchema,
 } from './users'
 export type {
   CreateUserPayload,
+  UpdateUserPayload,
   UpdateUserProfilePayload,
   AccountSetupPayload,
   UserSearchParams,

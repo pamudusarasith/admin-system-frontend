@@ -53,6 +53,9 @@ function LoginPage() {
       const isLoggedIn = await login(username, password)
 
       if (isLoggedIn) {
+        // Wait a tick to ensure React state has updated
+        await new Promise(resolve => setTimeout(resolve, 0))
+        
         // Navigate to redirect path - TanStack Router will handle the rest
         navigate({ to: search.redirect, replace: true })
       }

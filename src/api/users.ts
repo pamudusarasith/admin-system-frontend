@@ -1,7 +1,11 @@
 import { client } from './client'
-import type { AccountSetupPayload } from '@/schemas/users'
 import type { ApiResponse } from './client'
-import type { CreateUserPayload, UpdateUserProfilePayload } from '@/schemas'
+import type {
+  AccountSetupPayload,
+  CreateUserPayload,
+  UpdateUserPayload,
+  UpdateUserProfilePayload,
+} from '@/schemas'
 
 export interface User {
   id: number
@@ -32,9 +36,24 @@ export async function getUsers(
   return response.data
 }
 
-export const createUser = async (data: CreateUserPayload) => {
-  const res = await client.post('/users', data)
-  return res.data
+export async function createUser(
+  data: CreateUserPayload,
+): Promise<ApiResponse<void>> {
+  const response = await client.post('/users', data)
+  return response.data
+}
+
+export async function updateUser(
+  userId: number,
+  data: UpdateUserPayload,
+): Promise<ApiResponse<void>> {
+  const response = await client.put(`/users/${userId}`, data)
+  return response.data
+}
+
+export async function deleteUser(userId: number): Promise<ApiResponse<void>> {
+  const response = await client.delete(`/users/${userId}`)
+  return response.data
 }
 
 export async function getUserProfile(): Promise<ApiResponse<User>> {

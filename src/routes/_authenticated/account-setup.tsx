@@ -61,8 +61,11 @@ function AccountSetupPage() {
       // Invalidate user profile cache
       await queryClient.invalidateQueries({ queryKey: ['user-profile'] })
 
+      // Wait for React state to flush
+      await new Promise(resolve => setTimeout(resolve, 0))
+
       // Navigate to redirect or home
-      navigate({ to: search.redirect, replace: true })
+      navigate({ to: search.redirect || '/', replace: true })
     },
     onError: (error: AxiosError<ApiResponse<any>>) => {
       const message =
