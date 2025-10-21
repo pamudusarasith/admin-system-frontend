@@ -20,6 +20,7 @@ import {
   VisibilityOff,
 } from '@mui/icons-material'
 import { useForm } from '@tanstack/react-form'
+import { useQueryClient } from '@tanstack/react-query'
 import { AnimatedIcon } from '@/components'
 import { useAuth } from '@/core'
 
@@ -42,6 +43,7 @@ function LoginPage() {
   const { login, error, clearError, isLoading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const search = Route.useSearch()
+  const queryClient = useQueryClient()
 
   const form = useForm({
     defaultValues: {
@@ -50,12 +52,13 @@ function LoginPage() {
     },
     onSubmit: async ({ value: { username, password } }) => {
       clearError()
+      queryClient.invalidateQueries()
       const isLoggedIn = await login(username, password)
 
       if (isLoggedIn) {
         // Wait a tick to ensure React state has updated
-        await new Promise(resolve => setTimeout(resolve, 0))
-        
+        await new Promise((resolve) => setTimeout(resolve, 0))
+
         // Navigate to redirect path - TanStack Router will handle the rest
         navigate({ to: search.redirect, replace: true })
       }
