@@ -7,7 +7,6 @@ import {
   Edit as EditIcon,
   Flag as FlagIcon,
   NoteAdd as NoteAddIcon,
-  Print as PrintIcon,
   Restore as RestoreIcon,
   KeyboardReturn as ReturnIcon,
 } from '@mui/icons-material'
@@ -244,10 +243,6 @@ export const LetterActionMenu: React.FC<LetterActionMenuProps> = ({
           Reopen
         </MenuItem>
       )}
-      <MenuItem onClick={onClose}>
-        <PrintIcon sx={{ mr: 2 }} />
-        Print
-      </MenuItem>
       <Divider />
       {canMarkCompleted && (
         <MenuItem
